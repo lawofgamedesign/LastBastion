@@ -1,0 +1,53 @@
+﻿using UnityEngine;
+
+public static class Services {
+
+	private static BoardBehavior board;
+	public static BoardBehavior Board {
+		get {
+			Debug.Assert(board != null, "No board. Did you forget to create one?");
+			return board;
+		}
+		set { board = value; }
+	}
+
+
+	private static AttackerManager attackers;
+	public static AttackerManager Attackers {
+		get {
+			Debug.Assert(attackers != null, "No attacker manager. Did you forget to create one?");
+			return attackers;
+		}
+		set { attackers = value; }
+	}
+
+
+	private static TurnManager rulebook;
+	public static TurnManager Rulebook {
+		get {
+			Debug.Assert(rulebook != null, "No TurnManager. Did you forget to create one?");
+			return rulebook;
+		}
+		set { rulebook = value; }
+	}
+
+
+	private static TaskManager tasks;
+	public static TaskManager Tasks {
+		get {
+			Debug.Assert(tasks != null, "No task manager. Did you forget to create one?");
+			return tasks;
+		}
+		set { tasks = value; }
+	}
+
+
+	private static AttackerDeck attackDeck;
+	public static AttackerDeck AttackDeck {
+		get {
+			Debug.Assert(attackDeck != null, "No attacker deck. Did you forget to create one?");
+			return attackDeck;
+		}
+		set { attackDeck = value; }
+	}
+}
