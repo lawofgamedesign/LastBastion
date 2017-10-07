@@ -231,6 +231,17 @@ public class BoardBehavior {
 
 
 	/// <summary>
+	/// Triggers feedback for when attackers fail to damage a wall. This is routed through the board manager in the name of decoupling.
+	/// </summary>
+	/// <param name="column">The attacker's, and thus the wall's, column, zero-indexed.</param>
+	public void FailToDamageWall(int column){
+		Debug.Assert(column < walls.Count);
+
+		walls[column].NoDamageEffects();
+	}
+
+
+	/// <summary>
 	/// Get the defensive strength of the wall in a given column.
 	/// </summary>
 	/// <returns>The wall's strength.</returns>

@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour {
 		Services.Rulebook.Setup();
 		Services.AttackDeck = new AttackerDeck();
 		Services.AttackDeck.Setup();
+		Services.Defenders = new DefenderManager();
+		Services.Defenders.Setup();
 	}
 
 

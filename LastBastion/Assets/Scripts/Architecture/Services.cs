@@ -50,4 +50,14 @@ public static class Services {
 		}
 		set { attackDeck = value; }
 	}
+
+
+	private static DefenderManager defenders;
+	public static DefenderManager Defenders {
+		get {
+			Debug.Assert(defenders != null, "No defender manager. Did you forget to create one?");
+			return defenders;
+		}
+		set { defenders = value; }
+	}
 }

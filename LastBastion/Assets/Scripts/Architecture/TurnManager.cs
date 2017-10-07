@@ -21,9 +21,6 @@ public class TurnManager {
 
 	//how long the system waits during each phase
 	private float attackerAdvanceDuration = 10.0f;
-	private float besiegeWallsDuration = 5.0f;
-
-
 
 
 	/////////////////////////////////////////////
@@ -83,39 +80,40 @@ public class TurnManager {
 
 	private class BesiegeWalls : FSM<TurnManager>.State {
 		float timer;
-		bool besieging;
 		List<AttackerSandbox> besiegers;
 
+		//how long the system waits between resolving besieging attacks
+		private float besiegeWallDuration = 0.75f;
+
+
+		//are any enemies besieging the wall? Get a list of them
 		public override void OnEnter (){
 			timer = 0.0f;
-			besieging = false;
 			besiegers = Services.Board.GetBesiegingAttackers();
-
-			if (besiegers.Count > 0){
-				besieging = true;
-				foreach (AttackerSandbox attacker in besiegers){
-					int combatValue = Services.AttackDeck.GetAttackerCard().Value;
-
-					if (combatValue > Services.Board.GetWallStrength(attacker.GetColumn())){
-						Services.Board.ChangeWallDurability(attacker.GetColumn(), -attacker.SiegeStrength);
-					} else {
-						Debug.Log("Failed to damage the wall with a value of " + combatValue);
-					}
-				}
-			}
 		}
 
 
 		/// <summary>
-		/// If anyone is besieging, wait while the animations play
+		/// If anyone is besieging, wait while the animations play. Otherwise, wait a brief period.
 		/// </summary>
 		public override void Tick(){
-			if (besieging){
-				timer += Time.deltaTime;
+			timer += Time.deltaTime;
 
-				if (timer >= Context.besiegeWallsDuration) OnExit();
-			} else {
-				OnExit();
+			if (timer >= besiegeWallDuration){
+				if (besiegers.Count > 0){
+					int combatValue = Services.AttackDeck.GetAttackerCard().Value;
+
+					if (combatValue > Services.Board.GetWallStrength(besiegers[0].GetColumn())){
+						Services.Board.ChangeWallDurability(besiegers[0].GetColumn(), -besiegers[0].SiegeStrength);
+					} else {
+						Services.Board.FailToDamageWall(besiegers[0].GetColumn());
+					}
+
+					besiegers.RemoveAt(0);
+					timer = 0.0f;
+				} else {
+					OnExit();
+				}
 			}
 		}
 

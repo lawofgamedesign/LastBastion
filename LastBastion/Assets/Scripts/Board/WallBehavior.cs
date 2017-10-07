@@ -25,7 +25,10 @@ public class WallBehavior : MonoBehaviour {
 
 	//fx for loss of durability
 	private GameObject guardHitParticle;
+	private GameObject noDamageParticle;
 	private const string GUARD_HIT_PARTICLE = "Guard hit particle";
+	private const string NO_DAMAGE_PARTICLE = "No damage particle";
+
 
 
 	//the wall's defensive strength; attackers must get a higher value than this to do damage
@@ -42,6 +45,7 @@ public class WallBehavior : MonoBehaviour {
 	public void Setup(){
 		Durability = startDurability;
 		guardHitParticle = transform.Find(GUARD_HIT_PARTICLE).gameObject;
+		noDamageParticle = transform.Find(NO_DAMAGE_PARTICLE).gameObject;
 		Strength = startStrength;
 	}
 
@@ -57,6 +61,21 @@ public class WallBehavior : MonoBehaviour {
 			guardHitParticle.SetActive(true);
 			Services.Tasks.AddTask(new GuardFallTask(transform.Find(GUARD_LABEL + Durability.ToString()).GetComponent<Rigidbody>()));
 			Durability += change;
+		}
+	}
+
+
+	/// <summary>
+	/// FX for when attackers besiege the wall, and draw a card that does not exceed its strength.
+	/// </summary>
+	public void NoDamageEffects(){
+		if (Durability > 0){
+			Vector3 guardPosition = transform.Find(GUARD_LABEL + Durability.ToString()).localPosition;
+			noDamageParticle.transform.localPosition = new Vector3(guardPosition.x, 
+																   noDamageParticle.transform.localPosition.y,
+																   noDamageParticle.transform.localPosition.z);
+			noDamageParticle.SetActive(false);
+			noDamageParticle.SetActive(true);
 		}
 	}
 }

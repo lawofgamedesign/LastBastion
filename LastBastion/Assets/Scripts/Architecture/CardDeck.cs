@@ -83,4 +83,32 @@ public class CardDeck<T> {
 
 		return startingDeck;
 	}
+
+
+	/// <summary>
+	/// Get a list of all cards currently in the deck.
+	/// </summary>
+	/// <returns>The list.</returns>
+	/// <param name="currentDeck">The deck to be checked.</param>
+	public List<T> RemainingCards(){
+		List<T> temp = new List<T>();
+
+		for (int i = index; i < deck.Count; i++){
+			temp.Add(deck[i]);
+		}
+			
+		Debug.Assert(temp.Count == deck.Count - index, "Did not add all remaining cards");
+
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Convenience method for getting the number of cards in the deck when it is full.
+	/// </summary>
+	/// <returns>The total number of cards in the deck when it is full.</returns>
+	public int GetDeckSize(){
+		return deck.Count;
+	}
 }
