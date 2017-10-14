@@ -20,7 +20,14 @@ public class TurnManager {
 
 
 	//how long the system waits during each phase
-	private float attackerAdvanceDuration = 10.0f;
+	private float attackerAdvanceDuration = 1.0f;
+
+
+	//tags for selecting and clicking on things
+	private const string DEFENDER_TAG = "Defender";
+	private const string BOARD_TAG = "Board";
+
+
 
 
 	/////////////////////////////////////////////
@@ -39,6 +46,29 @@ public class TurnManager {
 	public void Tick(){
 		turnMachine.Tick();
 	}
+
+
+	/// <summary>
+	/// Tries to get a chosen object using a raycast.
+	/// 
+	/// This function return null if nothing was selected; it's up to the calling function to check for null returns.
+	/// </summary>
+	/// <returns>The chosen gameobject.</returns>
+	private GameObject GetClickedThing(){
+		RaycastHit hit;
+		GameObject obj = null;
+
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+		if (Physics.Raycast(ray, out hit)) obj = hit.collider.gameObject;
+
+		return obj;
+	}
+
+
+	/////////////////////////////////////////////
+	/// States
+	/////////////////////////////////////////////
 
 
 	/// <summary>
@@ -72,7 +102,29 @@ public class TurnManager {
 	private class PlayerMove : FSM<TurnManager>.State {
 
 
+		public override void OnEnter(){
+			Services.Defenders.PrepareDefenderMovePhase();
+		}
+
+
 		public override void Tick(){
+			if(Input.GetMouseButtonDown(0)){
+				GameObject temp = Context.GetClickedThing();
+
+				if (temp == null){
+					//do nothing; the player didn't click on anything
+				} else if (temp.tag == DEFENDER_TAG){
+					Services.Defenders.SelectDefender(temp.GetComponent<DefenderSandbox>());
+				} else if (temp.tag == BOARD_TAG){
+					if (Services.Defenders.IsAnyoneSelected()){
+						Services.Defenders.GetSelectedDefender().TryPlanMove(temp.GetComponent<SpaceBehavior>().GridLocation);
+					}
+				}
+			}
+		}
+
+
+		public override void OnExit(){
 			TransitionTo<BesiegeWalls>();
 		}
 	}

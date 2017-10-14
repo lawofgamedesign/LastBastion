@@ -27,6 +27,10 @@ public class DefenderManager {
 	private const string SPAWNER_OBJ = "Defender spawn point";
 
 
+	//the currently selected defender
+	private DefenderSandbox selectedDefender = null;
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -104,6 +108,67 @@ public class DefenderManager {
 
 		Services.Board.PutThingInSpace(newDefender, spawnPoint.x, spawnPoint.z, SpaceBehavior.ContentType.Defender);
 
+		newDefender.GetComponent<DefenderSandbox>().Setup();
+		newDefender.GetComponent<DefenderSandbox>().NewLoc(spawnPoint.x, spawnPoint.z);
+
 		return newDefender.GetComponent<DefenderSandbox>();
+	}
+
+
+	/// <summary>
+	/// Selects a defender for movement or attacking. Players cannot select a new defender while one is in the middle of a move.
+	/// </summary>
+	/// <param name="selected">The selected defender.</param>
+	public void SelectDefender(DefenderSandbox selected){
+		if (selected.Selected) return; //if the player is re-selecting the already-selected defender, do nothing
+
+		//if a defender is in the middle of a move, stop
+		foreach (DefenderSandbox defender in defenders){
+			if (defender.IsMoving()) return;
+		}
+
+
+		//de-select everyone
+		foreach (DefenderSandbox defender in defenders){
+			defender.BeUnselected();
+		}
+
+		//select the chosen defender
+		selectedDefender = selected;
+		selected.BeSelected();
+	}
+
+
+	/// <summary>
+	/// Check to see if any defenders are selected.
+	/// </summary>
+	/// <returns><c>true</c> if there is a currently selected defender, <c>false</c> if not.</returns>
+	public bool IsAnyoneSelected(){
+		bool temp = false;
+
+		foreach (DefenderSandbox defender in defenders){
+			if (defender.Selected) temp = true;
+		}
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Publicly-accessible way to get the currently selected defender.
+	/// 
+	/// This will return null if there is no currently selected defender; it's up to the calling function to check for null returns.
+	/// </summary>
+	/// <returns>The selected defender.</returns>
+	public DefenderSandbox GetSelectedDefender(){
+		return selectedDefender;
+	}
+
+
+	/// <summary>
+	/// Walks through each defender, and sets them up for the move phase.
+	/// </summary>
+	public void PrepareDefenderMovePhase(){
+		foreach (DefenderSandbox defender in defenders) defender.PrepareToMove();
 	}
 }

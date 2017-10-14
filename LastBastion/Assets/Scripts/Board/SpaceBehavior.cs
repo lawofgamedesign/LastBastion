@@ -22,4 +22,8 @@ public class SpaceBehavior : MonoBehaviour {
 
 	//where is this space, in world coordinates?
 	public Vector3 WorldLocation { get; set; }
+
+
+	//where is this space in the grid?
+	public TwoDLoc GridLocation { get; set; }
 }

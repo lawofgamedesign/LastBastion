@@ -63,6 +63,7 @@ public class BoardBehavior {
 																   BoardOrganizer).GetComponent<SpaceBehavior>();
 				temp[x, z].contentType = SpaceBehavior.ContentType.None;
 				temp[x, z].WorldLocation = AssignWorldLocation(x, z);
+				temp[x, z].GridLocation = new TwoDLoc(x, z);
 			}
 		}
 
