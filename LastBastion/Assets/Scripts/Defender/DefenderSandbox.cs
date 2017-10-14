@@ -3,7 +3,10 @@
 /// </summary>
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
+[RequireComponent(typeof(LineRenderer))]
+[RequireComponent(typeof(Rigidbody))]
 public class DefenderSandbox : MonoBehaviour {
 
 
@@ -33,6 +36,12 @@ public class DefenderSandbox : MonoBehaviour {
 	//how many spaces of movement does the defender have left? Also other fields relating to movement
 	protected int remainingSpeed = 0;
 	protected List<TwoDLoc> moves = new List<TwoDLoc>();
+	protected LineRenderer lineRend;
+	protected Button doneButton;
+	protected const string DONE_BUTTON_OBJ = "Done moving button";
+	protected const string UI_CANVAS = "Defender canvas";
+	[SerializeField] protected float moveSpeed = 1.0f; //movement on screen, as opposed to spaces on the grid
+	protected Rigidbody rb;
 
 
 	//location in the grid
@@ -51,6 +60,10 @@ public class DefenderSandbox : MonoBehaviour {
 		Armor = baseArmor;
 		Selected = false;
 		selectedParticle = transform.Find(SELECT_PARTICLE_OBJ).gameObject;
+		lineRend = GetComponent<LineRenderer>();
+		lineRend.positionCount = 0;
+		doneButton = transform.Find(UI_CANVAS).Find(DONE_BUTTON_OBJ).GetComponent<Button>();
+		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
 	}
 
@@ -101,15 +114,45 @@ public class DefenderSandbox : MonoBehaviour {
 		moves.Clear();
 		moves.Add(GridLoc);
 		remainingSpeed = Speed;
+		lineRend.positionCount++;
+		lineRend.SetPosition(0, Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z));
 	}
 
 
+	/// <summary>
+	/// Whenever the player tries to move a defender, TurnManager calls this function to determine whether the move is legal--
+	/// the defender has the movement remaining, the space is legal to enter, etc.
+	/// </summary>
+	/// <param name="loc">Location.</param>
 	public virtual void TryPlanMove(TwoDLoc loc){
-		if (moves.Count < Speed + 1){ //the defender can move up to their speed; they get a + 1 "credit" for the space they're in.
+		if (moves.Count <= Speed + 1){ //the defender can move up to their speed; they get a + 1 "credit" for the space they're in.
 			if (CheckAdjacent(loc, moves[Speed - remainingSpeed])){
-				Debug.Log("Can move to " + loc.x + " " + loc.z);
+				moves.Add(loc);
+				remainingSpeed--;
+				lineRend.positionCount++;
+				lineRend.SetPosition(Speed - remainingSpeed, Services.Board.GetWorldLocation(loc.x, loc.z));
 			}
 		}
+	}
+
+
+	/// <summary>
+	/// Called by the UI to move the defender.
+	/// </summary>
+	public virtual void Move(){
+		//move on the screen
+		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
+
+
+		//move on the grid used for game logic
+		Services.Board.TakeThingFromSpace(GridLoc.x, GridLoc.z);
+		TwoDLoc destination = moves[moves.Count - 1];
+		Services.Board.PutThingInSpace(gameObject, destination.x, destination.z, SpaceBehavior.ContentType.Defender);
+		GridLoc.x = destination.x;
+		GridLoc.z = destination.z;
+
+
+		remainingSpeed = 0;
 	}
 
 
