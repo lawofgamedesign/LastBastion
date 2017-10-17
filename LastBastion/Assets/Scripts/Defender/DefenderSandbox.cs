@@ -37,15 +37,30 @@ public class DefenderSandbox : MonoBehaviour {
 	protected int remainingSpeed = 0;
 	protected List<TwoDLoc> moves = new List<TwoDLoc>();
 	protected LineRenderer lineRend;
-	protected Button doneButton;
-	protected const string DONE_BUTTON_OBJ = "Done moving button";
-	protected const string UI_CANVAS = "Defender canvas";
+	protected Button moveButton;
+	protected const string MOVE_BUTTON_OBJ = "Done moving button";
+	protected const string PRIVATE_UI_CANVAS = "Defender canvas";
 	[SerializeField] protected float moveSpeed = 1.0f; //movement on screen, as opposed to spaces on the grid
 	protected Rigidbody rb;
+	protected const float LINE_OFFSET = 0.1f; //picks the movement line up off the board to avoid clipping
 
 
 	//location in the grid
 	protected TwoDLoc GridLoc { get; set; }
+
+
+	//this defender's hand of cards, along with UI
+	protected List<Card> combatHand;
+	protected Button noFightButton;
+	protected Transform uICanvas;
+	protected const string SHARED_UI_CANVAS = "Defender UI canvas";
+	protected const string TEXT_OBJ = "Text";
+	protected const string NO_FIGHT_BUTTON = "Done fighting button";
+
+
+	//combat
+	public Card ChosenCard { get; set; }
+	public const int NO_CARD_SELECTED = 999;
 
 
 	/////////////////////////////////////////////
@@ -62,9 +77,21 @@ public class DefenderSandbox : MonoBehaviour {
 		selectedParticle = transform.Find(SELECT_PARTICLE_OBJ).gameObject;
 		lineRend = GetComponent<LineRenderer>();
 		lineRend.positionCount = 0;
-		doneButton = transform.Find(UI_CANVAS).Find(DONE_BUTTON_OBJ).GetComponent<Button>();
+		moveButton = transform.Find(PRIVATE_UI_CANVAS).Find(MOVE_BUTTON_OBJ).GetComponent<Button>();
 		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
+		combatHand = MakeCombatHand();
+		uICanvas = GameObject.Find(SHARED_UI_CANVAS).transform;
+		noFightButton = transform.Find(PRIVATE_UI_CANVAS).Find(NO_FIGHT_BUTTON).GetComponent<Button>();
+	}
+
+
+	/// <summary>
+	/// Make a combat hand for this defender.
+	/// </summary>
+	/// <returns>A list of cards in the hand.</returns>
+	protected virtual List<Card> MakeCombatHand(){
+		return new List<Card>() { new Card(3), new Card(4), new Card(5) };
 	}
 
 
@@ -89,11 +116,14 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
-	/// Carries out all effects associated with being selected.
+	/// Carries out all effects associated with being selected to move.
 	/// </summary>
-	public virtual void BeSelected(){
+	public virtual void BeSelectedForMovement(){
+		if (Services.Defenders.IsDone(this)) return; //if this defender has already reported itself done with this phase, it can't be selected
+
 		Selected = true;
 		selectedParticle.SetActive(true);
+		moveButton.gameObject.SetActive(true);
 	}
 
 
@@ -104,6 +134,10 @@ public class DefenderSandbox : MonoBehaviour {
 	public virtual void BeUnselected(){
 		Selected = false;
 		selectedParticle.SetActive(false);
+		ChosenCard = null; //relevant for the fight phase
+		moveButton.gameObject.SetActive(false);
+		noFightButton.gameObject.SetActive(false);
+		Services.Defenders.NoSelectedDefender();
 	}
 
 
@@ -114,25 +148,38 @@ public class DefenderSandbox : MonoBehaviour {
 		moves.Clear();
 		moves.Add(GridLoc);
 		remainingSpeed = Speed;
-		lineRend.positionCount++;
-		lineRend.SetPosition(0, Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z));
+		DrawLine(0, GridLoc.x, GridLoc.z);
 	}
 
 
 	/// <summary>
 	/// Whenever the player tries to move a defender, TurnManager calls this function to determine whether the move is legal--
 	/// the defender has the movement remaining, the space is legal to enter, etc.
+	/// 
+	/// A move is illegal if:
+	/// 1. It is not adjacent to the defender (or to the last space the defender would move to), or
+	/// 2. the space is occupied.
 	/// </summary>
 	/// <param name="loc">Location.</param>
 	public virtual void TryPlanMove(TwoDLoc loc){
 		if (moves.Count <= Speed + 1){ //the defender can move up to their speed; they get a + 1 "credit" for the space they're in.
-			if (CheckAdjacent(loc, moves[Speed - remainingSpeed])){
+			if (CheckAdjacent(loc, moves[Speed - remainingSpeed]) &&
+				Services.Board.GeneralSpaceQuery(loc.x, loc.z) == SpaceBehavior.ContentType.None){
 				moves.Add(loc);
 				remainingSpeed--;
-				lineRend.positionCount++;
-				lineRend.SetPosition(Speed - remainingSpeed, Services.Board.GetWorldLocation(loc.x, loc.z));
+				DrawLine(Speed - remainingSpeed, loc.x, loc.z);
 			}
 		}
+	}
+
+
+	protected virtual void DrawLine(int index, int x, int z){
+		lineRend.positionCount++;
+
+		Vector3 lineEnd = Services.Board.GetWorldLocation(x, z);
+		lineEnd.y += LINE_OFFSET;
+
+		lineRend.SetPosition(index, lineEnd);
 	}
 
 
@@ -140,7 +187,12 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Called by the UI to move the defender.
 	/// </summary>
 	public virtual void Move(){
+		ClearLine();
+
 		//move on the screen
+//		foreach (TwoDLoc move in moves) Debug.Log("moves.x == " + move.x + ", z == " + move.z);
+
+
 		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
 
 
@@ -148,11 +200,19 @@ public class DefenderSandbox : MonoBehaviour {
 		Services.Board.TakeThingFromSpace(GridLoc.x, GridLoc.z);
 		TwoDLoc destination = moves[moves.Count - 1];
 		Services.Board.PutThingInSpace(gameObject, destination.x, destination.z, SpaceBehavior.ContentType.Defender);
-		GridLoc.x = destination.x;
-		GridLoc.z = destination.z;
-
+		NewLoc(destination.x, destination.z);
+		BeUnselected();
+		Services.Defenders.DeclareSelfDone(this);
 
 		remainingSpeed = 0;
+	}
+
+
+	/// <summary>
+	/// Reset the line players use to plan their movement.
+	/// </summary>
+	protected virtual void ClearLine(){
+		lineRend.positionCount = 0;
 	}
 
 
@@ -165,5 +225,89 @@ public class DefenderSandbox : MonoBehaviour {
 	protected bool CheckAdjacent(TwoDLoc next, TwoDLoc current){
 		return ((next.x == current.x && Mathf.Abs(next.z - current.z) == 1) ||
 				(Mathf.Abs(next.x - current.x) == 1 && next.z == current.z)) ? true : false;
+	}
+
+
+
+	/// <summary>
+	/// Carries out all effects associated with being selected to move.
+	/// </summary>
+	public virtual void BeSelectedForFight(){
+		if (Services.Defenders.IsDone(this)) return; //if this defender has already reported itself done with this phase, it can't be selected
+
+		Selected = true;
+		selectedParticle.SetActive(true);
+		uICanvas.GetComponent<DefenderUIBehavior>().ClearSelectedColor();
+
+		Debug.Assert(combatHand.Count <= uICanvas.childCount, "Too many combat cards to display!");
+
+		for (int i = 0; i < combatHand.Count; i++){
+			uICanvas.GetChild(i).Find(TEXT_OBJ).GetComponent<Text>().text = combatHand[i].Value.ToString();
+			uICanvas.GetChild(i).gameObject.SetActive(true);
+		}
+
+		ChosenCard = null;
+
+		noFightButton.gameObject.SetActive(true);
+	}
+
+
+	/// <summary>
+	/// Note which combat card the player has chosen.
+	/// </summary>
+	/// <param name="index">The card's number, zero-indexed.</param>
+	public virtual void AssignChosenCard(int index){
+		ChosenCard = combatHand[index];
+	}
+
+
+	/// <summary>
+	/// Returns the chosen card's value.
+	/// </summary>
+	/// <returns>The value; if no card is currently selected, this will be 999 (NO_CARD_SELECTED).</returns>
+	public virtual int GetChosenCardValue(){
+		if (ChosenCard == null) return NO_CARD_SELECTED;
+		return ChosenCard.Value;
+	}
+
+
+	/// <summary>
+	/// Damages an attacker if it is directly north and the player has chosen a stronger card than its value.
+	/// </summary>
+	/// <param name="attackerValue">Attacker value.</param>
+	public virtual void TryFight(AttackerSandbox attacker, int attackerValue){
+		if (CheckIsNorth(attacker) &&
+			ChosenCard.Value > attackerValue){
+			attacker.TakeDamage(ChosenCard.Value - attackerValue);
+			DoneFighting();
+		} else if (!CheckIsNorth(attacker)){
+			DoneFighting();
+		} else {
+			attacker.FailToDamage();
+			DoneFighting();
+		}
+	}
+
+
+	/// <summary>
+	/// Is an attacker directly north of this defender?
+	/// </summary>
+	/// <returns><c>true</c> if the attacker is one space north, <c>false</c> otherwise.</returns>
+	/// <param name="attacker">The attacker being checked.</param>
+	protected bool CheckIsNorth(AttackerSandbox attacker){
+		if (attacker.XPos == GridLoc.x && attacker.ZPos == GridLoc.z + 1) return true;
+		return false;
+	}
+
+
+	/// <summary>
+	/// When this defender is done fighting, this carries out all associated effects.
+	/// </summary>
+	public virtual void DoneFighting(){
+		BeUnselected();
+
+		for (int i = 0; i < combatHand.Count; i++) uICanvas.GetChild(i).gameObject.SetActive(false); //shut off the combat cards
+
+		Services.Defenders.DeclareSelfDone(this);
 	}
 }

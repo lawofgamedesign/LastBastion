@@ -234,9 +234,10 @@ GameObject:
   - component: {fileID: 4701721575045130}
   - component: {fileID: 114443189086781354}
   - component: {fileID: 54571438398505294}
+  - component: {fileID: 65512398606601912}
   m_Layer: 0
   m_Name: Petty Warlord
-  m_TagString: Untagged
+  m_TagString: Attacker
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -970,6 +971,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!65 &65512398606601912
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1535048415283020}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2, y: 2, z: 2}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!95 &95758718581498588
 Animator:
   serializedVersion: 3

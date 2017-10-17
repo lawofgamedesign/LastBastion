@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Defender
   - Board
+  - Attacker
   layers:
   - Default
   - TransparentFX

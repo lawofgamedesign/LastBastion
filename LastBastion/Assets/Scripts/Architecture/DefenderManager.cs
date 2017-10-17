@@ -31,6 +31,10 @@ public class DefenderManager {
 	private DefenderSandbox selectedDefender = null;
 
 
+	//how many defenders are finished with the current phase?
+	private List<DefenderSandbox> doneDefenders = new List<DefenderSandbox>();
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -119,7 +123,7 @@ public class DefenderManager {
 	/// Selects a defender for movement or attacking. Players cannot select a new defender while one is in the middle of a move.
 	/// </summary>
 	/// <param name="selected">The selected defender.</param>
-	public void SelectDefender(DefenderSandbox selected){
+	public void SelectDefenderForMovement(DefenderSandbox selected){
 		if (selected.Selected) return; //if the player is re-selecting the already-selected defender, do nothing
 
 		//if a defender is in the middle of a move, stop
@@ -135,7 +139,7 @@ public class DefenderManager {
 
 		//select the chosen defender
 		selectedDefender = selected;
-		selected.BeSelected();
+		selected.BeSelectedForMovement();
 	}
 
 
@@ -166,9 +170,78 @@ public class DefenderManager {
 
 
 	/// <summary>
+	/// This function sets selectedDefender to null, so that it behaves as expected.
+	/// </summary>
+	public void NoSelectedDefender(){
+		selectedDefender = null;
+	}
+
+
+	/// <summary>
 	/// Walks through each defender, and sets them up for the move phase.
 	/// </summary>
 	public void PrepareDefenderMovePhase(){
+		doneDefenders.Clear();
 		foreach (DefenderSandbox defender in defenders) defender.PrepareToMove();
+	}
+
+
+	public void PrepareDefenderFightPhase(){
+		doneDefenders.Clear();
+	}
+
+
+	/// <summary>
+	/// When a defender finishes with the current phase, it adds itself to this list
+	/// </summary>
+	/// <param name="defender">Defender.</param>
+	public void DeclareSelfDone(DefenderSandbox defender){
+		if (!doneDefenders.Contains(defender)) doneDefenders.Add(defender);
+	}
+
+
+	/// <summary>
+	/// Reports whether a defender has said it's finished with the current phase.
+	/// </summary>
+	/// <returns><c>true</c> if the defender has marked itself done, <c>false</c> otherwise.</returns>
+	/// <param name="defender">Defender.</param>
+	public bool IsDone(DefenderSandbox defender){
+		bool temp = (doneDefenders.Contains(defender));
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Reports whether all defenders are finished with the current phase.
+	/// </summary>
+	/// <returns><c>true</c> if all defenders have said they're done, <c>false</c> otherwise.</returns>
+	public bool IsEveryoneDone(){
+		bool temp = (doneDefenders.Count == defenders.Count) ? true : false;
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Select a defender in the fight phase
+	/// </summary>
+	/// <param name="selected">The chosen defender.</param>
+	public void SelectDefenderForFight(DefenderSandbox selected){
+		//de-select everyone
+		foreach (DefenderSandbox defender in defenders){
+			defender.BeUnselected();
+		}
+
+		selectedDefender = selected;
+		selected.BeSelectedForFight();
+	}
+
+
+	/// <summary>
+	/// Transmit the chosen combat card to the selected defender.
+	/// </summary>
+	/// <param name="card">The card chosen in the UI, from left to right, zero-indexed. NOT the card's value!.</param>
+	public void HandleCardChoice(int card){
+		selectedDefender.AssignChosenCard(card);
 	}
 }

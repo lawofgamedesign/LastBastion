@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TurnManager {
 
@@ -26,6 +27,16 @@ public class TurnManager {
 	//tags for selecting and clicking on things
 	private const string DEFENDER_TAG = "Defender";
 	private const string BOARD_TAG = "Board";
+	private const string ATTACKER_TAG = "Attacker";
+
+
+	//feedback for the player to help track which phase they're in
+	private Text phaseText;
+	private const string PHASE_OBJ = "Phase";
+	private const string ATTACKER_MOVE = "Attackers move";
+	private const string PLAYER_MOVE = "Defenders move";
+	private const string PLAYER_FIGHT = "Defenders fight";
+	private const string BESIEGE = "Attackers besiege";
 
 
 
@@ -39,6 +50,7 @@ public class TurnManager {
 	public void Setup(){
 		turnMachine = new FSM<TurnManager>(this);
 		turnMachine.TransitionTo<AttackersAdvance>();
+		phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
 	}
 
 
@@ -83,6 +95,7 @@ public class TurnManager {
 			timer = 0.0f;
 			Services.Attackers.SpawnNewAttackers();
 			Services.Attackers.MoveAttackers();
+			Context.phaseText.text = ATTACKER_MOVE;
 		}
 
 
@@ -104,6 +117,7 @@ public class TurnManager {
 
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderMovePhase();
+			Context.phaseText.text = PLAYER_MOVE;
 		}
 
 
@@ -114,12 +128,50 @@ public class TurnManager {
 				if (temp == null){
 					//do nothing; the player didn't click on anything
 				} else if (temp.tag == DEFENDER_TAG){
-					Services.Defenders.SelectDefender(temp.GetComponent<DefenderSandbox>());
+					Services.Defenders.SelectDefenderForMovement(temp.GetComponent<DefenderSandbox>());
 				} else if (temp.tag == BOARD_TAG){
 					if (Services.Defenders.IsAnyoneSelected()){
 						Services.Defenders.GetSelectedDefender().TryPlanMove(temp.GetComponent<SpaceBehavior>().GridLocation);
 					}
 				}
+
+				//each time the player clicks, ask if everyone is finished. If so, move on
+				if (Services.Defenders.IsEveryoneDone()) OnExit();
+			}
+		}
+
+
+		public override void OnExit(){
+			TransitionTo<PlayerFight>();
+		}
+	}
+
+
+	private class PlayerFight : FSM<TurnManager>.State {
+
+		public override void OnEnter(){
+			Services.Defenders.PrepareDefenderFightPhase();
+			Context.phaseText.text = PLAYER_FIGHT;
+		}
+
+		public override void Tick(){
+			if (Input.GetMouseButtonDown(0)){
+				GameObject temp = Context.GetClickedThing();
+
+				if (temp == null){
+					//do nothing; there was no action this script needs to handle
+				} else if (temp.tag == DEFENDER_TAG){
+					Services.Defenders.SelectDefenderForFight(temp.GetComponent<DefenderSandbox>());
+				} else if (temp.tag == ATTACKER_TAG && //if the player clicked on an attacker, try to have the chosen defender fight them
+						   Services.Defenders.IsAnyoneSelected() &&
+						   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
+					int combatValue = Services.AttackDeck.GetAttackerCard().Value; //the attacker's drwan card
+
+
+					Services.Defenders.GetSelectedDefender().TryFight(temp.GetComponent<AttackerSandbox>(), combatValue);
+				}
+
+				if (Services.Defenders.IsEveryoneDone()) OnExit();
 			}
 		}
 
@@ -142,6 +194,7 @@ public class TurnManager {
 		public override void OnEnter (){
 			timer = 0.0f;
 			besiegers = Services.Board.GetBesiegingAttackers();
+			Context.phaseText.text = BESIEGE;
 		}
 
 

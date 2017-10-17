@@ -5,6 +5,7 @@
 /// </summary>
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class AttackerSandbox : MonoBehaviour {
 
 	/////////////////////////////////////////////
@@ -13,9 +14,15 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 	//position in the grid and speed
-	protected int xPos { get; set; }
-	protected int zPos { get; set; }
+	public int XPos { get; set; }
+	public int ZPos { get; set; }
 	[SerializeField] protected int speed = 1; //speed in spaces/move, not 3D world speed
+
+	//attacker stats
+	public int AttackMod { get; set; }
+	public int Armor { get; set; }
+	public int Health { get; set; }
+	protected int baseHealth = 1;
 
 
 	//has this attacker already fought this turn?
@@ -41,13 +48,16 @@ public class AttackerSandbox : MonoBehaviour {
 		FoughtThisTurn = false;
 		SiegeStrength = startSiegeStrength;
 		SpawnedThisTurn = true;
+		AttackMod = 0;
+		Armor = 0;
+		Health = baseHealth;
 	}
 
 
 	//set this attacker's position
 	public void NewLoc(int x, int z){
-		xPos = x;
-		zPos = z;
+		XPos = x;
+		ZPos = z;
 	}
 
 
@@ -64,24 +74,24 @@ public class AttackerSandbox : MonoBehaviour {
 
 		//sanity check; prevent this attacker from trying to move off the board
 		int attemptedMove = speed;
-		if (zPos - attemptedMove < 0) attemptedMove = zPos;
+		if (ZPos - attemptedMove < 0) attemptedMove = ZPos;
 
 
 		//if the space the attacker wants to move to is empty, go there.
 		//this moves by spaces in the grid; MoveTask is responsible for having grid positions turned into world coordinates
-		if (Services.Board.GeneralSpaceQuery(xPos, zPos - attemptedMove) == SpaceBehavior.ContentType.None){
+		if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.None){
 
 			//is this enemy trying to move through the wall? If so, block the move.
-			if (zPos - attemptedMove == Services.Board.WallZPos){
-				if (Services.Board.GetWallDurability(xPos) > 0) return;
+			if (ZPos - attemptedMove == Services.Board.WallZPos){
+				if (Services.Board.GetWallDurability(XPos) > 0) return;
 			}
 
 			//OK, not moving through a wall. Leave the current space, go into the new space, move on-screen, and update this attacker's
 			//understanding of its own position
-			Services.Board.TakeThingFromSpace(xPos, zPos);
-			Services.Board.PutThingInSpace(gameObject, xPos, zPos - attemptedMove, SpaceBehavior.ContentType.Attacker);
-			Services.Tasks.AddTask(new MoveTask(transform, xPos, zPos - attemptedMove, Services.Attackers.MoveSpeed));
-			NewLoc(xPos, zPos - attemptedMove);
+			Services.Board.TakeThingFromSpace(XPos, ZPos);
+			Services.Board.PutThingInSpace(gameObject, XPos, ZPos - attemptedMove, SpaceBehavior.ContentType.Attacker);
+			Services.Tasks.AddTask(new MoveTask(transform, XPos, ZPos - attemptedMove, Services.Attackers.MoveSpeed));
+			NewLoc(XPos, ZPos - attemptedMove);
 		}
 	}
 
@@ -93,6 +103,22 @@ public class AttackerSandbox : MonoBehaviour {
 	/// </summary>
 	/// <returns>The column, zero-indexed.</returns>
 	public int GetColumn(){
-		return xPos;
+		return XPos;
+	}
+
+
+	public void TakeDamage(int damage){
+		Health -= damage;
+
+		if (Health <= 0) {
+			Services.Attackers.EliminateAttacker(this);
+			Services.Board.TakeThingFromSpace(XPos, ZPos);
+			Services.Tasks.AddTask(new AttackerFallTask(GetComponent<Rigidbody>()));
+		}
+	}
+
+
+	public void FailToDamage(){
+		Debug.Log("Attacker not damaged!");
 	}
 }

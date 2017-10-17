@@ -1,7 +1,16 @@
 ﻿using UnityEngine;
 
 public class GameManager : MonoBehaviour {
-	
+
+
+	/////////////////////////////////////////////
+	/// Fields
+	/////////////////////////////////////////////
+
+
+	//the canvas defenders use for their UI
+	private const string DEFENDER_UI = "Defender UI canvas";
+
 
 	//initialize variables and establish the game's starting state
 	private void Awake(){
@@ -16,6 +25,7 @@ public class GameManager : MonoBehaviour {
 		Services.AttackDeck.Setup();
 		Services.Defenders = new DefenderManager();
 		Services.Defenders.Setup();
+		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Init();
 	}
 
 

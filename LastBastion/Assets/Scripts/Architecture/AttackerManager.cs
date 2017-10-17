@@ -213,4 +213,9 @@ public class AttackerManager {
 			attacker.TryMoveSouth();
 		}
 	}
+
+
+	public void EliminateAttacker(AttackerSandbox attacker){
+		attackers.Remove(attacker);
+	}
 }
