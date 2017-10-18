@@ -45,7 +45,7 @@ public class DefenderManager {
 	public void Setup(){
 		defenderOrganizer = GameObject.Find(DEFENDER_ORGANIZER).transform;
 		spawnPoints = CreateSpawnPoints();
-		defenders = MakeProtagonists(new DefenderTypes[] { DefenderTypes.Generic_Defender, DefenderTypes.Generic_Defender, DefenderTypes.Generic_Defender });
+		defenders = MakeProtagonists(new DefenderTypes[] { DefenderTypes.Generic_Defender, DefenderTypes.Brawler, DefenderTypes.Generic_Defender });
 	}
 
 
@@ -188,6 +188,7 @@ public class DefenderManager {
 
 	public void PrepareDefenderFightPhase(){
 		doneDefenders.Clear();
+		foreach(DefenderSandbox defender in defenders) defender.PrepareToFight();
 	}
 
 

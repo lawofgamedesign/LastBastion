@@ -165,10 +165,9 @@ public class TurnManager {
 				} else if (temp.tag == ATTACKER_TAG && //if the player clicked on an attacker, try to have the chosen defender fight them
 						   Services.Defenders.IsAnyoneSelected() &&
 						   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
-					int combatValue = Services.AttackDeck.GetAttackerCard().Value; //the attacker's drwan card
-
-
-					Services.Defenders.GetSelectedDefender().TryFight(temp.GetComponent<AttackerSandbox>(), combatValue);
+					Services.Defenders.GetSelectedDefender().TryFight(temp.GetComponent<AttackerSandbox>());
+				} else if (temp.tag == BOARD_TAG){
+					Services.Events.Fire(new BoardClickedEvent(temp.GetComponent<SpaceBehavior>().GridLocation));
 				}
 
 				if (Services.Defenders.IsEveryoneDone()) OnExit();

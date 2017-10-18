@@ -76,7 +76,7 @@ public class DefenderSandbox : MonoBehaviour {
 		Selected = false;
 		selectedParticle = transform.Find(SELECT_PARTICLE_OBJ).gameObject;
 		lineRend = GetComponent<LineRenderer>();
-		lineRend.positionCount = 0;
+		ClearLine();
 		moveButton = transform.Find(PRIVATE_UI_CANVAS).Find(MOVE_BUTTON_OBJ).GetComponent<Button>();
 		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
@@ -138,6 +138,7 @@ public class DefenderSandbox : MonoBehaviour {
 		moveButton.gameObject.SetActive(false);
 		noFightButton.gameObject.SetActive(false);
 		Services.Defenders.NoSelectedDefender();
+		for (int i = 0; i < combatHand.Count; i++) uICanvas.GetChild(i).gameObject.SetActive(false); //shut off the combat cards
 	}
 
 
@@ -228,6 +229,13 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	/// <summary>
+	/// If this defender needs to do anything at the start of the Defender Fight phase, that happens here.
+	/// </summary>
+	public virtual void PrepareToFight(){
+		//generic defenders don't need to do anything
+	}
+
 
 	/// <summary>
 	/// Carries out all effects associated with being selected to move.
@@ -243,6 +251,9 @@ public class DefenderSandbox : MonoBehaviour {
 
 		for (int i = 0; i < combatHand.Count; i++){
 			uICanvas.GetChild(i).Find(TEXT_OBJ).GetComponent<Text>().text = combatHand[i].Value.ToString();
+
+			uICanvas.GetChild(i).GetComponent<Image>().color = AssignCardColor(i);
+
 			uICanvas.GetChild(i).gameObject.SetActive(true);
 		}
 
@@ -253,11 +264,25 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
-	/// Note which combat card the player has chosen.
+	/// Determines the appropriate color for a card based on its state.
+	/// </summary>
+	/// <returns>The card's color.</returns>
+	/// <param name="index">The index of the card, in the defender's combat hand AND the shared UI canvas' children.</param>
+	protected virtual Color AssignCardColor(int index){
+		if (combatHand[index].Available) return Color.white;
+		else return Color.red;
+	}
+
+
+	/// <summary>
+	/// Note which combat card the player has chosen. Reject attempts to choose a card that isn't available.
 	/// </summary>
 	/// <param name="index">The card's number, zero-indexed.</param>
 	public virtual void AssignChosenCard(int index){
-		ChosenCard = combatHand[index];
+		if (combatHand[index].Available){
+			ChosenCard = combatHand[index];
+			uICanvas.GetChild(index).GetComponent<Image>().color = Color.blue;
+		}
 	}
 
 
@@ -274,16 +299,20 @@ public class DefenderSandbox : MonoBehaviour {
 	/// <summary>
 	/// Damages an attacker if it is directly north and the player has chosen a stronger card than its value.
 	/// </summary>
-	/// <param name="attackerValue">Attacker value.</param>
-	public virtual void TryFight(AttackerSandbox attacker, int attackerValue){
-		if (CheckIsNorth(attacker) &&
-			ChosenCard.Value > attackerValue){
-			attacker.TakeDamage(ChosenCard.Value - attackerValue);
-			DoneFighting();
-		} else if (!CheckIsNorth(attacker)){
+	/// <param name="attacker">The attacker this defender is fighting.</param>
+	public virtual void TryFight(AttackerSandbox attacker){
+		if (!CheckIsNorth(attacker)) return; //don't fight if the attacker isn't directly to the north
+
+		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
+		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+
+		if (ChosenCard.Value + AttackMod > attackerValue + attacker.Armor){
+			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.Armor));
+			FinishWithCard();
 			DoneFighting();
 		} else {
 			attacker.FailToDamage();
+			FinishWithCard();
 			DoneFighting();
 		}
 	}
@@ -301,12 +330,51 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
+	/// Handle everything that needs to happen to the player's chosen card when a defender has finished a combat.
+	/// </summary>
+	protected virtual void FinishWithCard(){
+		ChosenCard.Available = false;
+		uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<Image>().color = AssignCardColor(combatHand.IndexOf(ChosenCard));
+		ChosenCard = null;
+
+		if (!StillAvailableCards()) ResetCombatHand();
+	}
+
+
+	/// <summary>
+	/// Are there any available cards in this defender's combat hand?
+	/// </summary>
+	/// <returns><c>true</c> if so, <c>false</c> if not.</returns>
+	protected bool StillAvailableCards(){
+		bool temp = false;
+
+		foreach (Card card in combatHand){
+			if (card.Available){
+				temp = true;
+				break;
+			}
+		}
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Resets a defender's combat hand, making the cards available for use and providing relevant feedback.
+	/// </summary>
+	protected void ResetCombatHand(){
+		foreach (Card card in combatHand){
+			card.Available = true;
+			uICanvas.GetChild(combatHand.IndexOf(card)).GetComponent<Image>().color = AssignCardColor(combatHand.IndexOf(card));
+		}
+	}
+
+
+	/// <summary>
 	/// When this defender is done fighting, this carries out all associated effects.
 	/// </summary>
 	public virtual void DoneFighting(){
 		BeUnselected();
-
-		for (int i = 0; i < combatHand.Count; i++) uICanvas.GetChild(i).gameObject.SetActive(false); //shut off the combat cards
 
 		Services.Defenders.DeclareSelfDone(this);
 	}

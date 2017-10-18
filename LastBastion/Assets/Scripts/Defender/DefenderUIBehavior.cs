@@ -27,6 +27,7 @@ public class DefenderUIBehavior : MonoBehaviour {
 	//the color a card turns upon being selected
 	private Color unselectedColor = Color.white;
 	private Color selectedColor = Color.blue;
+	private Color unavailableColor = Color.red;
 
 
 	/////////////////////////////////////////////
@@ -46,12 +47,13 @@ public class DefenderUIBehavior : MonoBehaviour {
 	/// Called when a card is clicked.
 	/// </summary>
 	/// <param name="card">The card clicked, numbered left to right, zero-indexed.</param>
-	public void OnCardClicked(int card){
-		Services.Defenders.HandleCardChoice(card);
+	public void OnCardClicked(int index){
+		Services.Defenders.HandleCardChoice(index);
+	}
 
-		ClearSelectedColor();
 
-		transform.GetChild(card).GetComponent<Image>().color = selectedColor;
+	public void TurnSelectedColor(int index){
+		transform.GetChild(index).GetComponent<Image>().color = selectedColor;
 	}
 
 
@@ -60,5 +62,10 @@ public class DefenderUIBehavior : MonoBehaviour {
 	/// </summary>
 	public void ClearSelectedColor(){
 		foreach (Transform child in transform) child.GetComponent<Image>().color = unselectedColor;
+	}
+
+
+	public void TurnUnavailableColor(int index){
+		transform.GetChild(index).GetComponent<Image>().color = unavailableColor;
 	}
 }

@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour {
 		Services.Defenders = new DefenderManager();
 		Services.Defenders.Setup();
 		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Init();
+		Services.Events = new EventManager();
 	}
 
 

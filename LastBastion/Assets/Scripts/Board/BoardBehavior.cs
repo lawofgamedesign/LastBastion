@@ -252,4 +252,9 @@ public class BoardBehavior {
 
 		return walls[column].Strength;
 	}
+
+
+	public void EliminateAttacker(AttackerSandbox attacker){
+
+	}
 }

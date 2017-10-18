@@ -60,4 +60,14 @@ public static class Services {
 		}
 		set { defenders = value; }
 	}
+
+
+	private static EventManager events;
+	public static EventManager Events {
+		get {
+			Debug.Assert(events != null, "No event manager. Did you forget to create one?");
+			return events;
+		}
+		set { events = value; }
+	}
 }
