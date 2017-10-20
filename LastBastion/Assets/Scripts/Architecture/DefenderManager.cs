@@ -243,6 +243,7 @@ public class DefenderManager {
 	/// </summary>
 	/// <param name="card">The card chosen in the UI, from left to right, zero-indexed. NOT the card's value!.</param>
 	public void HandleCardChoice(int card){
+		if (selectedDefender == null) return; //if the card UI is somehow displayed while noone is selected, discard clicks on it
 		selectedDefender.AssignChosenCard(card);
 	}
 }

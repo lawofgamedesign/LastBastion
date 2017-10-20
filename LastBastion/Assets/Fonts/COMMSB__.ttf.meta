@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: da5bf858bdb0d496c89b4e0676c5eb19
+timeCreated: 1508375148
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Communist
+  fontNames:
+  - Communist
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 36863424241a348c68d9f5a5de25075c, type: 3}
+  - {fileID: 12800000, guid: 6708fd4fc616a42c3849ac73f5fb2d24, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

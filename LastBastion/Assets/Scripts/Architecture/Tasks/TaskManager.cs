@@ -53,4 +53,16 @@ public class TaskManager {
 		tasks.RemoveAt(taskIndex);
 		task.SetStatus(Task.TaskStatus.Detached);
 	}
+
+
+	/// <summary>
+	/// Determines whether there is already a task of a given type in the list of current tasks.
+	/// </summary>
+	/// <returns><c>true</c> if there is a task of the given task's type in the list, <c>false</c> otherwise.</returns>
+	/// <param name="task">A task whose type you wish to check against.</param>
+	public bool CheckForTaskOfType(Task task){
+		if (tasks.Exists(e => e.GetType() == task.GetType())) return true;
+
+		return false;
+	}
 }

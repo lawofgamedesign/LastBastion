@@ -78,6 +78,15 @@ public class TurnManager {
 	}
 
 
+	/// <summary>
+	/// Provide feedback for changing phases by turning the rulebook's pages
+	/// </summary>
+	private void TurnRulebookPage(){
+		TurnPageTask turnPage = new TurnPageTask();
+		if (!Services.Tasks.CheckForTaskOfType(turnPage)) Services.Tasks.AddTask(turnPage);
+	}
+
+
 	/////////////////////////////////////////////
 	/// States
 	/////////////////////////////////////////////
@@ -96,6 +105,7 @@ public class TurnManager {
 			Services.Attackers.SpawnNewAttackers();
 			Services.Attackers.MoveAttackers();
 			Context.phaseText.text = ATTACKER_MOVE;
+			Context.TurnRulebookPage();
 		}
 
 
@@ -118,6 +128,7 @@ public class TurnManager {
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderMovePhase();
 			Context.phaseText.text = PLAYER_MOVE;
+			Context.TurnRulebookPage();
 		}
 
 
@@ -152,6 +163,7 @@ public class TurnManager {
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderFightPhase();
 			Context.phaseText.text = PLAYER_FIGHT;
+			Context.TurnRulebookPage();
 		}
 
 		public override void Tick(){
@@ -194,6 +206,7 @@ public class TurnManager {
 			timer = 0.0f;
 			besiegers = Services.Board.GetBesiegingAttackers();
 			Context.phaseText.text = BESIEGE;
+			Context.TurnRulebookPage();
 		}
 
 

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: d3faf8fe3b8f54eac89367c6644875a9
+timeCreated: 1508382276
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Print Dashed
+  fontNames:
+  - Print Dashed
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

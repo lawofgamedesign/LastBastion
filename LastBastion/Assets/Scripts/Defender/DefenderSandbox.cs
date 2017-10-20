@@ -138,7 +138,6 @@ public class DefenderSandbox : MonoBehaviour {
 		moveButton.gameObject.SetActive(false);
 		noFightButton.gameObject.SetActive(false);
 		Services.Defenders.NoSelectedDefender();
-		for (int i = 0; i < combatHand.Count; i++) uICanvas.GetChild(i).gameObject.SetActive(false); //shut off the combat cards
 	}
 
 
@@ -251,26 +250,32 @@ public class DefenderSandbox : MonoBehaviour {
 
 		for (int i = 0; i < combatHand.Count; i++){
 			uICanvas.GetChild(i).Find(TEXT_OBJ).GetComponent<Text>().text = combatHand[i].Value.ToString();
-
-			uICanvas.GetChild(i).GetComponent<Image>().color = AssignCardColor(i);
-
 			uICanvas.GetChild(i).gameObject.SetActive(true);
 		}
 
 		ChosenCard = null;
 
 		noFightButton.gameObject.SetActive(true);
+
+		TurnOverAvailableCards();
 	}
 
 
-	/// <summary>
-	/// Determines the appropriate color for a card based on its state.
-	/// </summary>
-	/// <returns>The card's color.</returns>
-	/// <param name="index">The index of the card, in the defender's combat hand AND the shared UI canvas' children.</param>
-	protected virtual Color AssignCardColor(int index){
-		if (combatHand[index].Available) return Color.white;
-		else return Color.red;
+	protected virtual void TurnOverAvailableCards(){
+		uICanvas.GetComponent<DefenderUIBehavior>().FlipAllCardsDown();
+
+		for (int i = 0; i < combatHand.Count; i++){
+			if (combatHand[i].Available){
+				PickUpCardTask pickUpTask = new PickUpCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
+				FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Up);
+				PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
+
+				pickUpTask.Then(flipTask);
+				flipTask.Then(putDownTask);
+
+				Services.Tasks.AddTask(pickUpTask);
+			}
+		}
 	}
 
 
@@ -279,9 +284,9 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	/// <param name="index">The card's number, zero-indexed.</param>
 	public virtual void AssignChosenCard(int index){
-		if (combatHand[index].Available){
+		if (combatHand[index].Available && combatHand[index] != ChosenCard){
 			ChosenCard = combatHand[index];
-			uICanvas.GetChild(index).GetComponent<Image>().color = Color.blue;
+			Services.Tasks.AddTask(new PickUpCardTask(uICanvas.GetChild(index).GetComponent<RectTransform>()));
 		}
 	}
 
@@ -334,7 +339,12 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	protected virtual void FinishWithCard(){
 		ChosenCard.Available = false;
-		uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<Image>().color = AssignCardColor(combatHand.IndexOf(ChosenCard));
+		uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<Image>().color = Color.white;
+
+		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
+		flipTask.Then(new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>()));
+		Services.Tasks.AddTask(flipTask);
+
 		ChosenCard = null;
 
 		if (!StillAvailableCards()) ResetCombatHand();
@@ -365,7 +375,6 @@ public class DefenderSandbox : MonoBehaviour {
 	protected void ResetCombatHand(){
 		foreach (Card card in combatHand){
 			card.Available = true;
-			uICanvas.GetChild(combatHand.IndexOf(card)).GetComponent<Image>().color = AssignCardColor(combatHand.IndexOf(card));
 		}
 	}
 

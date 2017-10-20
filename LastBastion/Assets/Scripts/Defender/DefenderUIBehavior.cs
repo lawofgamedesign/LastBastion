@@ -30,6 +30,11 @@ public class DefenderUIBehavior : MonoBehaviour {
 	private Color unavailableColor = Color.red;
 
 
+	//for flipping cards face-down
+	private const float FACE_DOWN_Y = 180.0f;
+	private const string CARD_BACK_OBJ = "Card back";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -49,6 +54,25 @@ public class DefenderUIBehavior : MonoBehaviour {
 	/// <param name="card">The card clicked, numbered left to right, zero-indexed.</param>
 	public void OnCardClicked(int index){
 		Services.Defenders.HandleCardChoice(index);
+	}
+
+
+	/// <summary>
+	/// Turn all cards over, by setting their local rotation and displaying the card back.
+	/// </summary>
+	public void FlipAllCardsDown(){
+		foreach (RectTransform child in transform){
+			child.localRotation = Quaternion.Euler(new Vector3(child.localRotation.eulerAngles.x, FACE_DOWN_Y, child.localRotation.eulerAngles.z));
+			child.Find(CARD_BACK_OBJ).gameObject.SetActive(true);
+		}
+	}
+
+
+	/// <summary>
+	/// Deactivates the cards' gameobjects when the player is done with them.
+	/// </summary>
+	public void ShutCardsOff(){
+		foreach (Transform child in transform) child.gameObject.SetActive(false);
 	}
 
 
