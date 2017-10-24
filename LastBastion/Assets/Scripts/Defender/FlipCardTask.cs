@@ -21,7 +21,6 @@ public class FlipCardTask : Task {
 	private const float HALFWAY_Y_ROT = 90.0f;
 	private float currentRot;
 	private float startRot;
-	private float endRot;
 	private const float ROT_SPEED = 180.0f;
 	private float currentSpeed;
 
@@ -33,7 +32,6 @@ public class FlipCardTask : Task {
 
 	//get this close to the target rotation, then stop
 	private const float TOLERANCE = 0.5f;
-	private float currentLimit;
 
 
 
@@ -58,16 +56,12 @@ public class FlipCardTask : Task {
 		switch(flipDir){
 			case UpOrDown.Up:
 				startRot = FACE_DOWN_Y_ROT;
-				endRot = FACE_UP_Y_ROT;
 				currentSpeed = -ROT_SPEED;
-				currentLimit = TOLERANCE;
 				cardBack.SetActive(true);
 				break;
 			case UpOrDown.Down:
 				startRot = FACE_UP_Y_ROT;
-				endRot = FACE_DOWN_Y_ROT;
 				currentSpeed = ROT_SPEED;
-				currentLimit = FACE_DOWN_Y_ROT - TOLERANCE;
 				cardBack.SetActive(false);
 				break;
 			default:

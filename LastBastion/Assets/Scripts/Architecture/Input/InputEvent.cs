@@ -1,0 +1,25 @@
+﻿using UnityEngine;
+
+public class InputEvent : Event {
+
+
+	/////////////////////////////////////////////
+	/// Fields
+	/////////////////////////////////////////////
+
+
+	//the object the player chose
+	public readonly GameObject selected;
+
+
+
+	/////////////////////////////////////////////
+	/// Functions
+	/////////////////////////////////////////////
+
+
+	//constructor
+	public InputEvent(GameObject selected){
+		this.selected = selected;
+	}
+}

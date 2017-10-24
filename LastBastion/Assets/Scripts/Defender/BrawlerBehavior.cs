@@ -16,8 +16,20 @@ public class BrawlerBehavior : DefenderSandbox {
 	private int brawlerArmor = 1;
 
 
+	//upgrade tracks
+	private enum UpgradeTracks { Rampage, Boasting };
+
+
 	//rampage track
 	private enum RampageTrack { None, Rampage, Wade_In, Berserk, The_Last_One_Standing };
+	private List<string> rampageDescriptions = new List<string>() {
+		"<b>Start rampaging</b>",
+		"<b>Rampage</b>\n\nYou can make an extra attack to the left or right each Defenders Fight phase.",
+		"<b>Wade In</b>\n\nYou can make an extra attack to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.",
+		"<b>Berserk</b>\n\nYou can make two extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.",
+		"<b>The Last One Standing</b>\n\nYou can make any number of extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.\"",
+		"<b>Maximum rampage!</b>"
+	};
 	private RampageTrack currentRampage;
 	private enum Directions { North, South, West, East, Error };
 	private List<Directions> attacksSoFar = new List<Directions>();
@@ -28,6 +40,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const int AVAILABLE_JUMPS_LAST_STANDING = 9999; //effectively unlimited
 	private int availableJumps;
 	private int jumpsSoFar = 0;
+
+
+	//character sheet information
+	private const string BRAWLER_NAME = "Brawler";
 
 
 	/////////////////////////////////////////////
@@ -45,7 +61,9 @@ public class BrawlerBehavior : DefenderSandbox {
 		AttackMod = brawlerAttackMod;
 		Armor = brawlerArmor;
 
-		currentRampage = RampageTrack.The_Last_One_Standing;
+
+
+		currentRampage = RampageTrack.None;
 	}
 
 
@@ -349,8 +367,42 @@ public class BrawlerBehavior : DefenderSandbox {
 	public override void DoneFighting(){
 		base.DoneFighting();
 
+		charSheet.ChangeSheetState();
+
 		if (currentRampage == RampageTrack.Wade_In || currentRampage == RampageTrack.Berserk || currentRampage == RampageTrack.The_Last_One_Standing){
 			Services.Events.Unregister<BoardClickedEvent>(boardFunc);
 		}
+	}
+
+
+	/// <summary>
+	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
+	/// </summary>
+	public override void TakeOverCharSheet(){
+		charSheet.RenameSheet(BRAWLER_NAME);
+		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
+		charSheet.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
+		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
+	}
+
+
+	/// <summary>
+	/// When the player clicks a button to power up, this function is called.
+	/// </summary>
+	/// <param>The upgrade tree the player wants to move along.</param>
+	/// <param name="tree">The upgrade tree the player clicked. Left is 0, right is 1.</param>
+	public override bool PowerUp(int tree){
+		if (!base.PowerUp(tree)) return false; //has the Brawler defeated enough attackers to upgrade?
+
+		switch (tree){
+			case (int)UpgradeTracks.Rampage:
+				if (currentRampage != RampageTrack.The_Last_One_Standing) currentRampage++;
+				break;
+		}
+
+		charSheet.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
+
+		return true;
 	}
 }

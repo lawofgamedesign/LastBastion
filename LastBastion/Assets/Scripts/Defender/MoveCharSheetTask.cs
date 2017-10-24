@@ -1,0 +1,110 @@
+﻿using UnityEngine;
+
+public class MoveCharSheetTask : Task {
+
+
+	/////////////////////////////////////////////
+	/// Fields
+	/////////////////////////////////////////////
+
+
+	//the character sheet's positions on the screen
+	private readonly Vector3 hiddenLoc = new Vector3(35.74f, 0.1f, -7.9f);
+	private readonly Vector3 displayedLoc = new Vector3(20.0f, 14.52f, 2.3f);
+	private readonly Vector3 hiddenRot = new Vector3(90.0f, -10.7f, 0.0f);
+	private readonly Vector3 displayedRot = new Vector3(70.69f, 0.0f, 0.0f);
+
+
+	private Vector3 startLoc;
+	private Vector3 endLoc;
+	private Quaternion startRot;
+	private Quaternion endRot;
+
+
+	//is the player picking up the character sheet, or putting it down?
+	public enum Move { Pick_up, Put_down };
+
+
+	//the recttransform this task moves
+	private RectTransform sheet;
+	private const string SHEET_CANVAS = "Defender sheet canvas";
+
+
+	//movement speeds and direction
+	private const float MOVE_SPEED = 100.0f;
+	private const float ROT_SPEED = 5.0f;
+	private Vector3 moveDir;
+
+
+	//get this close, then stop
+	private const float TOLERANCE = 0.5f;
+
+
+	/////////////////////////////////////////////
+	/// Functions
+	/////////////////////////////////////////////
+
+
+	//constructor
+	public MoveCharSheetTask(Move actionToTake){
+		switch(actionToTake){
+			case Move.Pick_up:
+				startLoc = hiddenLoc;
+				endLoc = displayedLoc;
+				startRot = Quaternion.Euler(hiddenRot);
+				endRot = Quaternion.Euler(displayedRot);
+				break;
+			case Move.Put_down:
+				startLoc = displayedLoc;
+				endLoc = hiddenLoc;
+				startRot = Quaternion.Euler(displayedRot);
+				endRot = Quaternion.Euler(hiddenRot);
+				break;
+			default:
+				Debug.Log("Illegal action to take: " + actionToTake);
+				break;
+		}
+	}
+
+
+	//generic constructor for type checks in CharacterSheetBehavior
+	public MoveCharSheetTask(){
+		SetStatus(TaskStatus.Aborted);
+	}
+
+
+	/// <summary>
+	/// Initialize variables.
+	/// </summary>
+	protected override void Init (){
+		sheet = GameObject.Find(SHEET_CANVAS).GetComponent<RectTransform>();
+
+		Debug.Assert(sheet != null, "Can't find the character sheet. Was it deactivated?");
+
+
+		moveDir = (endLoc - startLoc).normalized;
+	}
+
+
+	/// <summary>
+	/// Each frame, move and rotate the character sheet until it reaches its final position.
+	/// </summary>
+	public override void Tick(){
+		if (Vector3.Distance(sheet.position, endLoc) <= TOLERANCE){ //don't overshoot
+			sheet.position = endLoc;
+		} else {
+			sheet.Translate(moveDir * MOVE_SPEED * Time.deltaTime, Space.World);
+		}
+
+		if (Quaternion.Angle(sheet.rotation, endRot) <= TOLERANCE){ //don't overshoot on the rotation either
+			sheet.rotation = endRot;
+		} else {
+			sheet.rotation = Quaternion.RotateTowards(sheet.rotation, endRot, ROT_SPEED);
+		}
+
+		if (Vector3.Distance(sheet.position, endLoc) <= TOLERANCE &&
+			Quaternion.Angle(sheet.rotation, endRot) <= TOLERANCE){
+			SetStatus(TaskStatus.Success);
+		}
+	}
+}

@@ -41,7 +41,7 @@ public class DefenderUIBehavior : MonoBehaviour {
 
 
 	//initialize variables
-	public void Init(){
+	public void Setup(){
 		card1 = transform.Find(CARD_ONE).GetComponent<Button>();
 		card2 = transform.Find(CARD_TWO).GetComponent<Button>();
 		card3 = transform.Find(CARD_THREE).GetComponent<Button>();

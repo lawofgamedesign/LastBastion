@@ -9,7 +9,11 @@ public class GameManager : MonoBehaviour {
 
 
 	//the canvas defenders use for their UI
-	private const string DEFENDER_UI = "Defender UI canvas";
+	private const string DEFENDER_UI = "Defender card canvas";
+
+
+	//the canvas for the character sheet
+	private const string CHAR_SHEET_UI = "Defender sheet canvas";
 
 
 	//initialize variables and establish the game's starting state
@@ -25,8 +29,10 @@ public class GameManager : MonoBehaviour {
 		Services.AttackDeck.Setup();
 		Services.Defenders = new DefenderManager();
 		Services.Defenders.Setup();
-		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Init();
+		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Setup();
 		Services.Events = new EventManager();
+		Services.Inputs = new InputManager();
+		GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
 	}
 
 
@@ -35,6 +41,7 @@ public class GameManager : MonoBehaviour {
 	/// frame-by-frame is controlled from here.
 	/// </summary>
 	private void Update(){
+		Services.Inputs.Tick();
 		Services.Rulebook.Tick();
 		Services.Tasks.Tick();
 	}

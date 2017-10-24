@@ -53,7 +53,7 @@ public class DefenderSandbox : MonoBehaviour {
 	protected List<Card> combatHand;
 	protected Button noFightButton;
 	protected Transform uICanvas;
-	protected const string SHARED_UI_CANVAS = "Defender UI canvas";
+	protected const string CARD_UI_CANVAS = "Defender card canvas";
 	protected const string TEXT_OBJ = "Text";
 	protected const string NO_FIGHT_BUTTON = "Done fighting button";
 
@@ -63,9 +63,25 @@ public class DefenderSandbox : MonoBehaviour {
 	public const int NO_CARD_SELECTED = 999;
 
 
+	//character sheet UI
+	private const string GENERIC_NAME = "Generic defender";
+	protected CharacterSheetBehavior charSheet;
+	protected const string CHAR_SHEET_OBJ = "Defender sheet canvas";
+
+
+	//powering up
+	protected int DefeatedSoFar { get; private set; }
+	protected const int START_DEFEATED = 0;
+	protected int defeatsToNextUpgrade = 0;
+	protected int upgradeInterval = 3;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
+
+
+	#region setup
 
 
 	//initialize variables
@@ -81,8 +97,10 @@ public class DefenderSandbox : MonoBehaviour {
 		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
 		combatHand = MakeCombatHand();
-		uICanvas = GameObject.Find(SHARED_UI_CANVAS).transform;
+		uICanvas = GameObject.Find(CARD_UI_CANVAS).transform;
 		noFightButton = transform.Find(PRIVATE_UI_CANVAS).Find(NO_FIGHT_BUTTON).GetComponent<Button>();
+		charSheet = GameObject.Find(CHAR_SHEET_OBJ).GetComponent<CharacterSheetBehavior>();
+		DefeatedSoFar = START_DEFEATED;
 	}
 
 
@@ -106,6 +124,12 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	#endregion setup
+
+
+	#region movement
+
+
 	/// <summary>
 	/// Reports whether this defender is in the middle of a move.
 	/// </summary>
@@ -119,11 +143,15 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Carries out all effects associated with being selected to move.
 	/// </summary>
 	public virtual void BeSelectedForMovement(){
-		if (Services.Defenders.IsDone(this)) return; //if this defender has already reported itself done with this phase, it can't be selected
+		if (Services.Defenders.IsDone(this)){ //if this defender has already reported itself done with this phase, it can't be selected
+			TakeOverCharSheet();
+			return;
+		}
 
 		Selected = true;
 		selectedParticle.SetActive(true);
 		moveButton.gameObject.SetActive(true);
+		TakeOverCharSheet();
 	}
 
 
@@ -202,6 +230,7 @@ public class DefenderSandbox : MonoBehaviour {
 		Services.Board.PutThingInSpace(gameObject, destination.x, destination.z, SpaceBehavior.ContentType.Defender);
 		NewLoc(destination.x, destination.z);
 		BeUnselected();
+		charSheet.ChangeSheetState();
 		Services.Defenders.DeclareSelfDone(this);
 
 		remainingSpeed = 0;
@@ -228,6 +257,12 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	#endregion movement
+
+
+	#region combat
+
+
 	/// <summary>
 	/// If this defender needs to do anything at the start of the Defender Fight phase, that happens here.
 	/// </summary>
@@ -240,7 +275,10 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Carries out all effects associated with being selected to move.
 	/// </summary>
 	public virtual void BeSelectedForFight(){
-		if (Services.Defenders.IsDone(this)) return; //if this defender has already reported itself done with this phase, it can't be selected
+		if (Services.Defenders.IsDone(this)){ //if this defender has already reported itself done with this phase, it can't be selected
+			TakeOverCharSheet();
+			return;
+		}
 
 		Selected = true;
 		selectedParticle.SetActive(true);
@@ -258,6 +296,8 @@ public class DefenderSandbox : MonoBehaviour {
 		noFightButton.gameObject.SetActive(true);
 
 		TurnOverAvailableCards();
+
+		TakeOverCharSheet();
 	}
 
 
@@ -314,6 +354,8 @@ public class DefenderSandbox : MonoBehaviour {
 		if (ChosenCard.Value + AttackMod > attackerValue + attacker.Armor){
 			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.Armor));
 			FinishWithCard();
+			DefeatedSoFar++;
+			charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 			DoneFighting();
 		} else {
 			attacker.FailToDamage();
@@ -385,6 +427,40 @@ public class DefenderSandbox : MonoBehaviour {
 	public virtual void DoneFighting(){
 		BeUnselected();
 
+		charSheet.ChangeSheetState();
+
 		Services.Defenders.DeclareSelfDone(this);
+	}
+
+
+	#endregion combat
+
+
+	/// <summary>
+	/// Call this to display this defender's information on the character sheet.
+	/// </summary>
+	public virtual void TakeOverCharSheet(){
+		charSheet.RenameSheet(GENERIC_NAME);
+		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
+		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
+	}
+
+
+	/// <summary>
+	/// Each defender is responsible for figuring out how they power up. This base function only handles making sure the defender
+	/// has defeated enough enemies for a new upgrade.
+	/// 
+	/// The pattern for upgrades is: the first one is free, the second costs 3, and each one thereafter costs one more than the one before it.
+	/// </summary>
+	/// <param>The upgrade tree the player wants to move along.</param>
+	public virtual bool PowerUp(int tree){
+		if (DefeatedSoFar < defeatsToNextUpgrade) return false;
+
+		defeatsToNextUpgrade += upgradeInterval;
+		upgradeInterval++;
+		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+
+		return true;
 	}
 }

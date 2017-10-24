@@ -61,24 +61,6 @@ public class TurnManager {
 
 
 	/// <summary>
-	/// Tries to get a chosen object using a raycast.
-	/// 
-	/// This function return null if nothing was selected; it's up to the calling function to check for null returns.
-	/// </summary>
-	/// <returns>The chosen gameobject.</returns>
-	private GameObject GetClickedThing(){
-		RaycastHit hit;
-		GameObject obj = null;
-
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-		if (Physics.Raycast(ray, out hit)) obj = hit.collider.gameObject;
-
-		return obj;
-	}
-
-
-	/// <summary>
 	/// Provide feedback for changing phases by turning the rulebook's pages
 	/// </summary>
 	private void TurnRulebookPage(){
@@ -125,34 +107,33 @@ public class TurnManager {
 	private class PlayerMove : FSM<TurnManager>.State {
 
 
+		private void HandleMoveInputs(Event e){
+			InputEvent inputEvent = e as InputEvent;
+
+			if (inputEvent.selected.tag == DEFENDER_TAG){
+				Services.Defenders.SelectDefenderForMovement(inputEvent.selected.GetComponent<DefenderSandbox>());
+			} else if (inputEvent.selected.tag == BOARD_TAG){
+				if (Services.Defenders.IsAnyoneSelected()){
+					Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
+				}
+			}
+
+
+			//each time the player clicks, ask if everyone is finished. If so, move on
+			if (Services.Defenders.IsEveryoneDone()) OnExit();
+		}
+
+
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderMovePhase();
 			Context.phaseText.text = PLAYER_MOVE;
 			Context.TurnRulebookPage();
-		}
-
-
-		public override void Tick(){
-			if(Input.GetMouseButtonDown(0)){
-				GameObject temp = Context.GetClickedThing();
-
-				if (temp == null){
-					//do nothing; the player didn't click on anything
-				} else if (temp.tag == DEFENDER_TAG){
-					Services.Defenders.SelectDefenderForMovement(temp.GetComponent<DefenderSandbox>());
-				} else if (temp.tag == BOARD_TAG){
-					if (Services.Defenders.IsAnyoneSelected()){
-						Services.Defenders.GetSelectedDefender().TryPlanMove(temp.GetComponent<SpaceBehavior>().GridLocation);
-					}
-				}
-
-				//each time the player clicks, ask if everyone is finished. If so, move on
-				if (Services.Defenders.IsEveryoneDone()) OnExit();
-			}
+			Services.Events.Register<InputEvent>(HandleMoveInputs);
 		}
 
 
 		public override void OnExit(){
+			Services.Events.Unregister<InputEvent>(HandleMoveInputs);
 			TransitionTo<PlayerFight>();
 		}
 	}
@@ -160,34 +141,34 @@ public class TurnManager {
 
 	private class PlayerFight : FSM<TurnManager>.State {
 
+
+		private void HandleFightInputs(Event e){
+			InputEvent inputEvent = e as InputEvent;
+
+			if (inputEvent.selected.tag == DEFENDER_TAG){
+				Services.Defenders.SelectDefenderForFight(inputEvent.selected.GetComponent<DefenderSandbox>());
+			} else if (inputEvent.selected.tag == ATTACKER_TAG &&
+					   Services.Defenders.IsAnyoneSelected() &&
+					   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
+				Services.Defenders.GetSelectedDefender().TryFight(inputEvent.selected.GetComponent<AttackerSandbox>());
+			} else if (inputEvent.selected.tag == BOARD_TAG){
+				Services.Events.Fire(new BoardClickedEvent(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation));
+			}
+
+			if (Services.Defenders.IsEveryoneDone()) OnExit();
+		}
+
+
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderFightPhase();
 			Context.phaseText.text = PLAYER_FIGHT;
 			Context.TurnRulebookPage();
-		}
-
-		public override void Tick(){
-			if (Input.GetMouseButtonDown(0)){
-				GameObject temp = Context.GetClickedThing();
-
-				if (temp == null){
-					//do nothing; there was no action this script needs to handle
-				} else if (temp.tag == DEFENDER_TAG){
-					Services.Defenders.SelectDefenderForFight(temp.GetComponent<DefenderSandbox>());
-				} else if (temp.tag == ATTACKER_TAG && //if the player clicked on an attacker, try to have the chosen defender fight them
-						   Services.Defenders.IsAnyoneSelected() &&
-						   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
-					Services.Defenders.GetSelectedDefender().TryFight(temp.GetComponent<AttackerSandbox>());
-				} else if (temp.tag == BOARD_TAG){
-					Services.Events.Fire(new BoardClickedEvent(temp.GetComponent<SpaceBehavior>().GridLocation));
-				}
-
-				if (Services.Defenders.IsEveryoneDone()) OnExit();
-			}
+			Services.Events.Register<InputEvent>(HandleFightInputs);
 		}
 
 
 		public override void OnExit(){
+			Services.Events.Unregister<InputEvent>(HandleFightInputs);
 			TransitionTo<BesiegeWalls>();
 		}
 	}

@@ -65,4 +65,17 @@ public class TaskManager {
 
 		return false;
 	}
+
+
+	/// <summary>
+	/// Also determines whether the list of current tasks includes a task of a given type, this time by comparing directly
+	/// against a type.
+	/// </summary>
+	/// <returns><c>true</c> if there is at least one current task of the given type, <c>false</c> otherwise.</returns>
+	/// <typeparam name="T">The type to check against.</typeparam>
+	public bool CheckForTaskOfType<T>(){
+		if (tasks.Exists(e => e.GetType() == typeof(T))) return true;
+
+		return false;
+	}
 }

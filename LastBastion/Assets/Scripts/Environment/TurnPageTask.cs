@@ -24,10 +24,6 @@ public class TurnPageTask : Task {
 	private float rotSpeed = 180.0f;
 
 
-	//when the rotation is at least this close, stop
-	private float tolerance = 0.5f;
-
-
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////

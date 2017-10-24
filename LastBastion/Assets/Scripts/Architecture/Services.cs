@@ -70,4 +70,14 @@ public static class Services {
 		}
 		set { events = value; }
 	}
+
+
+	private static InputManager inputs;
+	public static InputManager Inputs {
+		get {
+			Debug.Assert(inputs != null, "No input manager. Did you forget to create one?");
+			return inputs;
+		}
+		set { inputs = value; }
+	}
 }
