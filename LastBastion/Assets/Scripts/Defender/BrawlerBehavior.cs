@@ -122,6 +122,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
 				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+				extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 				//the player can attack this direction, and they have a good enough value to hit the enemy
 				if (ChosenCard.Value > attackerValue){
@@ -154,6 +155,7 @@ public class BrawlerBehavior : DefenderSandbox {
 				
 				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
 				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+				extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 				//the player can attack this direction, and they have a good enough value to hit the enemy
 				if (canAttackThisDir &&
@@ -192,6 +194,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
 				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+				extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 				//the player can attack this direction, and they have a good enough value to hit the enemy
 				if (canAttackThisDir &&
@@ -228,6 +231,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
 				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+				extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 				//the player can attack this direction, and they have a good enough value to hit the enemy
 				if (canAttackThisDir &&
@@ -388,6 +392,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 			if (currentRampage == RampageTrack.None) resetTask.Then(new ShutOffCardsTask());
 		} else if (currentRampage == RampageTrack.None) putDownTask.Then(new ShutOffCardsTask());
+		else if (CheckUsedAllLimitedAttacks()) putDownTask.Then(new ShutOffCardsTask());
 
 		Services.Tasks.AddTask(flipTask);
 	}
@@ -399,15 +404,11 @@ public class BrawlerBehavior : DefenderSandbox {
 	public override void DoneFighting(){
 		if (Services.Tasks.CheckForTaskOfType<PutDownCardTask>()) return; //the Brawler has to wait for cards to be down to stop fighting, for error prevention
 
-		base.DoneFighting();
-
-		charSheet.ChangeSheetState();
-
-		uICanvas.GetComponent<DefenderUIBehavior>().ShutCardsOff();
-
 		if (currentRampage == RampageTrack.Wade_In || currentRampage == RampageTrack.Berserk || currentRampage == RampageTrack.The_Last_One_Standing){
 			Services.Events.Unregister<BoardClickedEvent>(boardFunc);
 		}
+
+		base.DoneFighting();
 	}
 
 

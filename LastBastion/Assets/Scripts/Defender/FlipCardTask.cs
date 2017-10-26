@@ -123,4 +123,13 @@ public class FlipCardTask : Task {
 				return false;
 		}
 	}
+
+
+	/// <summary>
+	/// Sanity check; make sure the card back is in the correct state when the task finishes.
+	/// </summary>
+	protected override void OnSuccess (){
+		if (flipDir == UpOrDown.Up) cardBack.SetActive(false);
+		else cardBack.SetActive(true);
+	}
 }

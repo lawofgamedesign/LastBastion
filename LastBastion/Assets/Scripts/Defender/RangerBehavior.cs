@@ -37,11 +37,19 @@ public class RangerBehavior : DefenderSandbox {
 	private const int BASE_ATTACKS = 1;
 
 	//UI for the Showboat track
-	private Text extraText;
-	private const string EXTRA_INFO_OBJ = "Extra info canvas";
 	private const string ATTACKS_REMAINING = " attacks left";
-	private const string NEXT_ATTACKS = " attacks next turn";
+	private const string RANGER_GETS = "Ranger gets ";
+	private const string NEXT_ATTACKS = " extra attacks next turn";
 	private const string NEWLINE = "\n";
+
+
+	//the Eagle Eye upgrade track
+	private enum LandTrack { None, Lay_of_the_Land, Tricks_and_Traps, On_the_Lookout, The_Last_Chance };
+	private List<string> eagleDescriptions = new List<string>() {
+		"<b>Get the lay of the land</b>",
+		"<b>Eagle Eye</b>\n\nOnce per turn, you may learn what combat card the Horde will play next."
+	};
+	private LandTrack currentLand;
 
 
 	/////////////////////////////////////////////
@@ -58,8 +66,7 @@ public class RangerBehavior : DefenderSandbox {
 		Armor = rangerArmor;
 
 		currentShowboat = ShowboatTrack.None;
-
-		extraText = GameObject.Find(EXTRA_INFO_OBJ).transform.Find(TEXT_OBJ).GetComponent<Text>();
+		currentLand = LandTrack.None;
 	}
 
 
@@ -69,6 +76,15 @@ public class RangerBehavior : DefenderSandbox {
 	/// <returns>A list of cards in the hand.</returns>
 	protected override List<Card> MakeCombatHand(){
 		return new List<Card>() { new Card(3), new Card(5), new Card(6) };
+	}
+
+
+	/// <summary>
+	/// If the Ranger has anything on the extra UI notepad, blank it when the Ranger moves.
+	/// </summary>
+	public override void Move(){
+		extraText.text = BlankAttackText();
+		base.Move();
 	}
 
 
@@ -107,6 +123,7 @@ public class RangerBehavior : DefenderSandbox {
 
 		//if the Ranger gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+		extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 
 		//the attacker's attack modifier might be reduced if the Ranger is behind them
@@ -130,6 +147,20 @@ public class RangerBehavior : DefenderSandbox {
 
 		//the Ranger can keep fighting until they run out of attacks
 		if (currentAttacks <= 0) DoneFighting();
+	}
+
+
+	/// <summary>
+	/// The Ranger's combat math changes when showboating.
+	/// </summary>
+	/// <returns>A string explaining the math behind each combat.</returns>
+	/// <param name="attacker">The attacker this defender is fighting.</param>
+	/// <param name="attackerValue">The value of the attacker's card.</param>
+	protected override string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
+			   ATTACKER_VALUE + attackerValue + PLUS + DetermineAttackerModifier(attacker) + NEWLINE +
+			   HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + DetermineAttackerModifier(attacker))).ToString() + NEWLINE +
+			   DAMAGE + (((ChosenCard.Value + AttackMod) - (attackerValue + DetermineAttackerModifier(attacker))) - DetermineAttackerArmor(attacker)).ToString();;
 	}
 
 
@@ -183,7 +214,7 @@ public class RangerBehavior : DefenderSandbox {
 	/// </summary>
 	private string ReviseAttackText(){
 		return currentAttacks.ToString() + ATTACKS_REMAINING + NEWLINE +
-			   extraAttacks.ToString() + NEXT_ATTACKS;
+			   RANGER_GETS + extraAttacks.ToString() + NEXT_ATTACKS;
 	}
 
 
@@ -220,12 +251,9 @@ public class RangerBehavior : DefenderSandbox {
 			putDownTask.Then(resetTask);
 
 			if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) resetTask.Then(new ShutOffCardsTask());
-		} else if (currentShowboat == ShowboatTrack.None){
-			putDownTask.Then(new ShutOffCardsTask());
-		} else if (currentAttacks <= 0){
-			putDownTask.Then(new ShutOffCardsTask());
-		}
-
+			else if (currentShowboat == ShowboatTrack.None) putDownTask.Then(new ShutOffCardsTask());
+			else if (currentAttacks <= 0) putDownTask.Then(new ShutOffCardsTask());
+		} else if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) putDownTask.Then(new ShutOffCardsTask());
 
 		Services.Tasks.AddTask(flipTask);
 	}
@@ -236,13 +264,9 @@ public class RangerBehavior : DefenderSandbox {
 	/// that provides feedback on the number of attacks remaining.
 	/// </summary>
 	public override void DoneFighting(){
-		BeUnselected();
-
-		charSheet.ChangeSheetState();
-
 		extraText.text = BlankAttackText();
 
-		Services.Defenders.DeclareSelfDone(this);
+		base.DoneFighting();
 	}
 
 
@@ -253,6 +277,7 @@ public class RangerBehavior : DefenderSandbox {
 		charSheet.RenameSheet(RANGER_NAME);
 		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
 		charSheet.ReviseTrack1(showboatDescriptions[(int)currentShowboat + 1], showboatDescriptions[(int)currentShowboat]);
+		charSheet.ReviseTrack2(eagleDescriptions[(int)currentLand + 1], eagleDescriptions[(int)currentLand]);
 		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
 	}
@@ -272,10 +297,10 @@ public class RangerBehavior : DefenderSandbox {
 					currentShowboat++;
 					charSheet.ReviseTrack1(showboatDescriptions[(int)currentShowboat + 1], showboatDescriptions[(int)currentShowboat]);
 
-					//just started showboating; need to make sure the UI is correct
+					//just started showboating; need to make sure the UI is correct, and displayed if it's the appropriate phase
 					if (currentShowboat == ShowboatTrack.Showboat){
 						PrepareToFight();
-						extraText.text = ReviseAttackText();
+						if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)) extraText.text = ReviseAttackText();
 					}
 				}
 

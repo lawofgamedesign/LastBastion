@@ -69,6 +69,18 @@ public class DefenderSandbox : MonoBehaviour {
 	protected const string CHAR_SHEET_OBJ = "Defender sheet canvas";
 
 
+	//extra UI for displaying combat math
+	protected Text extraText;
+	protected const string EXTRA_INFO_OBJ = "Extra info canvas";
+	protected const string DEFENDER_VALUE = "Defender: ";
+	protected const string ATTACKER_VALUE = "Horde: ";
+	protected const string PLUS = " + ";
+	protected const string EQUALS = " = ";
+	protected const string HITS = "Hits: ";
+	protected const string DAMAGE = "Damage: ";
+	protected const string NEWLINE = "\n";
+
+
 	//powering up
 	protected int DefeatedSoFar { get; set; }
 	protected const int START_DEFEATED = 0;
@@ -100,6 +112,7 @@ public class DefenderSandbox : MonoBehaviour {
 		uICanvas = GameObject.Find(CARD_UI_CANVAS).transform;
 		noFightButton = transform.Find(PRIVATE_UI_CANVAS).Find(NO_FIGHT_BUTTON).GetComponent<Button>();
 		charSheet = GameObject.Find(CHAR_SHEET_OBJ).GetComponent<CharacterSheetBehavior>();
+		extraText = GameObject.Find(EXTRA_INFO_OBJ).transform.Find(TEXT_OBJ).GetComponent<Text>();
 		DefeatedSoFar = START_DEFEATED;
 	}
 
@@ -309,6 +322,7 @@ public class DefenderSandbox : MonoBehaviour {
 				PickUpCardTask pickUpTask = new PickUpCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
 				FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Up);
 				PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
+				putDownTask.Then(new ShutOffCardsTask()); //the cards will only shut off if the player immediately hits "done" and doesn't select anyone else
 
 				pickUpTask.Then(flipTask);
 				flipTask.Then(putDownTask);
@@ -350,6 +364,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+		extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){
 			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
@@ -362,6 +377,20 @@ public class DefenderSandbox : MonoBehaviour {
 			FinishWithCard();
 			DoneFighting();
 		}
+	}
+
+
+	/// <summary>
+	/// Show the math behind combats on the extra information UI.
+	/// </summary>
+	/// <returns>A string explaining the math behind each combat.</returns>
+	/// <param name="attacker">The attacker this defender is fighting.</param>
+	/// <param name="attackerValue">The value of the attacker's card.</param>
+	protected virtual string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
+			   ATTACKER_VALUE + attackerValue + PLUS + attacker.AttackMod + NEWLINE +
+			   HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod)).ToString() + NEWLINE + 
+			   DAMAGE + (((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod)) - attacker.Armor).ToString();
 	}
 
 
@@ -436,6 +465,12 @@ public class DefenderSandbox : MonoBehaviour {
 		charSheet.ChangeSheetState();
 
 		Services.Defenders.DeclareSelfDone(this);
+
+		//if the cards are on the table at this point, shut them off
+		//the most common reason for that is if the player selects a defender, thinks about what to do, and decides to do nothing
+		if (!Services.Tasks.CheckForTaskOfType<PickUpCardTask>() &&
+			!Services.Tasks.CheckForTaskOfType<FlipCardTask>() &&
+			!Services.Tasks.CheckForTaskOfType<PutDownCardTask>()) Services.Tasks.AddTask(new ShutOffCardsTask());
 	}
 
 

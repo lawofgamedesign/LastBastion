@@ -27,10 +27,16 @@ public class ShutOffCardsTask : Task {
 
 
 	/// <summary>
-	/// When this task is active, shut the cards off and then declare the task done.
+	/// When this task is active, shut the cards off and then declare the task done so long as no one is selected.
+	/// 
+	/// If any defenders are currently selected, don't shut the cards off--we assume someone is using them!
 	/// </summary>
 	public override void Tick(){
-		GameObject.Find(UI_CANVAS).GetComponent<DefenderUIBehavior>().ShutCardsOff();
-		SetStatus(TaskStatus.Success);
+		if (!Services.Defenders.IsAnyoneSelected()){
+			GameObject.Find(UI_CANVAS).GetComponent<DefenderUIBehavior>().ShutCardsOff();
+			SetStatus(TaskStatus.Success);
+		} else {
+			SetStatus(TaskStatus.Aborted);
+		}
 	}
 }

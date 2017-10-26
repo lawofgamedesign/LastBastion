@@ -23,9 +23,9 @@ public class GuardianBehavior : DefenderSandbox {
 	private enum SingleCombatTrack { None, Single_Combat, Youre_Mine, Challenger, Champion };
 	private List<string> singleCombatDescriptions = new List<string>() {
 		"<b>Prepare for single combat</b>",
-		"<b>Single Combat</b>\n\nWhen attacking a Warlord, gain +3 attack.",
-		"<b>You're Mine!</b>\n\nWhen attacking a Warlord, gain +3 attack.\n\nWhen you defeat a Warlord, upgrade again immediately.",
-		"<b>Challenger</b>\n\nWhen attacking a Warlord, gain +3 attack and +3 armor.\n\nWhen you defeat a Warlord, upgrade again immediately.",
+		"<b>Single Combat</b>\n\nWhen you defeat a Warlord, upgrade immediately.",
+		"<b>You're Mine!</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +3 attack.",
+		"<b>Challenger</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +3 attack and +3 armor.",
 		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +3 attack and +3 armor.\n\nWhen you defeat a Leader, also defeat their retinue.",
 		"<b>Master of single combat!</b>"
 	};
@@ -38,10 +38,16 @@ public class GuardianBehavior : DefenderSandbox {
 	//Hold the Line track
 	private enum HoldTrack { None, Hold_the_Line, Draw_Them_In, Bulwark, The_Last_Bastion };
 	private List<string> holdDescriptions = new List<string>() {
-
-
+		"Stand strong",
+		"<b>Hold the Line</b>\n\nAfter moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen the Horde is defeated in that column, gain 1 experience.",
+		"<b>Face me!</b>\n\nAfter moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 1 experience."
 	};
 	private HoldTrack currentHold;
+	private GameObject holdMarker;
+	private const string HOLD_MARKER_OBJ = "Line held marker";
+	private const string CHOOSE_TO_BLOCK = "Choose a column to hold the line";
+	private const string BOARD_TAG = "Board";
+	private int blockedColumn = null;
 
 
 	//character sheet information
@@ -61,8 +67,62 @@ public class GuardianBehavior : DefenderSandbox {
 		AttackMod = guardianAttack;
 		Armor = guardianArmor;
 
+		currentHold = HoldTrack.None;
+		holdMarker = Resources.Load<GameObject>(HOLD_MARKER_OBJ);
 		currentSingleCombat = SingleCombatTrack.None;
 	}
+
+
+	#region movement
+
+
+	/// <summary>
+	/// When holding the line, the Guardian chooses one or more columns to block after moving.
+	/// </summary>
+	public override void Move(){
+		if (currentHold != HoldTrack.None) UnholdLine();
+
+		base.Move();
+
+		extraText.text = CHOOSE_TO_BLOCK;
+
+		if (currentHold != HoldTrack.None) Services.Events.Register<InputEvent>(ChooseColumn);
+	}
+
+
+	/// <summary>
+	/// If the Guardian is moving up the Hold the Line track, call this at the start of the Defenders Move phase to release the currently blocked column.
+	/// </summary>
+	private void UnholdLine(){
+		if (blockedColumn != null){
+			Services.Events.Fire(new UnblockColumnEvent(blockedColumn));
+			blockedColumn = null;
+		}
+	}
+
+
+	/// <summary>
+	/// Used as an InputEvent handler to enable the Guardian to choose a column to block.
+	/// </summary>
+	/// <param name="e">The input event.</param>
+	private void ChooseColumn(Event e){
+		InputEvent inputEvent = e as InputEvent;
+
+		if (inputEvent.selected.tag == BOARD_TAG){
+			SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
+
+			if (space.GridLocation.x - 1 == GridLoc.x || space.GridLocation.x + 1 == GridLoc.x){
+				blockedColumn = space.GridLocation.x;
+				Services.Events.Fire(new BlockColumnEvent(blockedColumn));
+			}
+		}
+	}
+
+
+	#endregion movement
+
+
+	#region combat
 
 
 	/// <summary>
@@ -74,6 +134,7 @@ public class GuardianBehavior : DefenderSandbox {
 
 		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+		extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 		if (ChosenCard.Value + DetermineAttackMod(attacker) > attackerValue + attacker.AttackMod){
 			attacker.TakeDamage((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor));
@@ -87,6 +148,22 @@ public class GuardianBehavior : DefenderSandbox {
 			FinishWithCard();
 			DoneFighting();
 		}
+	}
+
+
+
+
+	/// <summary>
+	/// The Guardian's combat math changes when mastering single combat.
+	/// </summary>
+	/// <returns>A string explaining the math behind each combat.</returns>
+	/// <param name="attacker">The attacker this defender is fighting.</param>
+	/// <param name="attackerValue">The value of the attacker's card.</param>
+	protected override string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		return DEFENDER_VALUE + ChosenCard.Value + PLUS + DetermineAttackMod(attacker) + NEWLINE +
+			   ATTACKER_VALUE + attackerValue + PLUS + attacker.AttackMod + NEWLINE +
+			   HITS + ((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod)).ToString() + NEWLINE + 
+			   DAMAGE + (((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod)) - attacker.Armor).ToString();;
 	}
 
 
@@ -108,8 +185,9 @@ public class GuardianBehavior : DefenderSandbox {
 	private int DetermineDefeatedSoFar(AttackerSandbox attacker){
 		int temp = DefeatedSoFar;
 
-		if ((currentSingleCombat == SingleCombatTrack.Youre_Mine || currentSingleCombat == SingleCombatTrack.Challenger) &&
-			attacker.tag == LEADER_TAG){
+		if ((currentSingleCombat == SingleCombatTrack.Single_Combat ||
+			 currentSingleCombat == SingleCombatTrack.Youre_Mine ||
+			 currentSingleCombat == SingleCombatTrack.Challenger) && attacker.tag == LEADER_TAG){
 			temp = defeatsToNextUpgrade;
 		} else temp++;
 
@@ -153,12 +231,16 @@ public class GuardianBehavior : DefenderSandbox {
 	}
 
 
+	#endregion combat
+
+
 	/// <summary>
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
 	/// </summary>
 	public override void TakeOverCharSheet(){
 		charSheet.RenameSheet(GUARDIAN_NAME);
 		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
+		charSheet.ReviseTrack1(holdDescriptions[(int)currentHold + 1], holdDescriptions[(int)currentHold]);
 		charSheet.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
 		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
@@ -174,11 +256,15 @@ public class GuardianBehavior : DefenderSandbox {
 		if (!base.PowerUp(tree)) return false; //has the Brawler defeated enough attackers to upgrade?
 
 		switch (tree){
-		case (int)UpgradeTracks.Single_Combat:
-			if (currentSingleCombat != SingleCombatTrack.Champion) currentSingleCombat++;
-			break;
+			case (int)UpgradeTracks.Hold_the_Line:
+				if (currentHold != HoldTrack.The_Last_Bastion) currentHold++;
+				break;
+			case (int)UpgradeTracks.Single_Combat:
+				if (currentSingleCombat != SingleCombatTrack.Champion) currentSingleCombat++;
+				break;
 		}
 
+		charSheet.ReviseTrack1(holdDescriptions[(int)currentHold + 1], holdDescriptions[(int)currentHold]);
 		charSheet.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
 
 		return true;

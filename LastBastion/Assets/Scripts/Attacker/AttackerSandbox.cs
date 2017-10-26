@@ -44,7 +44,7 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 	//initialize variables
-	public void Setup(){
+	public virtual void Setup(){
 		FoughtThisTurn = false;
 		SiegeStrength = startSiegeStrength;
 		SpawnedThisTurn = true;
@@ -62,16 +62,24 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 	/// <summary>
-	/// Move this attacker.
+	/// This function manages limits and controls on movement, deciding whether and where the attacker should move.
 	/// </summary>
-	public void TryMoveSouth(){
+	public void TryMove(){
 		//don't move if this attacker spawned this turn, but get ready to move next turn
 		if (SpawnedThisTurn){
 			SpawnedThisTurn = false;
 			return;
 		}
 
+		//if the attacker gets this far, it can make a normal move to the south.
+		TryMoveSouth();
+	}
 
+
+	/// <summary>
+	/// Move this attacker.
+	/// </summary>
+	protected void TryMoveSouth(){
 		//sanity check; prevent this attacker from trying to move off the board
 		int attemptedMove = speed;
 		if (ZPos - attemptedMove < 0) attemptedMove = ZPos;
@@ -107,7 +115,11 @@ public class AttackerSandbox : MonoBehaviour {
 	}
 
 
-	public void TakeDamage(int damage){
+	/// <summary>
+	/// Call this when an attacker suffers damage.
+	/// </summary>
+	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
+	public virtual void TakeDamage(int damage){
 		Health -= damage;
 
 		if (Health <= 0) {

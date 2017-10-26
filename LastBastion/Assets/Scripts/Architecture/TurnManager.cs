@@ -18,6 +18,7 @@ public class TurnManager {
 
 	//the state machine that controls movement through phases of turns
 	private FSM<TurnManager> turnMachine;
+	public FSM<TurnManager> TurnMachine { get { return turnMachine; } private set { turnMachine = value; } }
 
 
 	//how long the system waits during each phase
@@ -51,6 +52,7 @@ public class TurnManager {
 	//initialize variables
 	public void Setup(){
 		turnMachine = new FSM<TurnManager>(this);
+		TurnMachine = turnMachine;
 		turnMachine.TransitionTo<AttackersAdvance>();
 		phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
 	}
@@ -105,7 +107,9 @@ public class TurnManager {
 		}
 	}
 
-
+	/// <summary>
+	/// State for the defenders' movement.
+	/// </summary>
 	private class PlayerMove : FSM<TurnManager>.State {
 
 
@@ -141,7 +145,11 @@ public class TurnManager {
 	}
 
 
-	private class PlayerFight : FSM<TurnManager>.State {
+	/// <summary>
+	/// State for the defenders' combat. This is public so that the Ranger can determine whether it's the Defenders Fight phase, and display--or not display--
+	/// the Showboating UI accordingly.
+	/// </summary>
+	public class PlayerFight : FSM<TurnManager>.State {
 
 
 		private void HandleFightInputs(Event e){

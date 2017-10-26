@@ -210,7 +210,7 @@ public class AttackerManager {
 		List<AttackerSandbox> currentAttackers = Services.Board.GetOrderedAttackerList();
 
 		foreach (AttackerSandbox attacker in currentAttackers){
-			attacker.TryMoveSouth();
+			attacker.TryMove();
 		}
 	}
 

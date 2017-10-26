@@ -505,7 +505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Selected: 0
-  moveSpeed: 5
+  moveSpeed: 15
 --- !u!114 &114988304089962610
 MonoBehaviour:
   m_ObjectHideFlags: 1
