@@ -28,15 +28,17 @@ public class TurnManager {
 	private const string DEFENDER_TAG = "Defender";
 	private const string BOARD_TAG = "Board";
 	private const string ATTACKER_TAG = "Attacker";
+	private const string LEADER_TAG = "Leader";
+	private const string MINION_TAG = "Minion";
 
 
 	//feedback for the player to help track which phase they're in
 	private Text phaseText;
 	private const string PHASE_OBJ = "Phase";
-	private const string ATTACKER_MOVE = "Attackers move";
+	private const string ATTACKER_MOVE = "Horde moves";
 	private const string PLAYER_MOVE = "Defenders move";
 	private const string PLAYER_FIGHT = "Defenders fight";
-	private const string BESIEGE = "Attackers besiege";
+	private const string BESIEGE = "Horde besieges";
 
 
 
@@ -147,7 +149,7 @@ public class TurnManager {
 
 			if (inputEvent.selected.tag == DEFENDER_TAG){
 				Services.Defenders.SelectDefenderForFight(inputEvent.selected.GetComponent<DefenderSandbox>());
-			} else if (inputEvent.selected.tag == ATTACKER_TAG &&
+			} else if ((inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) &&
 					   Services.Defenders.IsAnyoneSelected() &&
 					   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
 				Services.Defenders.GetSelectedDefender().TryFight(inputEvent.selected.GetComponent<AttackerSandbox>());

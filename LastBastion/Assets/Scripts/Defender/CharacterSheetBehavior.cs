@@ -31,6 +31,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private const string DEFEATS = " defeats";
 	private const string DEFEAT = " defeat";
 	private const string CHOOSE = "Choose an upgrade";
+	private const string NOT_SELECTED = "Can't upgrade out-of-turn";
 	private const int UPGRADE_READY = 0;
 
 
@@ -39,6 +40,13 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private Text track1Current;
 	private const string TRACK_1_NEXT_OBJ = "Track 1 next";
 	private const string TRACK_1_CURRENT_OBJ = "Track 1 current";
+
+
+	//upgrade track 2
+	private Text track2Next;
+	private Text track2Current;
+	private const string TRACK_2_NEXT_OBJ = "Track 2 next";
+	private const string TRACK_2_CURRENT_OBJ = "Track 2 current";
 
 
 	//is the character sheet currently hidden or displayed?
@@ -58,6 +66,8 @@ public class CharacterSheetBehavior : MonoBehaviour {
 		nextLabel = transform.Find(NEXT_LABEL_OBJ).GetComponent<Text>();
 		track1Next = transform.Find(TRACK_1_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		track1Current = transform.Find(TRACK_1_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
+		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
+		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		ChangeSheetState();
 	}
 
@@ -97,7 +107,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	/// </summary>
 	/// <param name="defeats">The number of attackers the defender must defeat before choosing another upgrade.</param>
 	public void ReviseNextLabel(int defeats){
-		if (defeats == UPGRADE_READY){
+		if (defeats <= UPGRADE_READY){
 			nextLabel.text = CHOOSE;
 		} else if (defeats != 1){
 			nextLabel.text = NEXT_IN + defeats.ToString() + DEFEATS;
@@ -115,6 +125,17 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	public void ReviseTrack1(string next, string current){
 		track1Next.text = next;
 		track1Current.text = current;
+	}
+
+
+	/// <summary>
+	/// Change the current and next ability text on the track on the right.
+	/// </summary>
+	/// <param name="next">The text of the next ability.</param>
+	/// <param name="current">The text of the ability the player currently has.</param>
+	public void ReviseTrack2(string next, string current){
+		track2Next.text = next;
+		track2Current.text = current;
 	}
 
 
@@ -143,5 +164,10 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	/// <param name="tree">The upgrade tree the player clicked on. Left is 0, right is 1.</param>
 	public void PowerUpButton(int tree){
 		if (Services.Defenders.IsAnyoneSelected()) Services.Defenders.GetSelectedDefender().PowerUp(tree);
+
+		//the most common reason for no one to be selected when the player presses a powerup button is that the selected
+		//defender is already finished for the phase. The following else-statement provides feedback for that situation
+
+		else nextLabel.text = NOT_SELECTED;
 	}
 }

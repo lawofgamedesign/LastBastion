@@ -70,7 +70,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	//powering up
-	protected int DefeatedSoFar { get; private set; }
+	protected int DefeatedSoFar { get; set; }
 	protected const int START_DEFEATED = 0;
 	protected int defeatsToNextUpgrade = 0;
 	protected int upgradeInterval = 3;
@@ -301,7 +301,7 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
-	protected virtual void TurnOverAvailableCards(){
+	public virtual void TurnOverAvailableCards(){
 		uICanvas.GetComponent<DefenderUIBehavior>().FlipAllCardsDown();
 
 		for (int i = 0; i < combatHand.Count; i++){
@@ -351,8 +351,8 @@ public class DefenderSandbox : MonoBehaviour {
 		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
 
-		if (ChosenCard.Value + AttackMod > attackerValue + attacker.Armor){
-			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.Armor));
+		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){
+			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
 			FinishWithCard();
 			DefeatedSoFar++;
 			charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
@@ -381,15 +381,21 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	protected virtual void FinishWithCard(){
 		ChosenCard.Available = false;
-		uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<Image>().color = Color.white;
 
 		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
-		flipTask.Then(new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>()));
-		Services.Tasks.AddTask(flipTask);
+		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
+		flipTask.Then(putDownTask);
 
 		ChosenCard = null;
 
-		if (!StillAvailableCards()) ResetCombatHand();
+		if (!StillAvailableCards()){
+			ResetCombatHand();
+			ResetHandTask resetTask = new ResetHandTask(this);
+			putDownTask.Then(resetTask);
+			resetTask.Then(new ShutOffCardsTask());
+		} else putDownTask.Then(new ShutOffCardsTask());
+
+		Services.Tasks.AddTask(flipTask);
 	}
 
 

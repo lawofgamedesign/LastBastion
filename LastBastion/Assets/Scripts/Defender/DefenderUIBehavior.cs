@@ -15,15 +15,6 @@ public class DefenderUIBehavior : MonoBehaviour {
 	/////////////////////////////////////////////
 
 
-	//the combat cards for each defender
-	private Button card1;
-	private Button card2;
-	private Button card3;
-	private const string CARD_ONE = "Card 1";
-	private const string CARD_TWO = "Card 2";
-	private const string CARD_THREE = "Card 3";
-
-
 	//the color a card turns upon being selected
 	private Color unselectedColor = Color.white;
 	private Color selectedColor = Color.blue;
@@ -42,9 +33,7 @@ public class DefenderUIBehavior : MonoBehaviour {
 
 	//initialize variables
 	public void Setup(){
-		card1 = transform.Find(CARD_ONE).GetComponent<Button>();
-		card2 = transform.Find(CARD_TWO).GetComponent<Button>();
-		card3 = transform.Find(CARD_THREE).GetComponent<Button>();
+		//no action required
 	}
 
 

@@ -126,6 +126,8 @@ public class BrawlerBehavior : DefenderSandbox {
 				//the player can attack this direction, and they have a good enough value to hit the enemy
 				if (ChosenCard.Value > attackerValue){
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
+					DefeatedSoFar++;
+					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 					FinishWithCard();
 
 				//the player can attack this direction, but they don't have a good enough value to hit the enemy
@@ -158,6 +160,8 @@ public class BrawlerBehavior : DefenderSandbox {
 						 ChosenCard.Value > attackerValue){
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+					DefeatedSoFar++;
+					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 					FinishWithCard();
 				}
 
@@ -194,6 +198,8 @@ public class BrawlerBehavior : DefenderSandbox {
 					ChosenCard.Value > attackerValue){
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+					DefeatedSoFar++;
+					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 					FinishWithCard();
 				}
 
@@ -228,6 +234,8 @@ public class BrawlerBehavior : DefenderSandbox {
 					ChosenCard.Value > attackerValue){
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+					DefeatedSoFar++;
+					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
 					FinishWithCard();
 				}
 
@@ -362,12 +370,40 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	/// <summary>
+	/// The Brawler doesn't shut off cards automatically when rampaging.
+	/// </summary>
+	protected virtual void FinishWithCard(){
+		ChosenCard.Available = false;
+
+		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
+		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
+		flipTask.Then(putDownTask);
+
+		ChosenCard = null;
+
+		if (!StillAvailableCards()){
+			ResetCombatHand();
+			ResetHandTask resetTask = new ResetHandTask(this);
+			putDownTask.Then(resetTask);
+
+			if (currentRampage == RampageTrack.None) resetTask.Then(new ShutOffCardsTask());
+		} else if (currentRampage == RampageTrack.None) putDownTask.Then(new ShutOffCardsTask());
+
+		Services.Tasks.AddTask(flipTask);
+	}
+
+
+	/// <summary>
 	/// When the Brawler is done fighting, it must additionally stop listening for instructions to move into new spaces.
 	/// </summary>
 	public override void DoneFighting(){
+		if (Services.Tasks.CheckForTaskOfType<PutDownCardTask>()) return; //the Brawler has to wait for cards to be down to stop fighting, for error prevention
+
 		base.DoneFighting();
 
 		charSheet.ChangeSheetState();
+
+		uICanvas.GetComponent<DefenderUIBehavior>().ShutCardsOff();
 
 		if (currentRampage == RampageTrack.Wade_In || currentRampage == RampageTrack.Berserk || currentRampage == RampageTrack.The_Last_One_Standing){
 			Services.Events.Unregister<BoardClickedEvent>(boardFunc);

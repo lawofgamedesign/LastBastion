@@ -17,7 +17,6 @@ public class MoveCharSheetTask : Task {
 
 	private Vector3 startLoc;
 	private Vector3 endLoc;
-	private Quaternion startRot;
 	private Quaternion endRot;
 
 
@@ -51,13 +50,11 @@ public class MoveCharSheetTask : Task {
 			case Move.Pick_up:
 				startLoc = hiddenLoc;
 				endLoc = displayedLoc;
-				startRot = Quaternion.Euler(hiddenRot);
 				endRot = Quaternion.Euler(displayedRot);
 				break;
 			case Move.Put_down:
 				startLoc = displayedLoc;
 				endLoc = hiddenLoc;
-				startRot = Quaternion.Euler(displayedRot);
 				endRot = Quaternion.Euler(hiddenRot);
 				break;
 			default:
@@ -105,6 +102,20 @@ public class MoveCharSheetTask : Task {
 		if (Vector3.Distance(sheet.position, endLoc) <= TOLERANCE &&
 			Quaternion.Angle(sheet.rotation, endRot) <= TOLERANCE){
 			SetStatus(TaskStatus.Success);
+		} else if ((sheet.position.x > hiddenLoc.x && //sanity check; don't let the character sheet fly off into space if it skips past the tolerance
+					sheet.position.y < hiddenLoc.y) ||
+				   (sheet.position.x < displayedLoc.x &&
+					sheet.position.y > displayedLoc.y)){
+			
+			SetStatus(TaskStatus.Success);
 		}
+	}
+
+
+	/// <summary>
+	/// Don't let the sheet drift over time; make sure it's at the final location when the task is done.
+	/// </summary>
+	protected override void Cleanup (){
+		sheet.position = endLoc;
 	}
 }

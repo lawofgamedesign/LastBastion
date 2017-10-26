@@ -127,15 +127,48 @@ public class BoardBehavior {
 
 
 	/// <summary>
+	/// Check whether given coordinates fall within the board.
+	/// </summary>
+	/// <returns><c>true</c> if the coordinates are valid, <c>false</c> otherwise.</returns>
+	/// <param name="x">The x coordinate.</param>
+	/// <param name="z">The z coordinate.</param>
+	public bool CheckValidSpace(int x, int z){
+		if (x < 0 ||
+			x > BOARD_WIDTH - 1 ||
+			z < 0 ||
+			z > BOARD_HEIGHT - 1){
+			return false;
+		} else return true;
+	}
+
+
+	/// <summary>
 	/// Get the type--in game terms, not as a c# class--of a space's contents
 	/// </summary>
 	/// <returns>The type of the space's contents.</returns>
 	/// <param name="x">The x coordinate of the space.</param>
 	/// <param name="z">The z coordinate of the space.</param>
 	public SpaceBehavior.ContentType GeneralSpaceQuery(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Invalid coordinates: " + x + ", " + z);
 		Debug.Assert(spaces[x, z] != null, "No space at " + x + ", " + z);
 
 		return spaces[x, z].contentType;
+	}
+
+
+	/// <summary>
+	/// Get the gameobject in a given space.
+	/// 
+	/// It is up to the calling function to check for null returns!
+	/// </summary>
+	/// <returns>The gameobject, if any, in the space.</returns>
+	/// <param name="x">The x coordinate of the space.</param>
+	/// <param name="z">The z coordinate of teh space.</param>
+	public GameObject GetThingInSpace(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Invalid coordinates: " + x + ", " + z);
+		Debug.Assert(spaces[x, z] != null, "No space at " + x + ", " + z);
+
+		return spaces[x, z].Contents;
 	}
 
 
@@ -147,6 +180,9 @@ public class BoardBehavior {
 	/// <param name="z">The z coordinate of the space, zero-indexed.</param>
 	/// <param name="type">The type of the object in game terms (not in the sense of a c# class!).</param>
 	public void PutThingInSpace(GameObject obj, int x, int z, SpaceBehavior.ContentType type){
+		Debug.Assert(CheckValidSpace(x, z), "Invalid coordinates: " + x + ", " + z);
+		Debug.Assert(spaces[x, z] != null, "No space at " + x + ", " + z);
+
 		spaces[x, z].Contents = obj;
 		spaces[x, z].contentType = type;
 	}
@@ -158,6 +194,7 @@ public class BoardBehavior {
 	/// <param name="x">The x coordinate of the space to be blanked.</param>
 	/// <param name="z">The z coordinate of the space to be blanked.</param>
 	public void TakeThingFromSpace(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Invalid coordinates: " + x + ", " + z);
 		spaces[x, z].Contents = null;
 		spaces[x, z].contentType = SpaceBehavior.ContentType.None;
 	}

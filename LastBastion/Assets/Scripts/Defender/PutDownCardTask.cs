@@ -40,12 +40,4 @@ public class PutDownCardTask : Task {
 			cardTransform.position += dropSpeed * Time.deltaTime;
 		}
 	}
-
-
-	/// <summary>
-	/// If this is the last card a defender used, such that they are no longer selected, switch the cards off.
-	/// </summary>
-	protected override void Cleanup (){
-		if (!Services.Defenders.IsAnyoneSelected()) uICanvas.ShutCardsOff();
-	}
 }
