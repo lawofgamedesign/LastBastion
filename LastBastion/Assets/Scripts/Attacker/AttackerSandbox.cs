@@ -38,6 +38,10 @@ public class AttackerSandbox : MonoBehaviour {
 	public bool SpawnedThisTurn { get; set; }
 
 
+	//is something stopping this attacker from moving?
+	public bool Blocked { get; set; }
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -51,7 +55,55 @@ public class AttackerSandbox : MonoBehaviour {
 		AttackMod = 0;
 		Armor = 0;
 		Health = baseHealth;
+		Blocked = false;
+		RegisterForEvents();
 	}
+
+
+	#region events
+
+
+	/// <summary>
+	/// Call this to register for all events this attacker cares about.
+	/// </summary>
+	protected virtual void RegisterForEvents(){
+		Services.Events.Register<BlockColumnEvent>(BecomeBlocked);
+		Services.Events.Register<UnblockColumnEvent>(BecomeUnblocked);
+	}
+
+
+	/// <summary>
+	/// Movement is blocked when this attacker receives an event indicating that its column cannot move.
+	/// </summary>
+	/// <param name="e">The BlockColumn event.</param>
+	protected void BecomeBlocked(Event e){
+		BlockColumnEvent blockEvent = e as BlockColumnEvent;
+
+		if (blockEvent.Column == XPos) Blocked = true;
+	}
+
+
+	/// <summary>
+	/// Movement is unblocked when this attacker receives a relevant event.
+	/// </summary>
+	/// <param name="e">The UnblockColumn event.</param>
+	protected void BecomeUnblocked(Event e){
+		UnblockColumnEvent unblockEvent = e as UnblockColumnEvent;
+
+		if (unblockEvent.Column == XPos) Blocked = false;
+	}
+
+
+	/// <summary>
+	/// Call this when the attacker is being taken off the board to unregister.
+	/// </summary>
+	protected virtual void UnregisterForEvents(){
+		Services.Events.Unregister<BlockColumnEvent>(BecomeBlocked);
+		Services.Events.Unregister<UnblockColumnEvent>(BecomeBlocked);
+	}
+
+
+	#endregion events
 
 
 	//set this attacker's position
@@ -68,6 +120,11 @@ public class AttackerSandbox : MonoBehaviour {
 		//don't move if this attacker spawned this turn, but get ready to move next turn
 		if (SpawnedThisTurn){
 			SpawnedThisTurn = false;
+			return;
+		}
+
+		//don't move if the attacker is blocked by an "off the board" game effect.
+		if (Blocked){
 			return;
 		}
 

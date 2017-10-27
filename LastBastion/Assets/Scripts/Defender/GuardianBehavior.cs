@@ -46,8 +46,12 @@ public class GuardianBehavior : DefenderSandbox {
 	private GameObject holdMarker;
 	private const string HOLD_MARKER_OBJ = "Line held marker";
 	private const string CHOOSE_TO_BLOCK = "Choose a column to hold the line";
+	private const string INVALID_COLUMN = "Please choose an adjacent column";
+	private const string COLUMN_CHOSEN = "The Guardian is holding the line";
 	private const string BOARD_TAG = "Board";
-	private int blockedColumn = null;
+	private const int BLANK_COLUMN = 999; //nonsense value
+	private const int JUST_STARTED = 111; //nonsense value
+	private int blockedColumn = BLANK_COLUMN;
 
 
 	//character sheet information
@@ -80,13 +84,24 @@ public class GuardianBehavior : DefenderSandbox {
 	/// When holding the line, the Guardian chooses one or more columns to block after moving.
 	/// </summary>
 	public override void Move(){
-		if (currentHold != HoldTrack.None) UnholdLine();
-
 		base.Move();
 
 		extraText.text = CHOOSE_TO_BLOCK;
 
-		if (currentHold != HoldTrack.None) Services.Events.Register<InputEvent>(ChooseColumn);
+
+		/*
+		 * 
+		 * The following sequence handles the Guardian's post-movement Hold the Line choices.
+		 * 1. If the Guardian is holding the line, but there's no chosen column, the Guardian didn't make a choice last turn. Don't re-register.
+		 * 2. If the Guardian is holding the line, and there's a valid column chosen (or the column is set to the nonsense "just leveled up" value),
+		 * the Guardian made a choice last time. Unblock that column, and then re-register.
+		 * 
+		 */
+		if (currentHold != HoldTrack.None && blockedColumn == BLANK_COLUMN) return;
+		if (currentHold != HoldTrack.None){
+			UnholdLine();
+			Services.Events.Register<InputEvent>(ChooseColumn);
+		}
 	}
 
 
@@ -94,9 +109,9 @@ public class GuardianBehavior : DefenderSandbox {
 	/// If the Guardian is moving up the Hold the Line track, call this at the start of the Defenders Move phase to release the currently blocked column.
 	/// </summary>
 	private void UnholdLine(){
-		if (blockedColumn != null){
+		if (blockedColumn != BLANK_COLUMN){
 			Services.Events.Fire(new UnblockColumnEvent(blockedColumn));
-			blockedColumn = null;
+			blockedColumn = BLANK_COLUMN;
 		}
 	}
 
@@ -114,6 +129,11 @@ public class GuardianBehavior : DefenderSandbox {
 			if (space.GridLocation.x - 1 == GridLoc.x || space.GridLocation.x + 1 == GridLoc.x){
 				blockedColumn = space.GridLocation.x;
 				Services.Events.Fire(new BlockColumnEvent(blockedColumn));
+				Services.Events.Unregister<InputEvent>(ChooseColumn);
+				extraText.text = COLUMN_CHOSEN;
+				return;
+			} else {
+				extraText.text = INVALID_COLUMN;
 			}
 		}
 	}
@@ -258,6 +278,7 @@ public class GuardianBehavior : DefenderSandbox {
 		switch (tree){
 			case (int)UpgradeTracks.Hold_the_Line:
 				if (currentHold != HoldTrack.The_Last_Bastion) currentHold++;
+				if (currentHold == HoldTrack.Hold_the_Line) blockedColumn = JUST_STARTED;
 				break;
 			case (int)UpgradeTracks.Single_Combat:
 				if (currentSingleCombat != SingleCombatTrack.Champion) currentSingleCombat++;

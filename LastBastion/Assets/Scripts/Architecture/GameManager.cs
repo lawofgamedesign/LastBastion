@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour {
 		Services.Board = new BoardBehavior();
 		Services.Board.Setup();
 		Services.Tasks = new TaskManager();
+		Services.Events = new EventManager();
 		Services.Attackers = new AttackerManager();
 		Services.Attackers.Setup();
 		Services.Rulebook = new TurnManager();
@@ -30,7 +31,6 @@ public class GameManager : MonoBehaviour {
 		Services.Defenders = new DefenderManager();
 		Services.Defenders.Setup();
 		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Setup();
-		Services.Events = new EventManager();
 		Services.Inputs = new InputManager();
 		GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
 	}
