@@ -86,7 +86,7 @@ public class GuardianBehavior : DefenderSandbox {
 	public override void Move(){
 		base.Move();
 
-		extraText.text = CHOOSE_TO_BLOCK;
+		if (currentHold != HoldTrack.None) extraText.text = CHOOSE_TO_BLOCK;
 
 
 		/*
@@ -98,7 +98,7 @@ public class GuardianBehavior : DefenderSandbox {
 		 * 
 		 */
 		if (currentHold != HoldTrack.None && blockedColumn == BLANK_COLUMN) return;
-		if (currentHold != HoldTrack.None){
+		else if (currentHold != HoldTrack.None){
 			UnholdLine();
 			Services.Events.Register<InputEvent>(ChooseColumn);
 		}
@@ -131,6 +131,10 @@ public class GuardianBehavior : DefenderSandbox {
 				Services.Events.Fire(new BlockColumnEvent(blockedColumn));
 				Services.Events.Unregister<InputEvent>(ChooseColumn);
 				extraText.text = COLUMN_CHOSEN;
+
+				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask();
+				pickUpTask.Then(new BlockFeedbackTask(blockedColumn));
+				Services.Tasks.AddTask(pickUpTask);
 				return;
 			} else {
 				extraText.text = INVALID_COLUMN;
@@ -273,12 +277,15 @@ public class GuardianBehavior : DefenderSandbox {
 	/// <param>The upgrade tree the player wants to move along.</param>
 	/// <param name="tree">The upgrade tree the player clicked. Left is 0, right is 1.</param>
 	public override bool PowerUp(int tree){
-		if (!base.PowerUp(tree)) return false; //has the Brawler defeated enough attackers to upgrade?
+		if (!base.PowerUp(tree)) return false; //has the Guardian defeated enough attackers to upgrade?
 
 		switch (tree){
 			case (int)UpgradeTracks.Hold_the_Line:
 				if (currentHold != HoldTrack.The_Last_Bastion) currentHold++;
-				if (currentHold == HoldTrack.Hold_the_Line) blockedColumn = JUST_STARTED;
+				if (currentHold == HoldTrack.Hold_the_Line){
+					blockedColumn = JUST_STARTED;
+					Services.Events.Register<AttackerDefeatedEvent>(GainExperienceFromElsewhere); //listen for chances to gain experience from a blocked column
+				}
 				break;
 			case (int)UpgradeTracks.Single_Combat:
 				if (currentSingleCombat != SingleCombatTrack.Champion) currentSingleCombat++;
@@ -289,5 +296,18 @@ public class GuardianBehavior : DefenderSandbox {
 		charSheet.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
 
 		return true;
+	}
+
+
+	/// <summary>
+	/// Allows the Guardian to gain experience when an attacker is defeated in a blocked column.
+	/// </summary>
+	/// <param name="e">An AttackerDefeatedEvent from when an attacker is defeated..</param>
+	private void GainExperienceFromElsewhere(Event e){
+		Debug.Assert(e.GetType() == typeof(AttackerDefeatedEvent), "Non-AttackerDefeatedEvent in GainExperienceFromElsewhere.");
+
+		AttackerDefeatedEvent defeatEvent = e as AttackerDefeatedEvent;
+
+		if (defeatEvent.location.x == blockedColumn) DefeatedSoFar++;
 	}
 }

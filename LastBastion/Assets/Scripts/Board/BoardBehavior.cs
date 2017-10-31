@@ -31,6 +31,10 @@ public class BoardBehavior {
 	private const string MODEL_OBJ = "Model"; //tiles are at localscale (1, 1, 1); it's their model that gets resized
 
 
+	//nonsense return value for when something is not on the board
+	public readonly int NOT_FOUND = -1;
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -133,12 +137,31 @@ public class BoardBehavior {
 	/// <param name="x">The x coordinate.</param>
 	/// <param name="z">The z coordinate.</param>
 	public bool CheckValidSpace(int x, int z){
-		if (x < 0 ||
-			x > BOARD_WIDTH - 1 ||
-			z < 0 ||
-			z > BOARD_HEIGHT - 1){
-			return false;
-		} else return true;
+		if (!CheckValidColumn(x) ||
+			!CheckValidRow(z)) return false;
+		else return true;
+	}
+
+
+	/// <summary>
+	/// Makes sure a given column number is found within the board
+	/// </summary>
+	/// <returns><c>true</c> if the number represents a valid column, <c>false</c> otherwise.</returns>
+	/// <param name="x">The number to check.</param>
+	private bool CheckValidColumn(int x){
+		if (x < 0 || x > BOARD_WIDTH - 1) return false;
+		else return true;
+	}
+
+
+	/// <summary>
+	/// Makes sure a given row number is found within the board
+	/// </summary>
+	/// <returns><c>true</c> if the number represents a valid row, <c>false</c> otherwise.</returns>
+	/// <param name="x">The number to check.</param>
+	private bool CheckValidRow(int z){
+		if (z < 0 || z > BOARD_HEIGHT - 1) return false;
+		else return true;
 	}
 
 
@@ -293,5 +316,40 @@ public class BoardBehavior {
 
 	public void EliminateAttacker(AttackerSandbox attacker){
 
+	}
+
+
+	/// <summary>
+	/// Gets the first empty space in a given column, counting from the south side of the board.
+	/// </summary>
+	/// <returns>The grid coordinate of the row of the empty space.</returns>
+	/// <param name="x">The grid column to be checked.</param>
+	public int GetFirstEmptyInColumn(int x){
+		Debug.Assert(CheckValidColumn(x), "Trying to find the first empty space in a non-existent column: " + x);
+
+		int temp = NOT_FOUND;
+
+		for (int z = 0; z <= BOARD_HEIGHT - 1; z++){
+			if (GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.None) temp = z;
+			else break;
+		}
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// As GetFirstEmptyInColumn, above, but counting southward from a given row.
+	/// </summary>
+	/// <returns>The grid coordinate of the row of the empty space.</returns>
+	/// <param name="x">The grid column to be checked.</param>
+	public int GetFirstEmptyInColumn(int x, int z){
+		Debug.Assert(CheckValidColumn(x), "Trying to find the first empty space in a non-existent column: " + x);
+
+		for (int index = z; index >= 0; index--){
+			if (GeneralSpaceQuery(x, index) == SpaceBehavior.ContentType.None) return index;
+		}
+
+		return NOT_FOUND;
 	}
 }

@@ -183,6 +183,7 @@ public class AttackerSandbox : MonoBehaviour {
 			Services.Attackers.EliminateAttacker(this);
 			Services.Board.TakeThingFromSpace(XPos, ZPos);
 			Services.Tasks.AddTask(new AttackerFallTask(GetComponent<Rigidbody>()));
+			Services.Events.Fire(new AttackerDefeatedEvent(this));
 		}
 	}
 
