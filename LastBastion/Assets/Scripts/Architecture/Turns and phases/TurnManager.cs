@@ -42,6 +42,16 @@ public class TurnManager {
 	private const string BESIEGE = "Horde besieges";
 
 
+	//button for ending the current phase and moving to the next
+	public GameObject nextPhaseButton;
+	private const string NEXT_BUTTON_OBJ = "Next phase button";
+
+
+	//what turn is it?
+	public int CurrentTurn { get; private set; }
+	public int TotalTurns { get; private set; }
+
+
 
 
 	/////////////////////////////////////////////
@@ -53,8 +63,12 @@ public class TurnManager {
 	public void Setup(){
 		turnMachine = new FSM<TurnManager>(this);
 		TurnMachine = turnMachine;
-		turnMachine.TransitionTo<AttackersAdvance>();
+		CurrentTurn = 0;
+		TotalTurns = 10;
+		turnMachine.TransitionTo<StartOfTurn>();
 		phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
+		nextPhaseButton = GameObject.Find(NEXT_BUTTON_OBJ);
+		ToggleNextPhaseButton();
 	}
 
 
@@ -73,9 +87,39 @@ public class TurnManager {
 	}
 
 
+	/// <summary>
+	/// Handle all effects relating to keeping track of which turn it is.
+	/// </summary>
+	private void NewTurn(){
+		CurrentTurn++;
+		Services.UI.SetTurnText(CurrentTurn, TotalTurns);
+	}
+
+
+	/// <summary>
+	/// Switch the next phase button on or off.
+	/// </summary>
+	private void ToggleNextPhaseButton(){
+		nextPhaseButton.SetActive(!nextPhaseButton.activeInHierarchy);
+	}
+
+
 	/////////////////////////////////////////////
 	/// States
 	/////////////////////////////////////////////
+
+
+	//update the turn counter
+	private class StartOfTurn : FSM<TurnManager>.State {
+
+		public override void OnEnter (){
+			Context.NewTurn();
+		}
+
+		public override void Tick (){
+			TransitionTo<AttackersAdvance>();
+		}
+	}
 
 
 	/// <summary>
@@ -98,12 +142,7 @@ public class TurnManager {
 		//wait while the attackers move
 		public override void Tick(){
 			timer += Time.deltaTime;
-			if (timer >= Context.attackerAdvanceDuration) OnExit();
-		}
-
-
-		public override void OnExit(){
-			TransitionTo<PlayerMove>();
+			if (timer >= Context.attackerAdvanceDuration) TransitionTo<PlayerMove>();;
 		}
 	}
 
@@ -112,6 +151,8 @@ public class TurnManager {
 	/// </summary>
 	private class PlayerMove : FSM<TurnManager>.State {
 
+
+		bool needToExit;
 
 		private void HandleMoveInputs(Event e){
 			InputEvent inputEvent = e as InputEvent;
@@ -122,11 +163,20 @@ public class TurnManager {
 				if (Services.Defenders.IsAnyoneSelected()){
 					Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
 				}
+			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG){
+				Services.UI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			}
 
 
 			//each time the player clicks, ask if everyone is finished. If so, move on
-			if (Services.Defenders.IsEveryoneDone()) OnExit();
+			//if (Services.Defenders.IsEveryoneDone()) OnExit();
+		}
+
+
+		private void HandlePhaseEndInput(Event e){
+			Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in HandlePhaseEndInput");
+
+			TransitionTo<PlayerFight>();
 		}
 
 
@@ -135,12 +185,17 @@ public class TurnManager {
 			Context.phaseText.text = PLAYER_MOVE;
 			Context.TurnRulebookPage();
 			Services.Events.Register<InputEvent>(HandleMoveInputs);
+			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
+			needToExit = false;
+			Context.ToggleNextPhaseButton();
 		}
 
 
 		public override void OnExit(){
+			Services.Defenders.CompleteMovePhase();
 			Services.Events.Unregister<InputEvent>(HandleMoveInputs);
-			TransitionTo<PlayerFight>();
+			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
+			Context.ToggleNextPhaseButton();
 		}
 	}
 
@@ -161,11 +216,27 @@ public class TurnManager {
 					   Services.Defenders.IsAnyoneSelected() &&
 					   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
 				Services.Defenders.GetSelectedDefender().TryFight(inputEvent.selected.GetComponent<AttackerSandbox>());
+			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) {
+				Services.UI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			} else if (inputEvent.selected.tag == BOARD_TAG){
 				Services.Events.Fire(new BoardClickedEvent(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation));
 			}
 
-			if (Services.Defenders.IsEveryoneDone()) OnExit();
+			if (Services.Defenders.IsEveryoneDone()) TransitionTo<BesiegeWalls>();;
+		}
+
+
+		/// <summary>
+		/// End the phase, but only if the cards aren't moving. This is a bodge to protect the Brawler, who otherwise might fail to
+		/// unregister for InputEvents if they return from their DoneFighting() early.
+		/// </summary>
+		/// <param name="e">E.</param>
+		private void HandlePhaseEndInput(Event e){
+			Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in HandlePhaseEndInput");
+
+			if (!Services.Tasks.CheckForTaskOfType<PickUpCardTask>() &&
+				!Services.Tasks.CheckForTaskOfType<FlipCardTask>() &&
+				!Services.Tasks.CheckForTaskOfType<PutDownCardTask>()) TransitionTo<BesiegeWalls>();
 		}
 
 
@@ -174,12 +245,16 @@ public class TurnManager {
 			Context.phaseText.text = PLAYER_FIGHT;
 			Context.TurnRulebookPage();
 			Services.Events.Register<InputEvent>(HandleFightInputs);
+			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
+			Context.ToggleNextPhaseButton();
 		}
 
 
 		public override void OnExit(){
 			Services.Events.Unregister<InputEvent>(HandleFightInputs);
-			TransitionTo<BesiegeWalls>();
+			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
+			Services.Defenders.CompleteFightPhase();
+			Context.ToggleNextPhaseButton();
 		}
 	}
 
@@ -220,14 +295,36 @@ public class TurnManager {
 					besiegers.RemoveAt(0);
 					timer = 0.0f;
 				} else {
-					OnExit();
+					TransitionTo<EndPhase>();
 				}
 			}
 		}
+	}
 
 
-		public override void OnExit (){
-			TransitionTo<AttackersAdvance>();
+	/// <summary>
+	/// Nothing has to happen during the end phase, but if there's some end-of-turn cleanup to be done, this state sends
+	/// out an event to tell others to do it.
+	/// </summary>
+	public class EndPhase : FSM<TurnManager>.State {
+
+
+		public override void OnEnter(){
+			Services.Events.Fire(new EndPhaseEvent());
+		}
+
+
+		public override void Tick (){
+			if(CheckStartNextTurn()) TransitionTo<StartOfTurn>();
+		}
+
+
+		/// <summary>
+		/// Don't go on to the start of the next turn if this is the last turn of the wave.
+		/// </summary>
+		private bool CheckStartNextTurn(){
+			if (Context.CurrentTurn < Context.TotalTurns) return true;
+			return false;
 		}
 	}
 }

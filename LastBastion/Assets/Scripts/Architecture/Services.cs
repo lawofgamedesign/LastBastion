@@ -80,4 +80,14 @@ public static class Services {
 		}
 		set { inputs = value; }
 	}
+
+
+	private static UIManager uI;
+	public static UIManager UI {
+		get {
+			Debug.Assert(uI != null, "No UI manager. Did you forget to create one?");
+			return uI;
+		}
+		set { uI = value; }
+	}
 }

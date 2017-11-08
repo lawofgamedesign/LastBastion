@@ -42,6 +42,19 @@ public class AttackerSandbox : MonoBehaviour {
 	public bool Blocked { get; set; }
 
 
+	//left and right; used for being lured to the side
+	protected const int WEST = -1;
+	protected const int EAST = 1;
+
+
+	//for the UI, when the player needs info on this attacker
+	protected string attackerName = "Skeleton";
+	protected const string ATTACK = "Attack: ";
+	protected const string ARMOR = "Armor: ";
+	protected const string HEALTH = "Health: ";
+	protected const string NEWLINE = "\n";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -127,6 +140,14 @@ public class AttackerSandbox : MonoBehaviour {
 		if (Blocked){
 			return;
 		}
+			
+		//move west or east if being lured there and there is space to do so
+		//note that this privileges westward movement; it checks westward movement first, and will therefore go west in preference to being lured east
+		if (Services.Board.CheckIfLure(XPos + WEST, ZPos)){
+			if (TryMoveLateral(WEST)) return;
+		} else if (Services.Board.CheckIfLure(XPos + EAST, ZPos)){
+			if (TryMoveLateral(EAST)) return;
+		}
 
 		//if the attacker gets this far, it can make a normal move to the south.
 		TryMoveSouth();
@@ -134,7 +155,7 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 	/// <summary>
-	/// Move this attacker.
+	/// Move this attacker south a number of spaces based on their speed.
 	/// </summary>
 	protected void TryMoveSouth(){
 		//sanity check; prevent this attacker from trying to move off the board
@@ -158,6 +179,23 @@ public class AttackerSandbox : MonoBehaviour {
 			Services.Tasks.AddTask(new MoveTask(transform, XPos, ZPos - attemptedMove, Services.Attackers.MoveSpeed));
 			NewLoc(XPos, ZPos - attemptedMove);
 		}
+	}
+
+
+	/// <summary>
+	/// Try to move the attacker one space east or west.
+	/// </summary>
+	/// <returns><c>true</c> if the attacker was able to move into an empty space, <c>false</c> if the space was occupied, blocking movement.</returns>
+	/// <param name="dir">The direction of movement, east (1) or west (-1).</param>
+	protected bool TryMoveLateral(int dir){
+		//if the space one to the east is empty, go there.
+		if (Services.Board.GeneralSpaceQuery(XPos + dir, ZPos) == SpaceBehavior.ContentType.None){
+			Services.Board.TakeThingFromSpace(XPos, ZPos);
+			Services.Board.PutThingInSpace(gameObject, XPos + dir, ZPos, SpaceBehavior.ContentType.Attacker);
+			Services.Tasks.AddTask(new MoveTask(transform, XPos + dir, ZPos, Services.Attackers.MoveSpeed));
+			NewLoc(XPos + dir, ZPos);
+			return true;
+		} else return false;
 	}
 
 
@@ -190,5 +228,17 @@ public class AttackerSandbox : MonoBehaviour {
 
 	public void FailToDamage(){
 		Debug.Log("Attacker not damaged!");
+	}
+
+
+	/// <summary>
+	/// Provides information on this attacker when the attacker is clicked.
+	/// </summary>
+	/// <returns>This attacker's name and stats.</returns>
+	public string GetUIInfo(){
+		return attackerName + NEWLINE +
+			   ATTACK + AttackMod.ToString() + NEWLINE +
+			   ARMOR + Armor.ToString() + NEWLINE +
+			   HEALTH + Health.ToString() + NEWLINE;
 	}
 }

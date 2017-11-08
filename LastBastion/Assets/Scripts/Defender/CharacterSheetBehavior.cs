@@ -81,6 +81,15 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 
 	/// <summary>
+	/// Switch the character sheet off. A convenient way to guarantee that the character sheet ends up off, for situations where
+	/// ChangeSheetState() might not give the right result.
+	/// </summary>
+	public void ShutOffCharSheet(){
+		gameObject.SetActive(false);
+	}
+
+
+	/// <summary>
 	/// Change the name at the top of the character sheet.
 	/// </summary>
 	/// <param name="newName">The new name.</param>

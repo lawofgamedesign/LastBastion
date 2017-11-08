@@ -128,7 +128,7 @@ public class BrawlerBehavior : DefenderSandbox {
 				if (ChosenCard.Value > attackerValue){
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					DefeatedSoFar++;
-					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 					FinishWithCard();
 
 				//the player can attack this direction, but they don't have a good enough value to hit the enemy
@@ -163,7 +163,7 @@ public class BrawlerBehavior : DefenderSandbox {
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
 					DefeatedSoFar++;
-					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 					FinishWithCard();
 				}
 
@@ -202,7 +202,7 @@ public class BrawlerBehavior : DefenderSandbox {
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
 					DefeatedSoFar++;
-					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 					FinishWithCard();
 				}
 
@@ -239,7 +239,7 @@ public class BrawlerBehavior : DefenderSandbox {
 					attacker.TakeDamage(ChosenCard.Value - attackerValue);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
 					DefeatedSoFar++;
-					charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 					FinishWithCard();
 				}
 
@@ -416,11 +416,16 @@ public class BrawlerBehavior : DefenderSandbox {
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
 	/// </summary>
 	public override void TakeOverCharSheet(){
-		charSheet.RenameSheet(BRAWLER_NAME);
-		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
-		charSheet.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
-		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
-		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
+		Services.UI.TakeOverCharSheet(BRAWLER_NAME,
+									  Speed,
+									  AttackMod,
+									  Armor,
+									  defeatsToNextUpgrade,
+									  DefeatedSoFar,
+									  rampageDescriptions[(int)currentRampage + 1],
+									  rampageDescriptions[(int)currentRampage],
+									  "",
+									  "");
 	}
 
 
@@ -438,7 +443,7 @@ public class BrawlerBehavior : DefenderSandbox {
 				break;
 		}
 
-		charSheet.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
+		Services.UI.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
 
 		return true;
 	}

@@ -137,7 +137,7 @@ public class RangerBehavior : DefenderSandbox {
 
 			FinishWithCard();
 			DefeatedSoFar++;
-			charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 		} else {
 			attacker.FailToDamage();
 			FinishWithCard();
@@ -274,12 +274,17 @@ public class RangerBehavior : DefenderSandbox {
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
 	/// </summary>
 	public override void TakeOverCharSheet(){
-		charSheet.RenameSheet(RANGER_NAME);
-		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
-		charSheet.ReviseTrack1(showboatDescriptions[(int)currentShowboat + 1], showboatDescriptions[(int)currentShowboat]);
-		charSheet.ReviseTrack2(eagleDescriptions[(int)currentLand + 1], eagleDescriptions[(int)currentLand]);
-		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
-		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
+		Services.UI.TakeOverCharSheet(RANGER_NAME,
+									  Speed,
+									  AttackMod,
+									  Armor,
+									  defeatsToNextUpgrade,
+									  DefeatedSoFar,
+									  showboatDescriptions[(int)currentShowboat + 1],
+									  showboatDescriptions[(int)currentShowboat],
+									  eagleDescriptions[(int)currentLand + 1],
+									  eagleDescriptions[(int)currentLand]
+		);
 	}
 
 
@@ -295,7 +300,7 @@ public class RangerBehavior : DefenderSandbox {
 			case (int)UpgradeTracks.Showboat:
 				if (currentShowboat != ShowboatTrack.Set_the_Standard){
 					currentShowboat++;
-					charSheet.ReviseTrack1(showboatDescriptions[(int)currentShowboat + 1], showboatDescriptions[(int)currentShowboat]);
+					Services.UI.ReviseTrack1(showboatDescriptions[(int)currentShowboat + 1], showboatDescriptions[(int)currentShowboat]);
 
 					//just started showboating; need to make sure the UI is correct, and displayed if it's the appropriate phase
 					if (currentShowboat == ShowboatTrack.Showboat){

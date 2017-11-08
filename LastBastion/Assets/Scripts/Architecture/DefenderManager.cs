@@ -246,4 +246,20 @@ public class DefenderManager {
 		if (selectedDefender == null) return; //if the card UI is somehow displayed while noone is selected, discard clicks on it
 		selectedDefender.AssignChosenCard(card);
 	}
+
+
+	/// <summary>
+	/// When the player ends the move phase, make sure everyone completes any moves they have programmed, reports themselves done, etc.
+	/// </summary>
+	public void CompleteMovePhase(){
+		foreach (DefenderSandbox defender in defenders) if (!doneDefenders.Contains(defender)) defender.Move();
+	}
+
+
+	/// <summary>
+	/// When the player ends the fight phase, make sure the cards and character sheet are off.
+	/// </summary>
+	public void CompleteFightPhase(){
+		foreach (DefenderSandbox defender in defenders) if (!doneDefenders.Contains(defender)) defender.DoneFighting();
+	}
 }

@@ -38,7 +38,9 @@ public class DefenderSandbox : MonoBehaviour {
 	protected List<TwoDLoc> moves = new List<TwoDLoc>();
 	protected LineRenderer lineRend;
 	protected Button moveButton;
+	protected Button undoButton;
 	protected const string MOVE_BUTTON_OBJ = "Done moving button";
+	protected const string UNDO_BUTTON_OBJ = "Undo move button";
 	protected const string PRIVATE_UI_CANVAS = "Defender canvas";
 	[SerializeField] protected float moveSpeed = 1.0f; //movement on screen, as opposed to spaces on the grid
 	protected Rigidbody rb;
@@ -65,8 +67,6 @@ public class DefenderSandbox : MonoBehaviour {
 
 	//character sheet UI
 	private const string GENERIC_NAME = "Generic defender";
-	protected CharacterSheetBehavior charSheet;
-	protected const string CHAR_SHEET_OBJ = "Defender sheet canvas";
 
 
 	//extra UI for displaying combat math
@@ -106,12 +106,12 @@ public class DefenderSandbox : MonoBehaviour {
 		lineRend = GetComponent<LineRenderer>();
 		ClearLine();
 		moveButton = transform.Find(PRIVATE_UI_CANVAS).Find(MOVE_BUTTON_OBJ).GetComponent<Button>();
+		undoButton = transform.Find(PRIVATE_UI_CANVAS).Find(UNDO_BUTTON_OBJ).GetComponent<Button>();
 		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
 		combatHand = MakeCombatHand();
 		uICanvas = GameObject.Find(CARD_UI_CANVAS).transform;
 		noFightButton = transform.Find(PRIVATE_UI_CANVAS).Find(NO_FIGHT_BUTTON).GetComponent<Button>();
-		charSheet = GameObject.Find(CHAR_SHEET_OBJ).GetComponent<CharacterSheetBehavior>();
 		extraText = GameObject.Find(EXTRA_INFO_OBJ).transform.Find(TEXT_OBJ).GetComponent<Text>();
 		DefeatedSoFar = START_DEFEATED;
 	}
@@ -164,6 +164,7 @@ public class DefenderSandbox : MonoBehaviour {
 		Selected = true;
 		selectedParticle.SetActive(true);
 		moveButton.gameObject.SetActive(true);
+		undoButton.gameObject.SetActive(true);
 		TakeOverCharSheet();
 	}
 
@@ -177,6 +178,7 @@ public class DefenderSandbox : MonoBehaviour {
 		selectedParticle.SetActive(false);
 		ChosenCard = null; //relevant for the fight phase
 		moveButton.gameObject.SetActive(false);
+		undoButton.gameObject.SetActive(false);
 		noFightButton.gameObject.SetActive(false);
 		Services.Defenders.NoSelectedDefender();
 	}
@@ -214,6 +216,12 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	/// <summary>
+	/// Draw the line that indicates to players where a defender is moving.
+	/// </summary>
+	/// <param name="index">The index of the new line position in the list of positions.</param>
+	/// <param name="x">The x grid coordinate of the new position.</param>
+	/// <param name="z">The z grid coordinate of the new position.</param>
 	protected virtual void DrawLine(int index, int x, int z){
 		lineRend.positionCount++;
 
@@ -221,6 +229,15 @@ public class DefenderSandbox : MonoBehaviour {
 		lineEnd.y += LINE_OFFSET;
 
 		lineRend.SetPosition(index, lineEnd);
+	}
+
+
+	/// <summary>
+	/// The undo button uses this to reset a defender's movement.
+	/// </summary>
+	public void UndoMove(){
+		ClearLine();
+		PrepareToMove();
 	}
 
 
@@ -243,7 +260,7 @@ public class DefenderSandbox : MonoBehaviour {
 		Services.Board.PutThingInSpace(gameObject, destination.x, destination.z, SpaceBehavior.ContentType.Defender);
 		NewLoc(destination.x, destination.z);
 		BeUnselected();
-		charSheet.ChangeSheetState();
+		Services.UI.ShutOffCharSheet();
 		Services.Defenders.DeclareSelfDone(this);
 
 		remainingSpeed = 0;
@@ -370,7 +387,7 @@ public class DefenderSandbox : MonoBehaviour {
 			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
 			FinishWithCard();
 			DefeatedSoFar++;
-			charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 			DoneFighting();
 		} else {
 			attacker.FailToDamage();
@@ -462,7 +479,7 @@ public class DefenderSandbox : MonoBehaviour {
 	public virtual void DoneFighting(){
 		BeUnselected();
 
-		charSheet.ChangeSheetState();
+		Services.UI.ShutOffCharSheet();
 
 		Services.Defenders.DeclareSelfDone(this);
 
@@ -478,13 +495,10 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
-	/// Call this to display this defender's information on the character sheet.
+	/// Each defender calls their own TakeOverCharSheet, which gives them the chance to substitute in their own text for the upgrade paths.
 	/// </summary>
 	public virtual void TakeOverCharSheet(){
-		charSheet.RenameSheet(GENERIC_NAME);
-		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
-		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
-		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
+		Services.UI.TakeOverCharSheet(name, Speed, AttackMod, Armor, defeatsToNextUpgrade, DefeatedSoFar);
 	}
 
 
@@ -500,7 +514,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		defeatsToNextUpgrade += upgradeInterval;
 		upgradeInterval++;
-		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 
 		return true;
 	}

@@ -4,7 +4,7 @@ public class InputManager {
 
 
 	public void Tick(){
-		if (Input.GetMouseButton(0)){
+		if (Input.GetMouseButtonDown(0)){
 			GameObject selected = GetClickedThing();
 
 			if (selected != null) Services.Events.Fire(new InputEvent(selected));

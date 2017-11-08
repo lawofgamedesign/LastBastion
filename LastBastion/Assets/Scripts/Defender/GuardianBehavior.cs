@@ -39,12 +39,13 @@ public class GuardianBehavior : DefenderSandbox {
 	private enum HoldTrack { None, Hold_the_Line, Draw_Them_In, Bulwark, The_Last_Bastion };
 	private List<string> holdDescriptions = new List<string>() {
 		"Stand strong",
-		"<b>Hold the Line</b>\n\nAfter moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen the Horde is defeated in that column, gain 1 experience.",
-		"<b>Face me!</b>\n\nAfter moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 1 experience."
+		"<b>Hold the Line</b>\n\n<size=12>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen the Horde is defeated in that column, gain 1 experience.</size>",
+		"<b>Face me!</b>\n\n<size=10>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 1 experience.</size>",
+		"<b>Bulwark</b>\n\n<size=10>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 2 experience.</size>",
+		"<b>The Last Bastion</b>\n\nEvery other turn, the Horde does not advance. Gain 2 experience when the Horde is defeated.",
+		"<b>None shall pass!</b>"
 	};
 	private HoldTrack currentHold;
-	private GameObject holdMarker;
-	private const string HOLD_MARKER_OBJ = "Line held marker";
 	private const string CHOOSE_TO_BLOCK = "Choose a column to hold the line";
 	private const string INVALID_COLUMN = "Please choose an adjacent column";
 	private const string COLUMN_CHOSEN = "The Guardian is holding the line";
@@ -52,6 +53,9 @@ public class GuardianBehavior : DefenderSandbox {
 	private const int BLANK_COLUMN = 999; //nonsense value
 	private const int JUST_STARTED = 111; //nonsense value
 	private int blockedColumn = BLANK_COLUMN;
+	private int alternateTurn = 1;
+	private const string ALL_BLOCKED = "The Last Bastion blocks all columns";
+	private const string NONE_BLOCKED = "The Last Bastion inactive this turn";
 
 
 	//character sheet information
@@ -72,7 +76,6 @@ public class GuardianBehavior : DefenderSandbox {
 		Armor = guardianArmor;
 
 		currentHold = HoldTrack.None;
-		holdMarker = Resources.Load<GameObject>(HOLD_MARKER_OBJ);
 		currentSingleCombat = SingleCombatTrack.None;
 	}
 
@@ -93,14 +96,37 @@ public class GuardianBehavior : DefenderSandbox {
 		 * 
 		 * The following sequence handles the Guardian's post-movement Hold the Line choices.
 		 * 1. If the Guardian is holding the line, but there's no chosen column, the Guardian didn't make a choice last turn. Don't re-register.
-		 * 2. If the Guardian is holding the line, and there's a valid column chosen (or the column is set to the nonsense "just leveled up" value),
+		 * 2. If the Guardian is holding the line, and there's a valid column chosen (or the column is set to the nonsense "just started" value),
 		 * the Guardian made a choice last time. Unblock that column, and then re-register.
 		 * 
+		 * The above applies before the The Last Bastion level. At that level, the player stops making choices and the system automatically tracks
+		 * whether the attackers can advance.
+		 * 
 		 */
-		if (currentHold != HoldTrack.None && blockedColumn == BLANK_COLUMN) return;
-		else if (currentHold != HoldTrack.None){
+		if (currentHold == HoldTrack.The_Last_Bastion){
+			//do nothing; at The Last Bastion, blocking is handled by listening to EndPhaseEvents
+		} else if (currentHold != HoldTrack.None && blockedColumn == BLANK_COLUMN) return;
+		else if (currentHold != HoldTrack.None && currentHold != HoldTrack.The_Last_Bastion){
+			if (blockedColumn != JUST_STARTED) MakeColumnLure(blockedColumn, false);
 			UnholdLine();
 			Services.Events.Register<InputEvent>(ChooseColumn);
+		}
+	}
+
+
+	/// <summary>
+	/// Handle blocking and unblocking all columns when the Guardian has reached The Last Bastion on the Hold the Line track.
+	/// </summary>
+	private void AlternateBlockingColumns(Event e){
+		Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in AlternateBlockingColumns");
+
+		alternateTurn++;
+		if (alternateTurn%2 == 0){
+			BlockAllColumns();
+			extraText.text = ALL_BLOCKED;
+		} else {
+			UnblockAllColumns();
+			extraText.text = NONE_BLOCKED;
 		}
 	}
 
@@ -113,6 +139,16 @@ public class GuardianBehavior : DefenderSandbox {
 			Services.Events.Fire(new UnblockColumnEvent(blockedColumn));
 			blockedColumn = BLANK_COLUMN;
 		}
+	}
+
+
+	private void BlockAllColumns(){
+		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++) Services.Events.Fire(new BlockColumnEvent(i));
+	}
+
+
+	private void UnblockAllColumns(){
+		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++) Services.Events.Fire(new UnblockColumnEvent(i));
 	}
 
 
@@ -129,6 +165,9 @@ public class GuardianBehavior : DefenderSandbox {
 			if (space.GridLocation.x - 1 == GridLoc.x || space.GridLocation.x + 1 == GridLoc.x){
 				blockedColumn = space.GridLocation.x;
 				Services.Events.Fire(new BlockColumnEvent(blockedColumn));
+
+				if (currentHold != HoldTrack.Hold_the_Line) MakeColumnLure(blockedColumn, true); //attackers move into blocked columns at higher Hold the Line levels
+
 				Services.Events.Unregister<InputEvent>(ChooseColumn);
 				extraText.text = COLUMN_CHOSEN;
 
@@ -140,6 +179,16 @@ public class GuardianBehavior : DefenderSandbox {
 				extraText.text = INVALID_COLUMN;
 			}
 		}
+	}
+
+
+	/// <summary>
+	/// Makes all spaces in a given column lure attackers into moving sideways into them, or undoes their lure state.
+	/// </summary>
+	private void MakeColumnLure(int column, bool newState){
+		List<SpaceBehavior> spaces = Services.Board.GetAllSpacesInColumn(column);
+
+		foreach (SpaceBehavior space in spaces) space.Lure = newState;
 	}
 
 
@@ -164,7 +213,7 @@ public class GuardianBehavior : DefenderSandbox {
 			attacker.TakeDamage((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor));
 			FinishWithCard();
 			DefeatedSoFar = DetermineDefeatedSoFar(attacker);
-			charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
+			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 			if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
 			DoneFighting();
 		} else {
@@ -262,12 +311,17 @@ public class GuardianBehavior : DefenderSandbox {
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
 	/// </summary>
 	public override void TakeOverCharSheet(){
-		charSheet.RenameSheet(GUARDIAN_NAME);
-		charSheet.ReviseStatBlock(Speed, AttackMod, Armor);
-		charSheet.ReviseTrack1(holdDescriptions[(int)currentHold + 1], holdDescriptions[(int)currentHold]);
-		charSheet.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
-		charSheet.ReviseNextLabel(defeatsToNextUpgrade - DefeatedSoFar);
-		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
+		Services.UI.TakeOverCharSheet(GUARDIAN_NAME,
+									  Speed,
+									  AttackMod,
+									  Armor,
+									  defeatsToNextUpgrade,
+									  DefeatedSoFar,
+									  holdDescriptions[(int)currentHold + 1],
+									  holdDescriptions[(int)currentHold],
+									  singleCombatDescriptions[(int)currentSingleCombat + 1],
+									  singleCombatDescriptions[(int)currentSingleCombat]
+		);
 	}
 
 
@@ -285,6 +339,17 @@ public class GuardianBehavior : DefenderSandbox {
 				if (currentHold == HoldTrack.Hold_the_Line){
 					blockedColumn = JUST_STARTED;
 					Services.Events.Register<AttackerDefeatedEvent>(GainExperienceFromElsewhere); //listen for chances to gain experience from a blocked column
+				//when the player reaches The Last Bastion, check whether the player has chosen a column to block (blockedColumn != BLANK_COLUMN)
+				//if so, release that column and get rid of the marker
+				//if not, unregister for input events--the player isn't going to need to make that choice
+				//either way, start listening for the event that the Guardian uses to decide whether to block columns
+				} else if (currentHold == HoldTrack.The_Last_Bastion) {
+					Services.Events.Register<EndPhaseEvent>(AlternateBlockingColumns);
+					if (blockedColumn != BLANK_COLUMN) {
+						MakeColumnLure(blockedColumn, false);
+						UnholdLine();
+						Services.Tasks.AddTask(new RemoveBlockFeedbackTask());
+					} else Services.Events.Unregister<InputEvent>(ChooseColumn);
 				}
 				break;
 			case (int)UpgradeTracks.Single_Combat:
@@ -292,8 +357,8 @@ public class GuardianBehavior : DefenderSandbox {
 				break;
 		}
 
-		charSheet.ReviseTrack1(holdDescriptions[(int)currentHold + 1], holdDescriptions[(int)currentHold]);
-		charSheet.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
+		Services.UI.ReviseTrack1(holdDescriptions[(int)currentHold + 1], holdDescriptions[(int)currentHold]);
+		Services.UI.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
 
 		return true;
 	}
@@ -308,6 +373,10 @@ public class GuardianBehavior : DefenderSandbox {
 
 		AttackerDefeatedEvent defeatEvent = e as AttackerDefeatedEvent;
 
-		if (defeatEvent.location.x == blockedColumn) DefeatedSoFar++;
+		if (defeatEvent.location.x == blockedColumn) {
+			DefeatedSoFar++;
+
+			if (currentHold == HoldTrack.Bulwark) DefeatedSoFar++; //gain extra experience at higher levels of the Hold the Line track
+		}
 	}
 }

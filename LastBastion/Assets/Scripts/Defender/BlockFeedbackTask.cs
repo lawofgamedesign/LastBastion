@@ -24,7 +24,6 @@ public class BlockFeedbackTask : Task {
 	private Vector3 endLoc = new Vector3(0.0f, 0.0f, 0.0f);
 
 
-	private int clickedRow = 0;
 	private const string BOARD_TAG = "Board";
 
 

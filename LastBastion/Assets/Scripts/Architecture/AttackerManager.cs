@@ -12,6 +12,7 @@ public class AttackerManager {
 	//attackers the manager can create, and the transform they're parented to
 	private const string EVIL_WARRIOR_OBJ = "Evil Warrior";
 	private const string PETTY_WARLORD_OBJ = "Petty Warlord";
+	private const string ARMORED_WARLORD_OBJ = "Armored Warlord";
 	private Transform attackerOrganizer;
 	private const string ATTACKER_ORGANIZER = "Attackers";
 
@@ -32,6 +33,11 @@ public class AttackerManager {
 	public float MoveSpeed { get; private set; }
 
 
+	//the waves
+	private Wave wave1;
+	private Wave CurrentWave { get; set; }
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -42,6 +48,8 @@ public class AttackerManager {
 		spawnPoints = CreateSpawnPoints();
 		attackerOrganizer = GameObject.Find(ATTACKER_ORGANIZER).transform;
 		MoveSpeed = 5.0f;
+		wave1 = new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ });
+		CurrentWave = wave1;
 		attackers = SpawnNewAttackers();
 	}
 
@@ -88,12 +96,17 @@ public class AttackerManager {
 				Services.Board.GeneralSpaceQuery(point.x, point.z - 1) != SpaceBehavior.ContentType.Attacker &&
 				Services.Board.GeneralSpaceQuery(point.x + 1, point.z) != SpaceBehavior.ContentType.Attacker){
 
-				temp.Add(MakeWarlord(PETTY_WARLORD_OBJ, point.x, point.z));
+				temp.Add(MakeWarlord(ChooseWarlordType(), point.x, point.z));
 				temp.AddRange(MakeRetinue(point.x, point.z));
 			}
 		}
 
 		return temp;
+	}
+
+
+	private string ChooseWarlordType(){
+		return CurrentWave.warlordTypes[Random.Range(0, 2)];
 	}
 
 
@@ -217,5 +230,20 @@ public class AttackerManager {
 
 	public void EliminateAttacker(AttackerSandbox attacker){
 		attackers.Remove(attacker);
+	}
+
+
+	/// <summary>
+	/// Class for waves.
+	/// 
+	/// warlordTypes is the names of the warlords that appear in this wave, as they appear in the Resources folder.
+	/// indices is like a deck of cards. 
+	/// </summary>
+	public class Wave {
+		public List<string> warlordTypes;
+
+		public Wave(List<string> warlordTypes){
+			this.warlordTypes = warlordTypes;
+		}
 	}
 }

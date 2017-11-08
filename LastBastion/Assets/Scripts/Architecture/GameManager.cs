@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour {
 		Services.Defenders.Setup();
 		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Setup();
 		Services.Inputs = new InputManager();
+		Services.UI = new UIManager();
+		Services.UI.Setup();
 		GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
 	}
 

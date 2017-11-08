@@ -9,7 +9,7 @@ public class BoardBehavior {
 
 
 	//putting down board tiles
-	private const int BOARD_WIDTH = 9;
+	public const int BOARD_WIDTH = 9;
 	public const int BOARD_HEIGHT = 6;
 	private const string SPACE_OBJ = "Board space";
 	private SpaceBehavior[,] spaces = new SpaceBehavior[BOARD_WIDTH, BOARD_HEIGHT];
@@ -66,6 +66,7 @@ public class BoardBehavior {
 																   objToCreate.transform.rotation,
 																   BoardOrganizer).GetComponent<SpaceBehavior>();
 				temp[x, z].contentType = SpaceBehavior.ContentType.None;
+				temp[x, z].Lure = false;
 				temp[x, z].WorldLocation = AssignWorldLocation(x, z);
 				temp[x, z].GridLocation = new TwoDLoc(x, z);
 			}
@@ -351,5 +352,42 @@ public class BoardBehavior {
 		}
 
 		return NOT_FOUND;
+	}
+
+
+	/// <summary>
+	/// Call this to check whether attackers are being lured into a given space.
+	/// 
+	/// Unlike most grid-checking functions, this one simply returns false if the checked space is off the grid rather than throwing an exception.
+	/// This makes things simpler for the attackers, since they don't have to be careful about not checking if they're at the edge of the board.
+	/// </summary>
+	/// <returns><c>true</c> if the space contains a lure, <c>false</c> otherwise.</returns>
+	/// <param name="x">The x grid coordinate of the space.</param>
+	/// <param name="z">The z grid coordinate of the space.</param>
+	public bool CheckIfLure(int x, int z){
+		if (!CheckValidSpace(x, z)) return false; //spaces that aren't on the grid can't be luring attackers
+
+		if (spaces[x, z].Lure) return true;
+		else return false;
+	}
+
+
+	/// <summary>
+	/// Provides a list of all spaces in a given column so that, frex., they can all become lures.
+	/// </summary>
+	/// <returns>The all spaces in column.</returns>
+	/// <param name="x">The x coordinate.</param>
+	public List<SpaceBehavior> GetAllSpacesInColumn(int x){
+		Debug.Assert(CheckValidColumn(x), "Invalid column in GetAllSpacesInColumn: " + x);
+
+		List<SpaceBehavior> temp = new List<SpaceBehavior>();
+
+		for (int z = 0; z < BOARD_HEIGHT; z++){
+			temp.Add(spaces[x, z]);
+		}
+
+		Debug.Assert(temp.Count == BOARD_HEIGHT); //make sure all spaces in the column were added
+
+		return temp;
 	}
 }

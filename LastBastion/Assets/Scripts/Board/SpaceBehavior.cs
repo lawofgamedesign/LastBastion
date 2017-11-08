@@ -26,4 +26,8 @@ public class SpaceBehavior : MonoBehaviour {
 
 	//where is this space in the grid?
 	public TwoDLoc GridLocation { get; set; }
+
+
+	//is something luring attackers into this space?
+	public bool Lure { get; set; }
 }
