@@ -218,11 +218,35 @@ public class AttackerSandbox : MonoBehaviour {
 		Health -= damage;
 
 		if (Health <= 0) {
-			Services.Attackers.EliminateAttacker(this);
-			Services.Board.TakeThingFromSpace(XPos, ZPos);
-			Services.Tasks.AddTask(new AttackerFallTask(GetComponent<Rigidbody>()));
-			Services.Events.Fire(new AttackerDefeatedEvent(this));
+			BeDefeated();
 		}
+	}
+
+
+	/// <summary>
+	/// Call this when this attacker is defeated by a defender.
+	/// </summary>
+	public virtual void BeDefeated(){
+		Services.Attackers.EliminateAttacker(this);
+		Services.Board.TakeThingFromSpace(XPos, ZPos);
+		Services.Events.Fire(new AttackerDefeatedEvent(this));
+
+		AttackerFallTask fallTask = new AttackerFallTask(GetComponent<Rigidbody>());
+		EjectAttackerTask throwTask = new EjectAttackerTask(GetComponent<Rigidbody>());
+		fallTask.Then(throwTask);
+		throwTask.Then(new DestroyAttackerTask(gameObject));
+		Services.Tasks.AddTask(fallTask);
+	}
+
+
+	/// <summary>
+	/// Call this when the attacker is taken out of the game by something that the defenders aren't rewarded for (e.g., the end of a wave).
+	/// </summary>
+	public virtual void BeRemovedFromBoard(){
+		Services.Board.TakeThingFromSpace(XPos, ZPos);
+		EjectAttackerTask throwTask = new EjectAttackerTask(GetComponent<Rigidbody>());
+		throwTask.Then(new DestroyAttackerTask(gameObject));
+		Services.Tasks.AddTask(throwTask);
 	}
 
 

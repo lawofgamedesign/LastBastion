@@ -376,7 +376,7 @@ public class BrawlerBehavior : DefenderSandbox {
 	/// <summary>
 	/// The Brawler doesn't shut off cards automatically when rampaging.
 	/// </summary>
-	protected virtual void FinishWithCard(){
+	protected override void FinishWithCard(){
 		ChosenCard.Available = false;
 
 		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);

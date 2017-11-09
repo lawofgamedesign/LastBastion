@@ -40,7 +40,6 @@ public class RangerBehavior : DefenderSandbox {
 	private const string ATTACKS_REMAINING = " attacks left";
 	private const string RANGER_GETS = "Ranger gets ";
 	private const string NEXT_ATTACKS = " extra attacks next turn";
-	private const string NEWLINE = "\n";
 
 
 	//the Eagle Eye upgrade track
@@ -236,7 +235,7 @@ public class RangerBehavior : DefenderSandbox {
 	/// 2. The ranger is showboating, and runs out of attacks.
 	/// 3. The ranger has used their last card, and the cards have reset.
 	/// </summary>
-	protected virtual void FinishWithCard(){
+	protected override void FinishWithCard(){
 		ChosenCard.Available = false;
 
 		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);

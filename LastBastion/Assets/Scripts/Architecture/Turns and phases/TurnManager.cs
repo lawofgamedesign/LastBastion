@@ -43,8 +43,12 @@ public class TurnManager {
 
 
 	//button for ending the current phase and moving to the next
-	public GameObject nextPhaseButton;
+	private GameObject nextPhaseButton;
+	private Text phaseButtonText;
+	private const string TEXT_OBJ = "Text";
 	private const string NEXT_BUTTON_OBJ = "Next phase button";
+	private const string STOP_MOVING_MSG = "Done moving";
+	private const string STOP_FIGHTING_MSG = "Done fighting";
 
 
 	//what turn is it?
@@ -63,11 +67,11 @@ public class TurnManager {
 	public void Setup(){
 		turnMachine = new FSM<TurnManager>(this);
 		TurnMachine = turnMachine;
-		CurrentTurn = 0;
-		TotalTurns = 10;
+		ResetTurnUI();
 		turnMachine.TransitionTo<StartOfTurn>();
 		phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
 		nextPhaseButton = GameObject.Find(NEXT_BUTTON_OBJ);
+		phaseButtonText = nextPhaseButton.transform.Find(TEXT_OBJ).GetComponent<Text>();
 		ToggleNextPhaseButton();
 	}
 
@@ -93,6 +97,15 @@ public class TurnManager {
 	private void NewTurn(){
 		CurrentTurn++;
 		Services.UI.SetTurnText(CurrentTurn, TotalTurns);
+	}
+
+
+	/// <summary>
+	/// Prepare the information the turn counter UI needs for a new wave.
+	/// </summary>
+	private void ResetTurnUI(){
+		CurrentTurn = 0;
+		TotalTurns = Services.Attackers.GetTurnsThisWave();
 	}
 
 
@@ -132,7 +145,7 @@ public class TurnManager {
 		//this is routed through the attacker manager to avoid spreading control over the attackers over multiple classes.
 		public override void OnEnter(){
 			timer = 0.0f;
-			Services.Attackers.SpawnNewAttackers();
+			Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
 			Services.Attackers.MoveAttackers();
 			Context.phaseText.text = ATTACKER_MOVE;
 			Context.TurnRulebookPage();
@@ -151,8 +164,6 @@ public class TurnManager {
 	/// </summary>
 	private class PlayerMove : FSM<TurnManager>.State {
 
-
-		bool needToExit;
 
 		private void HandleMoveInputs(Event e){
 			InputEvent inputEvent = e as InputEvent;
@@ -186,7 +197,7 @@ public class TurnManager {
 			Context.TurnRulebookPage();
 			Services.Events.Register<InputEvent>(HandleMoveInputs);
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
-			needToExit = false;
+			Context.phaseButtonText.text = STOP_MOVING_MSG;
 			Context.ToggleNextPhaseButton();
 		}
 
@@ -246,6 +257,7 @@ public class TurnManager {
 			Context.TurnRulebookPage();
 			Services.Events.Register<InputEvent>(HandleFightInputs);
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
+			Context.phaseButtonText.text = STOP_FIGHTING_MSG;
 			Context.ToggleNextPhaseButton();
 		}
 
@@ -316,6 +328,7 @@ public class TurnManager {
 
 		public override void Tick (){
 			if(CheckStartNextTurn()) TransitionTo<StartOfTurn>();
+			else TransitionTo<BetweenWaves>();
 		}
 
 
@@ -325,6 +338,22 @@ public class TurnManager {
 		private bool CheckStartNextTurn(){
 			if (Context.CurrentTurn < Context.TotalTurns) return true;
 			return false;
+		}
+	}
+
+
+	/// <summary>
+	/// When a wave is done, have the attacker manager go to the next wave and have the turn manager work out the new number of turns.
+	/// </summary>
+	public class BetweenWaves : FSM<TurnManager>.State {
+
+
+		public override void Tick (){
+			Services.Attackers.RemoveAllAttackers();
+			if (Services.Attackers.GoToNextWave()) {
+				Context.ResetTurnUI();
+				TransitionTo<StartOfTurn>();
+			}
 		}
 	}
 }

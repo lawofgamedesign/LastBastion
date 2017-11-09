@@ -53,10 +53,8 @@ public class UIManager {
 	/// <param name="turn">The current turn.</param>
 	/// <param name="totalTurns">How many turns there are in this wave.</param>
 	public void SetTurnText(int turn, int totalTurns){
-		if (turn < totalTurns){
+		if (turn <= totalTurns){
 			turnText.text = TURN + turn.ToString() + BACKSLASH + totalTurns.ToString();
-		} else {
-			turnText.text = GAME_OVER;
 		}
 	}
 

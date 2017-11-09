@@ -34,8 +34,8 @@ public class AttackerManager {
 
 
 	//the waves
-	private Wave wave1;
-	private Wave CurrentWave { get; set; }
+	private List<Wave> waves = new List<Wave>();
+	private int waveIndex = 0; //which wave in the list of waves the game is currently on
 
 
 	/////////////////////////////////////////////
@@ -48,8 +48,10 @@ public class AttackerManager {
 		spawnPoints = CreateSpawnPoints();
 		attackerOrganizer = GameObject.Find(ATTACKER_ORGANIZER).transform;
 		MoveSpeed = 5.0f;
-		wave1 = new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ });
-		CurrentWave = wave1;
+		waves = new List<Wave>() {
+			new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 2),
+			new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 6)
+		};
 		attackers = SpawnNewAttackers();
 	}
 
@@ -106,7 +108,28 @@ public class AttackerManager {
 
 
 	private string ChooseWarlordType(){
-		return CurrentWave.warlordTypes[Random.Range(0, 2)];
+		return waves[waveIndex].warlordTypes[Random.Range(0, 2)];
+	}
+
+
+	/// <summary>
+	/// Increase waveIndex, so that warlords are drawn from the next wave.
+	/// </summary>
+	/// <returns><c>true</c> if there was a new wave to go to, <c>false</c> otherwise.</returns>
+	public bool GoToNextWave(){
+		if (waveIndex < waves.Count - 1){
+			waveIndex++;
+			return true;
+		} else return false;
+	}
+
+
+	/// <summary>
+	/// Get the number of turns this wave lasts.
+	/// </summary>
+	/// <returns>The number of turns.</returns>
+	public int GetTurnsThisWave(){
+		return waves[waveIndex].Turns;
 	}
 
 
@@ -234,16 +257,27 @@ public class AttackerManager {
 
 
 	/// <summary>
+	/// Pulls all attackers off the board (both visually and within the grid logic).
+	/// </summary>
+	public void RemoveAllAttackers(){
+		foreach (AttackerSandbox attacker in attackers) attacker.BeRemovedFromBoard();
+		attackers.Clear();
+	}
+
+
+	/// <summary>
 	/// Class for waves.
 	/// 
 	/// warlordTypes is the names of the warlords that appear in this wave, as they appear in the Resources folder.
-	/// indices is like a deck of cards. 
+	/// Turns is the number of turns in this wave.
 	/// </summary>
 	public class Wave {
 		public List<string> warlordTypes;
+		public int Turns { get; private set; }
 
-		public Wave(List<string> warlordTypes){
+		public Wave(List<string> warlordTypes, int turns){
 			this.warlordTypes = warlordTypes;
+			Turns = turns;
 		}
 	}
 }
