@@ -20,6 +20,10 @@ public class CardDeck<T> {
 	protected int index = 0;
 
 
+	//return value of List<T>.LastIndexOf when the item isn't in the list
+	protected const int NOT_FOUND = -1;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -105,10 +109,56 @@ public class CardDeck<T> {
 
 
 	/// <summary>
+	/// Get a list of everything in the deck
+	/// </summary>
+	/// <returns>The list.</returns>
+	public List<T> GetDeck(){
+		List<T> temp = new List<T>();
+
+		foreach (T card in deck) temp.Add(card);
+
+		Debug.Assert(temp.Count == deck.Count, "Did not add all cards");
+
+		return temp;
+	}
+
+
+	/// <summary>
 	/// Convenience method for getting the number of cards in the deck when it is full.
 	/// </summary>
 	/// <returns>The total number of cards in the deck when it is full.</returns>
 	public int GetDeckSize(){
 		return deck.Count;
+	}
+
+
+	/// <summary>
+	/// Take a card out of the deck.
+	/// 
+	/// This removes the last instance of the card, so it will attempt to remove an instance that's still in the deck
+	/// to be drawn before removing from those already drawn.
+	/// </summary>
+	/// <param name="card">The card to remove.</param>
+	public void RemoveCard(T card){
+		int temp = deck.LastIndexOf(card);
+
+		if (temp == NOT_FOUND) return; //stop if there was no such card
+
+		if (index <= temp && index > 0) index--;
+
+		deck.RemoveAt(temp);
+	}
+
+
+	/// <summary>
+	/// Put a card into the deck.
+	/// 
+	/// This function always adds the card into the still-to-be-drawn deck, never into the discard.
+	/// </summary>
+	/// <param name="card">The card to add.</param>
+	public void AddCard(T card){
+		int tempIndex = Random.Range(index, deck.Count);
+
+		deck.Insert(tempIndex, card);
 	}
 }

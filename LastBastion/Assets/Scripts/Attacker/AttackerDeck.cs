@@ -88,7 +88,7 @@ public class AttackerDeck {
 	/// <summary>
 	/// Displays cards the attacker's discard.
 	/// </summary>
-	/// <returns>The played cards U.</returns>
+	/// <returns>The played cards.</returns>
 	/// <param name="newCard">New card.</param>
 	private string UpdatePlayedCardsUI(Card newCard){
 		playedCardList.Add(newCard);
@@ -106,5 +106,75 @@ public class AttackerDeck {
 
 			return newText;
 		}
+	}
+
+
+	/// <summary>
+	/// As above, but does not involve a new card being played.
+	/// </summary>
+	/// <returns>The played cards.</returns>
+	/// <param name="newCard">New card.</param>
+	private string UpdatePlayedCardsUI(){
+		playedCardList.Sort((card1, card2) => (int)card1.Value.CompareTo((int)card2.Value));
+
+		if (playedCardList.Count == attackerDeck.GetDeckSize()){
+			playedCardList.Clear();
+			return PLAYED_LABEL + NEWLINE;
+		} else {
+			string newText = PLAYED_LABEL + NEWLINE;
+
+			foreach(Card card in playedCardList){
+				newText += card.Value + NEWLINE;
+			}
+
+			return newText;
+		}
+	}
+
+
+	/// <summary>
+	/// Take a card with the given value out of the deck, and then update the UI accordingly.
+	/// 
+	/// This favors later cards in the list of cards in the deck, which are more likely to still be available to draw.
+	/// </summary>
+	/// <param name="value">The value of the card to remove.</param>
+	public void RemoveCardFromDeck(int value){
+		if (TakeOutCard(value)){
+			List<Card> remainingCards = attackerDeck.RemainingCards();
+			cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
+			playedCards.text = UpdatePlayedCardsUI();
+		}
+	}
+
+	/// <summary>
+	/// Remove a single card from the deck, preferring cards still to be drawn.
+	/// </summary>
+	/// <returns><c>true</c> if a card was removed, <c>false</c> otherwise.</returns>
+	/// <param name="value">The Value of the card to remove.</param>
+	private bool TakeOutCard(int value){
+		List<Card> tempDeck = attackerDeck.GetDeck();
+		bool tookOut = false;
+
+		for (int i = tempDeck.Count - 1; i >= 0; i--){
+			if (tempDeck[i].Value == value){
+				attackerDeck.RemoveCard(tempDeck[i]);
+				if (playedCardList.Contains(tempDeck[i])) playedCardList.Remove(tempDeck[i]);
+				tookOut = true;
+				break;
+			}
+		}
+
+		return tookOut;
+	}
+
+
+	/// <summary>
+	/// Adds a card to the deck.
+	/// </summary>
+	/// <param name="value">The card's value.</param>
+	public void PutCardInDeck(int value){
+		attackerDeck.AddCard(new Card(value));
+		List<Card> remainingCards = attackerDeck.RemainingCards();
+		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
 	}
 }

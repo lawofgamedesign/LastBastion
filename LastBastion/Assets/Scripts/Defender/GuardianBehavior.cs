@@ -246,7 +246,9 @@ public class GuardianBehavior : DefenderSandbox {
 	/// <returns>The attack mod.</returns>
 	/// <param name="attacker">The attacker the Guardian is fighting.</param>
 	private int DetermineAttackMod(AttackerSandbox attacker){
-		if (currentSingleCombat == SingleCombatTrack.None || attacker.tag != LEADER_TAG) return AttackMod;
+		if (currentSingleCombat == SingleCombatTrack.None ||
+			currentSingleCombat == SingleCombatTrack.Single_Combat ||
+			attacker.tag != LEADER_TAG) return AttackMod;
 		else return AttackMod + SINGLE_COMBAT_ATTACK_BONUS;
 	}
 

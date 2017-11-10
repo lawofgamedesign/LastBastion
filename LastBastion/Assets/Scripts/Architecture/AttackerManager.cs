@@ -13,6 +13,8 @@ public class AttackerManager {
 	private const string EVIL_WARRIOR_OBJ = "Evil Warrior";
 	private const string PETTY_WARLORD_OBJ = "Petty Warlord";
 	private const string ARMORED_WARLORD_OBJ = "Armored Warlord";
+	private const string SKILLED_WARLORD_OBJ = "Skilled Warlord";
+	private const string ENRAGED_WARLORD_OBJ = "Enraged Warlord";
 	private Transform attackerOrganizer;
 	private const string ATTACKER_ORGANIZER = "Attackers";
 
@@ -49,8 +51,8 @@ public class AttackerManager {
 		attackerOrganizer = GameObject.Find(ATTACKER_ORGANIZER).transform;
 		MoveSpeed = 5.0f;
 		waves = new List<Wave>() {
-			new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 2),
-			new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 6)
+			new Wave(new List<string>() { SKILLED_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 3),
+			new Wave(new List<string>() { ARMORED_WARLORD_OBJ, SKILLED_WARLORD_OBJ, ENRAGED_WARLORD_OBJ }, 6)
 		};
 		attackers = SpawnNewAttackers();
 	}

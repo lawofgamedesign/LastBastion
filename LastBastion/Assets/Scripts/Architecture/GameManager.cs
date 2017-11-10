@@ -22,12 +22,12 @@ public class GameManager : MonoBehaviour {
 		Services.Board.Setup();
 		Services.Tasks = new TaskManager();
 		Services.Events = new EventManager();
+		Services.AttackDeck = new AttackerDeck();
+		Services.AttackDeck.Setup();
 		Services.Attackers = new AttackerManager();
 		Services.Attackers.Setup();
 		Services.Rulebook = new TurnManager();
 		Services.Rulebook.Setup();
-		Services.AttackDeck = new AttackerDeck();
-		Services.AttackDeck.Setup();
 		Services.Defenders = new DefenderManager();
 		Services.Defenders.Setup();
 		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Setup();
