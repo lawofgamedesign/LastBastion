@@ -189,9 +189,15 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	public virtual void PrepareToMove(){
 		moves.Clear();
-		moves.Add(GridLoc);
+		moves.Add(new TwoDLoc(GridLoc.x, GridLoc.z));
 		remainingSpeed = Speed;
-		DrawLine(0, GridLoc.x, GridLoc.z);
+//		ClearLine();
+//		lineRend.SetPosition(0, Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z));
+	}
+
+
+	private void ReportMovesContents(){
+		for (int i = 0; i < moves.Count; i++) Debug.Log("moves[" + i + "] x == " + moves[i].x + ", z == " + moves[i].z);
 	}
 
 
@@ -205,13 +211,10 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	/// <param name="loc">Location.</param>
 	public virtual void TryPlanMove(TwoDLoc loc){
-		if (moves.Count <= Speed + 1){ //the defender can move up to their speed; they get a + 1 "credit" for the space they're in.
-			if (CheckAdjacent(loc, moves[Speed - remainingSpeed]) &&
-				Services.Board.GeneralSpaceQuery(loc.x, loc.z) == SpaceBehavior.ContentType.None){
-				moves.Add(loc);
-				remainingSpeed--;
-				DrawLine(Speed - remainingSpeed, loc.x, loc.z);
-			}
+		if (CheckAdjacent(moves[Speed - remainingSpeed], loc) &&
+			remainingSpeed > 0){
+			moves.Add(loc);
+			remainingSpeed--;
 		}
 	}
 
@@ -245,12 +248,6 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Called by the UI to move the defender.
 	/// </summary>
 	public virtual void Move(){
-		ClearLine();
-
-		//move on the screen
-//		foreach (TwoDLoc move in moves) Debug.Log("moves.x == " + move.x + ", z == " + move.z);
-
-
 		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
 
 
