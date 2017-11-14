@@ -165,14 +165,39 @@ public class AttackerSandbox : MonoBehaviour {
 
 		//if the space the attacker wants to move to is empty, go there.
 		//this moves by spaces in the grid; MoveTask is responsible for having grid positions turned into world coordinates
-		if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.None){
+		if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.None ||
+			Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender){
+
+			//does this enemy need to push past a defender who's on the last row? if so, the attacker can't move
+			//in addition, if there's something behind the defender preventing them from getting pushed back the attacker can't move
+			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender){
+				if (ZPos - attemptedMove == 0) return;
+				if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove - 1) != SpaceBehavior.ContentType.None) return;
+			}
+				
 
 			//is this enemy trying to move through the wall? If so, block the move.
 			if (ZPos - attemptedMove == Services.Board.WallZPos){
 				if (Services.Board.GetWallDurability(XPos) > 0) return;
 			}
 
-			//OK, not moving through a wall. Leave the current space, go into the new space, move on-screen, and update this attacker's
+
+			//if this attacker is pushing a defender back, move the defender
+			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender){
+				GameObject defender = Services.Board.GetThingInSpace(XPos, ZPos - attemptedMove);
+				Services.Board.TakeThingFromSpace(XPos, ZPos - attemptedMove);
+				Services.Board.PutThingInSpace(defender, XPos, ZPos - attemptedMove - 1, SpaceBehavior.ContentType.Defender);
+
+
+				defender.GetComponent<DefenderSandbox>().NewLoc(XPos, ZPos - attemptedMove - 1);
+				Services.Tasks.AddTask(new MoveDefenderTask(defender.GetComponent<Rigidbody>(),
+					defender.GetComponent<DefenderSandbox>().Speed,
+					new System.Collections.Generic.List<TwoDLoc>() { new TwoDLoc(XPos, ZPos - attemptedMove),
+						new TwoDLoc(XPos, ZPos - attemptedMove - 1)}));
+			}
+
+			//OK, not moving through a wall and any defender is out of the way.
+			//Leave the current space, go into the new space, move on-screen, and update this attacker's
 			//understanding of its own position
 			Services.Board.TakeThingFromSpace(XPos, ZPos);
 			Services.Board.PutThingInSpace(gameObject, XPos, ZPos - attemptedMove, SpaceBehavior.ContentType.Attacker);
