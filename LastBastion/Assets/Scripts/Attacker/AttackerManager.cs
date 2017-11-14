@@ -109,8 +109,12 @@ public class AttackerManager {
 	}
 
 
+	/// <summary>
+	/// Randomly select a warlord among those that can be spawned in a given wave.
+	/// </summary>
+	/// <returns>The warlord type's name.</returns>
 	private string ChooseWarlordType(){
-		return waves[waveIndex].warlordTypes[Random.Range(0, 2)];
+		return waves[waveIndex].warlordTypes[Random.Range(0, waves[waveIndex].warlordTypes.Count)];
 	}
 
 
