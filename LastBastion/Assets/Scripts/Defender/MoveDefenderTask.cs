@@ -37,8 +37,7 @@ public class MoveDefenderTask : Task {
 	/// <summary> 
 	/// Each update loop, move toward the next waypoint. 
 	/// </summary> 
-	public override void Tick(){ 
-		Debug.Log(waypoints[index].x + " " + waypoints[index].z);
+	public override void Tick(){
 		Vector3 nextWaypointLoc = Services.Board.GetWorldLocation(waypoints[index].x, waypoints[index].z); 
 
 		//if you're at the current waypoint, discard it 

@@ -212,11 +212,22 @@ public class DefenderSandbox : MonoBehaviour {
 	/// <param name="loc">Location.</param>
 	public virtual void TryPlanMove(TwoDLoc loc){
 		if (CheckAdjacent(moves[Speed - remainingSpeed], loc) &&
-			remainingSpeed > 0){
+			remainingSpeed > 0 &&
+			!CheckAlreadyThroughSpace(loc)){
 			moves.Add(loc);
 			remainingSpeed--;
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
 		}
+	}
+
+
+	protected bool CheckAlreadyThroughSpace(TwoDLoc loc){
+		foreach (TwoDLoc move in moves){
+			if (move.x == loc.x &&
+				move.z == loc.z) return true;
+		}
+
+		return false;
 	}
 
 
