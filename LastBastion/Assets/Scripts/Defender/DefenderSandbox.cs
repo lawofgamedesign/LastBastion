@@ -191,8 +191,8 @@ public class DefenderSandbox : MonoBehaviour {
 		moves.Clear();
 		moves.Add(new TwoDLoc(GridLoc.x, GridLoc.z));
 		remainingSpeed = Speed;
-//		ClearLine();
-//		lineRend.SetPosition(0, Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z));
+		ClearLine();
+		DrawLine(0, GridLoc.x, GridLoc.z);
 	}
 
 
@@ -215,6 +215,7 @@ public class DefenderSandbox : MonoBehaviour {
 			remainingSpeed > 0){
 			moves.Add(loc);
 			remainingSpeed--;
+			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
 		}
 	}
 
@@ -249,6 +250,7 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	public virtual void Move(){
 		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
+		ClearLine();
 
 
 		//move on the grid used for game logic
