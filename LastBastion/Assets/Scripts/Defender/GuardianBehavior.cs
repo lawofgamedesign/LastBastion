@@ -24,15 +24,15 @@ public class GuardianBehavior : DefenderSandbox {
 	private List<string> singleCombatDescriptions = new List<string>() {
 		"<b>Prepare for single combat</b>",
 		"<b>Single Combat</b>\n\nWhen you defeat a Warlord, upgrade immediately.",
-		"<b>You're Mine!</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +3 attack.",
-		"<b>Challenger</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +3 attack and +3 armor.",
+		"<b>You're Mine!</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack.",
+		"<b>Challenger</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack and +5 armor.",
 		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +3 attack and +3 armor.\n\nWhen you defeat a Leader, also defeat their retinue.",
 		"<b>Master of single combat!</b>"
 	};
 	private SingleCombatTrack currentSingleCombat;
 	private const string LEADER_TAG = "Leader";
-	private const int SINGLE_COMBAT_ATTACK_BONUS = 3;
-	private const int SINGLE_COMBAT_ARMOR_BONUS = 3;
+	private const int SINGLE_COMBAT_ATTACK_BONUS = 5;
+	private const int SINGLE_COMBAT_ARMOR_BONUS = 5;
 
 
 	//Hold the Line track

@@ -351,6 +351,7 @@ public class TurnManager {
 		public override void Tick (){
 			Services.Attackers.RemoveAllAttackers();
 			if (Services.Attackers.GoToNextWave()) {
+				Services.AttackDeck.Reshuffle();
 				Context.ResetTurnUI();
 				TransitionTo<StartOfTurn>();
 			}

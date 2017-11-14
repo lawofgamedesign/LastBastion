@@ -177,4 +177,15 @@ public class AttackerDeck {
 		List<Card> remainingCards = attackerDeck.RemainingCards();
 		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
 	}
+
+
+	/// <summary>
+	/// Reshuffle the deck, e.g., between waves.
+	/// </summary>
+	public void Reshuffle(){
+		attackerDeck.Reshuffle();
+		cardsInDeck.text = UpdateCardsInDeckUI(attackerDeck.RemainingCards());
+		playedCardList.Clear();
+		playedCards.text = UpdatePlayedCardsUI();
+	}
 }

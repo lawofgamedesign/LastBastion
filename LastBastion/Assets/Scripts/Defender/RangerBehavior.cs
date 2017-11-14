@@ -45,8 +45,8 @@ public class RangerBehavior : DefenderSandbox {
 	//the Eagle Eye upgrade track
 	private enum LandTrack { None, Lay_of_the_Land, Tricks_and_Traps, On_the_Lookout, The_Last_Chance };
 	private List<string> eagleDescriptions = new List<string>() {
-		"<b>Get the lay of the land</b>",
-		"<b>Eagle Eye</b>\n\nOnce per turn, you may learn what combat card the Horde will play next."
+		"",
+		""
 	};
 	private LandTrack currentLand;
 

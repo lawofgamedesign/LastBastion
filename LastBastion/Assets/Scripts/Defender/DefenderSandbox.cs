@@ -213,7 +213,8 @@ public class DefenderSandbox : MonoBehaviour {
 	public virtual void TryPlanMove(TwoDLoc loc){
 		if (CheckAdjacent(moves[Speed - remainingSpeed], loc) &&
 			remainingSpeed > 0 &&
-			!CheckAlreadyThroughSpace(loc)){
+			!CheckAlreadyThroughSpace(loc) &&
+			Services.Board.GeneralSpaceQuery(loc.x, loc.z) == SpaceBehavior.ContentType.None){
 			moves.Add(loc);
 			remainingSpeed--;
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);

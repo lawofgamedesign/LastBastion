@@ -68,6 +68,14 @@ public class CardDeck<T> {
 
 
 	/// <summary>
+	/// A publicly-accessible way to restart the deck.
+	/// </summary>
+	public virtual void Reshuffle(){
+		HandleEmptyDeck();
+	}
+
+
+	/// <summary>
 	/// Shuffles a deck using the Fisher-Yates algorithm.
 	/// </summary>
 	/// <returns>The deck, as a shuffled list.</returns>
