@@ -102,159 +102,32 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		if (dir == Directions.Error) return; //if the player clicked on an enemy they can't possibly fight, do nothing
 
-		bool canAttackThisDir = true;
-		int attackerValue = 0;
+		if (currentRampage == RampageTrack.None){
+			base.TryFight(attacker);
+			return;
+		}
 
-		switch (currentRampage){
-			case RampageTrack.None:
-				base.TryFight(attacker);
-				break;
-			case RampageTrack.Rampage:
-				canAttackThisDir = UseUpAttacks(dir);
+		if (!UseUpAttacks(dir)) return;
 
+		//if the Brawler gets this far, a fight will actually occur; get a card for the Attacker
+		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
+		extraText.text = DisplayCombatMath(attacker, attackerValue);
 
-				//There are several cases in Rampage mode:
+		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){ //successful attack
+			int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
 
-				//the player has already used up the attack in this direction
-				if (!canAttackThisDir){
-					return;
-				}
+			damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
 
-				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
-				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-				extraText.text = DisplayCombatMath(attacker, attackerValue);
-
-				//the player can attack this direction, and they have a good enough value to hit the enemy
-				if (ChosenCard.Value > attackerValue){
-					attacker.TakeDamage(ChosenCard.Value - attackerValue);
-					DefeatedSoFar++;
-					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-					FinishWithCard();
-
-				//the player can attack this direction, but they don't have a good enough value to hit the enemy
-				} else if (ChosenCard.Value <= attackerValue){
-					attacker.FailToDamage();
-					FinishWithCard();
-				}
-
-
-				//if the player has used up all available attacks, they're done
-				if (CheckUsedAllLimitedAttacks()) DoneFighting();
-
-				break;
-			case RampageTrack.Wade_In:
-				canAttackThisDir = UseUpAttacks(dir);
-
-
-				//There are several cases in Wade In mode:
-
-				//the player has already used up the attack in this direction
-				if (!canAttackThisDir){
-					return;
-				}
-				
-				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
-				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-				extraText.text = DisplayCombatMath(attacker, attackerValue);
-
-				//the player can attack this direction, and they have a good enough value to hit the enemy
-				if (canAttackThisDir &&
-						 ChosenCard.Value > attackerValue){
-					attacker.TakeDamage(ChosenCard.Value - attackerValue);
-					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
-					DefeatedSoFar++;
-					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-					FinishWithCard();
-				}
-
-
-				//the player can attack this direction, but they don't have a good enough value to hit the enemy
-				else if (canAttackThisDir &&
-					ChosenCard.Value <= attackerValue){
-					attacker.FailToDamage();
-					FinishWithCard();
-				}
-
-
-				//if the Brawler has used all of their attacks, and has made all possible jumps, the Brawler is finished
-				if (CheckUsedAllLimitedAttacks() && jumpsSoFar >= AVAILABLE_JUMPS_WADE_IN) DoneFighting();
-
-
-				break;
-			case RampageTrack.Berserk:
-				canAttackThisDir = UseUpAttacks(dir);
-
-
-				//There are several cases in Berserk mode:
-
-				//the player has already used up all available attacks in this direction
-				if (!canAttackThisDir){
-					return;
-				}
-
-				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
-				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-				extraText.text = DisplayCombatMath(attacker, attackerValue);
-
-				//the player can attack this direction, and they have a good enough value to hit the enemy
-				if (canAttackThisDir &&
-					ChosenCard.Value > attackerValue){
-					attacker.TakeDamage(ChosenCard.Value - attackerValue);
-					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
-					DefeatedSoFar++;
-					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-					FinishWithCard();
-				}
-
-
-				//the player can attack this direction, but they don't have a good enough value to hit the enemy
-				else if (canAttackThisDir &&
-					ChosenCard.Value <= attackerValue){
-					attacker.FailToDamage();
-					FinishWithCard();
-				}
-
-
-				//if the Brawler has used all of their attacks, and has made all possible jumps, the Brawler is finished
-				if (CheckUsedAllLimitedAttacks() && jumpsSoFar >= AVAILABLE_JUMPS_BERSERK) DoneFighting();
-
-				break;
-			case RampageTrack.The_Last_One_Standing:
-				canAttackThisDir = UseUpAttacks(dir);
-
-				//There are several cases in The Last One Standing mode:
-
-				//the player has already used up all available attacks in this direction
-				if (!canAttackThisDir){
-					return;
-				}
-
-				//if the Brawler gets this far, a fight will actually occur; get a combat card for the attacker
-				attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-				extraText.text = DisplayCombatMath(attacker, attackerValue);
-
-				//the player can attack this direction, and they have a good enough value to hit the enemy
-				if (canAttackThisDir &&
-					ChosenCard.Value > attackerValue){
-					attacker.TakeDamage(ChosenCard.Value - attackerValue);
-					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
-					DefeatedSoFar++;
-					Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-					FinishWithCard();
-				}
-
-
-				//the player can attack this direction, but they don't have a good enough value to hit the enemy
-				else if (canAttackThisDir &&
-					ChosenCard.Value <= attackerValue){
-					attacker.FailToDamage();
-					FinishWithCard();
-				}
-
-
-				//in The Last One Standing we don't check for whether the Brawler is done; the Brawler has lots and lots of attacks!
-
-				break;
+			attacker.TakeDamage(damage);
+			DefeatedSoFar++;
+			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+			if (currentRampage == RampageTrack.Wade_In ||
+				currentRampage == RampageTrack.Berserk ||
+				currentRampage == RampageTrack.The_Last_One_Standing) lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+			FinishWithCard();
+		} else { //the Brawler's value was too low
+			attacker.FailToDamage();
+			FinishWithCard();
 		}
 	}
 

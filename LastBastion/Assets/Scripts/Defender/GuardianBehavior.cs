@@ -210,7 +210,11 @@ public class GuardianBehavior : DefenderSandbox {
 		extraText.text = DisplayCombatMath(attacker, attackerValue);
 
 		if (ChosenCard.Value + DetermineAttackMod(attacker) > attackerValue + attacker.AttackMod){
-			attacker.TakeDamage((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor));
+			int damage = (ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor);
+
+			damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
+
+			attacker.TakeDamage(damage);
 			FinishWithCard();
 			DefeatedSoFar = DetermineDefeatedSoFar(attacker);
 			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
@@ -233,10 +237,14 @@ public class GuardianBehavior : DefenderSandbox {
 	/// <param name="attacker">The attacker this defender is fighting.</param>
 	/// <param name="attackerValue">The value of the attacker's card.</param>
 	protected override string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		int damage = (ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor);
+
+		damage = damage < 0 ? 0 : damage;
+
 		return DEFENDER_VALUE + ChosenCard.Value + PLUS + DetermineAttackMod(attacker) + NEWLINE +
 			   ATTACKER_VALUE + attackerValue + PLUS + attacker.AttackMod + NEWLINE +
 			   HITS + ((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod)).ToString() + NEWLINE + 
-			   DAMAGE + (((ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod)) - attacker.Armor).ToString();;
+			   DAMAGE + damage.ToString();;
 	}
 
 

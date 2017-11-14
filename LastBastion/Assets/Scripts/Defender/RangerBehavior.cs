@@ -127,7 +127,13 @@ public class RangerBehavior : DefenderSandbox {
 
 		//the attacker's attack modifier might be reduced if the Ranger is behind them
 		if (ChosenCard.Value + AttackMod > attackerValue + DetermineAttackerModifier(attacker)){
-			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + DetermineAttackerArmor(attacker) + DetermineAttackerArmor(attacker)));
+			int damage = (ChosenCard.Value + AttackMod) -
+						 (attackerValue + DetermineAttackerModifier(attacker) +
+						  DetermineAttackerArmor(attacker));
+
+			damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
+
+			attacker.TakeDamage(damage);
 
 			//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
 			currentAttacks--;
@@ -156,10 +162,16 @@ public class RangerBehavior : DefenderSandbox {
 	/// <param name="attacker">The attacker this defender is fighting.</param>
 	/// <param name="attackerValue">The value of the attacker's card.</param>
 	protected override string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		int damage = (ChosenCard.Value + AttackMod) -
+					 (attackerValue + DetermineAttackerModifier(attacker) +
+					  DetermineAttackerArmor(attacker));
+
+		damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
+
 		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
 			   ATTACKER_VALUE + attackerValue + PLUS + DetermineAttackerModifier(attacker) + NEWLINE +
 			   HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + DetermineAttackerModifier(attacker))).ToString() + NEWLINE +
-			   DAMAGE + (((ChosenCard.Value + AttackMod) - (attackerValue + DetermineAttackerModifier(attacker))) - DetermineAttackerArmor(attacker)).ToString();;
+			   DAMAGE + damage.ToString();;
 	}
 
 
