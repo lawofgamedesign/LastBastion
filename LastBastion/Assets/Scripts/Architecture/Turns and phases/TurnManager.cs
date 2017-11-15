@@ -146,6 +146,7 @@ public class TurnManager {
 		public override void OnEnter(){
 			timer = 0.0f;
 			Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
+			Services.Attackers.PrepareAttackerMove();
 			Services.Attackers.MoveAttackers();
 			Context.phaseText.text = ATTACKER_MOVE;
 			Context.TurnRulebookPage();

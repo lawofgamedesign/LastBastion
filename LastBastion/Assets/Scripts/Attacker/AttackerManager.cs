@@ -15,6 +15,7 @@ public class AttackerManager {
 	private const string ARMORED_WARLORD_OBJ = "Armored Warlord";
 	private const string SKILLED_WARLORD_OBJ = "Skilled Warlord";
 	private const string ENRAGED_WARLORD_OBJ = "Enraged Warlord";
+	private const string FAST_WARLORD_OBJ = "Fast Warlord";
 	private Transform attackerOrganizer;
 	private const string ATTACKER_ORGANIZER = "Attackers";
 
@@ -40,6 +41,10 @@ public class AttackerManager {
 	private int waveIndex = 0; //which wave in the list of waves the game is currently on
 
 
+	//used to give each enemy a unique ID number
+	private int enemyNum = 0;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -52,7 +57,8 @@ public class AttackerManager {
 		MoveSpeed = 5.0f;
 		waves = new List<Wave>() {
 			new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 3),
-			new Wave(new List<string>() { ARMORED_WARLORD_OBJ, SKILLED_WARLORD_OBJ, ENRAGED_WARLORD_OBJ }, 6)
+			new Wave(new List<string>() { ARMORED_WARLORD_OBJ, SKILLED_WARLORD_OBJ, ENRAGED_WARLORD_OBJ }, 6),
+			new Wave(new List<string>() { FAST_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 6)
 		};
 		attackers = SpawnNewAttackers();
 	}
@@ -160,6 +166,8 @@ public class AttackerManager {
 
 		newWarlord.GetComponent<AttackerSandbox>().Setup();
 		newWarlord.GetComponent<AttackerSandbox>().NewLoc(x, z);
+		newWarlord.name = type + enemyNum;
+		enemyNum++;
 		Services.Tasks.AddTask(new MoveTask(newWarlord.transform, x, z, MoveSpeed)); //create the task that moves the warlord onto the board
 
 		return newWarlord.GetComponent<AttackerSandbox>();
@@ -191,6 +199,8 @@ public class AttackerManager {
 
 			newRetinueMember.GetComponent<AttackerSandbox>().Setup();
 			newRetinueMember.GetComponent<AttackerSandbox>().NewLoc(x - 1, z);
+			newRetinueMember.name = newRetinueMember.name + enemyNum;
+			enemyNum++;
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x - 1, z, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
@@ -210,6 +220,8 @@ public class AttackerManager {
 
 			newRetinueMember.GetComponent<AttackerSandbox>().Setup();
 			newRetinueMember.GetComponent<AttackerSandbox>().NewLoc(x, z - 1);
+			newRetinueMember.name = newRetinueMember.name + enemyNum;
+			enemyNum++;
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x, z - 1, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
@@ -230,6 +242,8 @@ public class AttackerManager {
 
 			newRetinueMember.GetComponent<AttackerSandbox>().Setup();
 			newRetinueMember.GetComponent<AttackerSandbox>().NewLoc(x + 1, z);
+			newRetinueMember.name = newRetinueMember.name + enemyNum;
+			enemyNum++;
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x + 1, z, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
@@ -245,6 +259,15 @@ public class AttackerManager {
 	/// <returns>The list.</returns>
 	public List<AttackerSandbox> GetAttackers(){
 		return attackers;
+	}
+
+
+	public void PrepareAttackerMove(){
+		List<AttackerSandbox> currentAttackers = Services.Board.GetOrderedAttackerList();
+
+		foreach (AttackerSandbox attacker in currentAttackers){
+			attacker.PrepareToMove();
+		}
 	}
 
 

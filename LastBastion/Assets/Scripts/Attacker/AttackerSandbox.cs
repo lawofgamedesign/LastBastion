@@ -17,6 +17,7 @@ public class AttackerSandbox : MonoBehaviour {
 	public int XPos { get; set; }
 	public int ZPos { get; set; }
 	[SerializeField] protected int speed = 1; //speed in spaces/move, not 3D world speed
+	protected int currentSpeed = 0;
 
 	//attacker stats
 	public int AttackMod { get; set; }
@@ -53,6 +54,10 @@ public class AttackerSandbox : MonoBehaviour {
 	protected const string ARMOR = "Armor: ";
 	protected const string HEALTH = "Health: ";
 	protected const string NEWLINE = "\n";
+
+
+	//things that make this attacker go fast have this in their name
+	protected string FAST_MARKER = "Fast";
 
 
 	/////////////////////////////////////////////
@@ -127,6 +132,14 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 	/// <summary>
+	/// Anything this attacker needs to do at the start of the movement phase happens here.
+	/// </summary>
+	public virtual void PrepareToMove(){
+		currentSpeed = GetSpeed();
+	}
+
+
+	/// <summary>
 	/// This function manages limits and controls on movement, deciding whether and where the attacker should move.
 	/// </summary>
 	public void TryMove(){
@@ -158,9 +171,24 @@ public class AttackerSandbox : MonoBehaviour {
 	/// Move this attacker south a number of spaces based on their speed.
 	/// </summary>
 	protected void TryMoveSouth(){
+		int attemptedMove = currentSpeed;
+
 		//sanity check; prevent this attacker from trying to move off the board
-		int attemptedMove = speed;
 		if (ZPos - attemptedMove < 0) attemptedMove = ZPos;
+
+		//if the attacker can't move the entirety of their speed, but could move a shorter distance, allow that
+		//don't go below 1; the rest of the movement system handles that
+		if (attemptedMove > 1){
+			while (attemptedMove > 1){
+				if ((Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) != SpaceBehavior.ContentType.None && //blocked by something in the space
+					 Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) != SpaceBehavior.ContentType.Defender) ||
+					(ZPos - attemptedMove <= Services.Board.WallZPos && //blocked by the wall
+					 Services.Board.GetWallDurability(XPos) >0)) {
+					attemptedMove--;
+				}
+				else break;
+			}
+		}
 
 
 		//if the space the attacker wants to move to is empty, go there.
@@ -204,6 +232,47 @@ public class AttackerSandbox : MonoBehaviour {
 			Services.Tasks.AddTask(new MoveTask(transform, XPos, ZPos - attemptedMove, Services.Attackers.MoveSpeed));
 			NewLoc(XPos, ZPos - attemptedMove);
 		}
+	}
+
+
+	/// <summary>
+	/// Determine the attacker's current speed, based on whether there are things adjacent to it that cause it to move faster.
+	/// </summary>
+	/// <returns>The speed, in grid spaces.</returns>
+	protected virtual int GetSpeed(){
+		int temp = speed;
+
+		if (LookForSpeedUp(XPos, ZPos + 1)) temp++;
+		if (LookForSpeedUp(XPos, ZPos - 1)) temp++;
+		if (LookForSpeedUp(XPos - 1, ZPos)) temp++;
+		if (LookForSpeedUp(XPos + 1, ZPos)) temp++;
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Determine whether there's something in a space that causes an attacker to move faster.
+	/// </summary>
+	/// <returns><c>true</c> if there is such a thing in the space, <c>false</c> otherwise.</returns>
+	/// <param name="x">The x coordinate of the grid space to check.</param>
+	/// <param name="z">The z coordinate of the grid space to check.</param>
+	protected virtual bool LookForSpeedUp(int x, int z){
+
+		//first, if there's no space at the given coordinates, there's nothing to speed the attacker up there
+		if (x >= BoardBehavior.BOARD_WIDTH ||
+			x < 0 ||
+			z >= BoardBehavior.BOARD_HEIGHT ||
+			z < 0) return false;
+
+
+		//if there's an attacker in the space, return true if it's got "Fast" in its name, false otherwise
+		if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Attacker){
+			return (Services.Board.GetThingInSpace(x, z).name.Contains(FAST_MARKER)) ? true : false;
+		}
+
+		//by default, return false
+		return false;
 	}
 
 

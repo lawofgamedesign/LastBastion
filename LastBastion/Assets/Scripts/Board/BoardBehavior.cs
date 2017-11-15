@@ -227,7 +227,7 @@ public class BoardBehavior {
 	/// <summary>
 	/// Create a list of attackers ordered according to their position on the board.
 	/// 
-	/// This starts in the southeast, goes east, then goes one row north and counts again, etc.
+	/// This starts in the southwest, goes east, then goes one row north and counts again, etc.
 	/// 
 	/// By following this list it's possible to avoid recursion in figruing out whether an attacker can move. Each
 	/// attacker gets one chance; when it's used its chance, that's it.
