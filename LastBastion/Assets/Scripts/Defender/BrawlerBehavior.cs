@@ -25,9 +25,9 @@ public class BrawlerBehavior : DefenderSandbox {
 	private List<string> rampageDescriptions = new List<string>() {
 		"<b>Start rampaging</b>",
 		"<b>Rampage</b>\n\nYou can make an extra attack to the left or right each Defenders Fight phase.",
-		"<b>Wade In</b>\n\nYou can make an extra attack to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.",
-		"<b>Berserk</b>\n\nYou can make two extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.",
-		"<b>The Last One Standing</b>\n\nYou can make any number of extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.\"",
+		"<b>Wade In</b>\n\n<size=10>You can make an extra attack to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>Berserk</b>\n\n<size=10>You can make two extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>The Last One Standing</b>\n\n<size=10>You can make any number of extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
 		"<b>Maximum rampage!</b>"
 	};
 	private RampageTrack currentRampage;
