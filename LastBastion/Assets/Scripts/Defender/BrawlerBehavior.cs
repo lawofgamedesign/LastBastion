@@ -118,18 +118,36 @@ public class BrawlerBehavior : DefenderSandbox {
 
 			damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
 
+			if (damage >= attacker.Health){
+				DefeatedSoFar++;
+				powerupReadyParticle.SetActive(CheckUpgradeStatus());
+				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+				if (currentRampage == RampageTrack.Wade_In ||
+					currentRampage == RampageTrack.Berserk ||
+					currentRampage == RampageTrack.The_Last_One_Standing) lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+			}
+
 			attacker.TakeDamage(damage);
-			DefeatedSoFar++;
-			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-			if (currentRampage == RampageTrack.Wade_In ||
-				currentRampage == RampageTrack.Berserk ||
-				currentRampage == RampageTrack.The_Last_One_Standing) lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+
 			FinishWithCard();
 		} else { //the Brawler's value was too low
 			attacker.FailToDamage();
 			FinishWithCard();
 		}
 	}
+
+
+	/// <summary>
+	/// Determine whether the time-to-upgrade particle should be displayed.
+	/// </summary>
+	/// <returns><c>true</c> if the defender has defeated enough attackers and has room to upgrade, <c>false</c> otherwise.</returns>
+	protected override bool CheckUpgradeStatus(){
+		if (DefeatedSoFar >= defeatsToNextUpgrade &&
+			currentRampage != RampageTrack.The_Last_One_Standing) return true;
+
+		return false;
+	}
+
 
 
 	/// <summary>
@@ -200,8 +218,7 @@ public class BrawlerBehavior : DefenderSandbox {
 			else return false;
 		}
 
-		//needed by the compiler; the code should never get here
-		Debug.Log("Checked for use of limited attacks in an improper Rampage track state");
+		//at The Last One Standing, the computer never decides all attacks are used up
 		return false;
 	}
 
@@ -252,22 +269,22 @@ public class BrawlerBehavior : DefenderSandbox {
 	protected override void FinishWithCard(){
 		ChosenCard.Available = false;
 
-		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
-		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
-		flipTask.Then(putDownTask);
+//		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
+//		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
+//		flipTask.Then(putDownTask);
+		defenderCards.FlipCardDown(combatHand.IndexOf(ChosenCard));
 
 		ChosenCard = null;
 
 		if (!StillAvailableCards()){
 			ResetCombatHand();
-			ResetHandTask resetTask = new ResetHandTask(this);
-			putDownTask.Then(resetTask);
+//			ResetHandTask resetTask = new ResetHandTask(this);
+//			putDownTask.Then(resetTask);
+			if (currentRampage == RampageTrack.None) defenderCards.ShutCardsOff();//resetTask.Then(new ShutOffCardsTask());
+		} else if (currentRampage == RampageTrack.None) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
+		else if (CheckUsedAllLimitedAttacks()) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
 
-			if (currentRampage == RampageTrack.None) resetTask.Then(new ShutOffCardsTask());
-		} else if (currentRampage == RampageTrack.None) putDownTask.Then(new ShutOffCardsTask());
-		else if (CheckUsedAllLimitedAttacks()) putDownTask.Then(new ShutOffCardsTask());
-
-		Services.Tasks.AddTask(flipTask);
+		//Services.Tasks.AddTask(flipTask);
 	}
 
 
@@ -317,6 +334,9 @@ public class BrawlerBehavior : DefenderSandbox {
 		}
 
 		Services.UI.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
+
+		//shut off the particle telling the player to power up
+		powerupReadyParticle.SetActive(false);
 
 		return true;
 	}

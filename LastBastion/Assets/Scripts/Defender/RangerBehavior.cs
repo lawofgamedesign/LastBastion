@@ -133,6 +133,12 @@ public class RangerBehavior : DefenderSandbox {
 
 			damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
 
+			if (damage >= attacker.Health){
+				DefeatedSoFar++;
+				powerupReadyParticle.SetActive(CheckUpgradeStatus());
+				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+			}
+
 			attacker.TakeDamage(damage);
 
 			//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
@@ -141,8 +147,6 @@ public class RangerBehavior : DefenderSandbox {
 			extraText.text = ReviseAttackText();
 
 			FinishWithCard();
-			DefeatedSoFar++;
-			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 		} else {
 			attacker.FailToDamage();
 			FinishWithCard();
@@ -152,6 +156,18 @@ public class RangerBehavior : DefenderSandbox {
 
 		//the Ranger can keep fighting until they run out of attacks
 		if (currentAttacks <= 0) DoneFighting();
+	}
+
+
+	/// <summary>
+	/// Determine whether the time-to-upgrade particle should be displayed.
+	/// </summary>
+	/// <returns><c>true</c> if the defender has defeated enough attackers and has room to upgrade, <c>false</c> otherwise.</returns>
+	protected override bool CheckUpgradeStatus(){
+		if (DefeatedSoFar >= defeatsToNextUpgrade &&
+			currentShowboat != ShowboatTrack.Set_the_Standard) return true;
+
+		return false;
 	}
 
 
@@ -250,23 +266,24 @@ public class RangerBehavior : DefenderSandbox {
 	protected override void FinishWithCard(){
 		ChosenCard.Available = false;
 
-		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
-		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
-		flipTask.Then(putDownTask);
+//		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
+//		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
+//		flipTask.Then(putDownTask);
+		defenderCards.FlipCardDown(combatHand.IndexOf(ChosenCard));
 
 		ChosenCard = null;
 
 		if (!StillAvailableCards()){
 			ResetCombatHand();
-			ResetHandTask resetTask = new ResetHandTask(this);
-			putDownTask.Then(resetTask);
+//			ResetHandTask resetTask = new ResetHandTask(this);
+//			putDownTask.Then(resetTask);
 
-			if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) resetTask.Then(new ShutOffCardsTask());
-			else if (currentShowboat == ShowboatTrack.None) putDownTask.Then(new ShutOffCardsTask());
-			else if (currentAttacks <= 0) putDownTask.Then(new ShutOffCardsTask());
-		} else if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) putDownTask.Then(new ShutOffCardsTask());
+			if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) defenderCards.ShutCardsOff();//resetTask.Then(new ShutOffCardsTask());
+			else if (currentShowboat == ShowboatTrack.None) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
+			else if (currentAttacks <= 0) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
+		} else if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
 
-		Services.Tasks.AddTask(flipTask);
+		//Services.Tasks.AddTask(flipTask);
 	}
 
 
@@ -322,6 +339,9 @@ public class RangerBehavior : DefenderSandbox {
 
 				break;
 		}
+
+		//having powered up, shut off the particle telling the player to power up
+		powerupReadyParticle.SetActive(false);
 
 		return true;
 	}

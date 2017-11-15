@@ -357,7 +357,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4366304675433024}
-  - component: {fileID: 114047122645462216}
+  - component: {fileID: 114496942821029244}
   - component: {fileID: 54306652517452904}
   - component: {fileID: 65581810087215636}
   m_Layer: 0
@@ -1038,17 +1038,6 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &114047122645462216
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1783999625522298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95104a83736a94465ac0ecb345201415, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &114093007653677558
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1113,6 +1102,19 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+--- !u!114 &114496942821029244
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1783999625522298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95104a83736a94465ac0ecb345201415, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 1
+  startSiegeStrength: 1
 --- !u!137 &137125589429887234
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

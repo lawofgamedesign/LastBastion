@@ -55,6 +55,7 @@ public class DefenderSandbox : MonoBehaviour {
 	protected List<Card> combatHand;
 	protected Button noFightButton;
 	protected Transform uICanvas;
+	protected DefenderUIBehavior defenderCards;
 	protected const string CARD_UI_CANVAS = "Defender card canvas";
 	protected const string TEXT_OBJ = "Text";
 	protected const string NO_FIGHT_BUTTON = "Done fighting button";
@@ -82,10 +83,24 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	//powering up
-	protected int DefeatedSoFar { get; set; }
+	protected int defeatedSoFar = 0;
+	protected int DefeatedSoFar {
+		get { return defeatedSoFar; }
+		set {
+			if (value > defeatedSoFar) xpParticle.Play();
+			defeatedSoFar = value;
+		}
+	}
 	protected const int START_DEFEATED = 0;
 	protected int defeatsToNextUpgrade = 0;
 	protected int upgradeInterval = 3;
+
+
+	//feedback particle systems
+	protected ParticleSystem xpParticle;
+	protected GameObject powerupReadyParticle;
+	protected const string XP_PARTICLE_OBJ = "XP gained particle";
+	protected const string POWER_UP_PARTICLE_OBJ = "Powerup ready particle";
 
 
 	/////////////////////////////////////////////
@@ -111,9 +126,12 @@ public class DefenderSandbox : MonoBehaviour {
 		GridLoc = new TwoDLoc(0, 0); //default initialization
 		combatHand = MakeCombatHand();
 		uICanvas = GameObject.Find(CARD_UI_CANVAS).transform;
+		defenderCards = uICanvas.GetComponent<DefenderUIBehavior>();
 		noFightButton = transform.Find(PRIVATE_UI_CANVAS).Find(NO_FIGHT_BUTTON).GetComponent<Button>();
 		extraText = GameObject.Find(EXTRA_INFO_OBJ).transform.Find(TEXT_OBJ).GetComponent<Text>();
 		DefeatedSoFar = START_DEFEATED;
+		xpParticle = transform.Find(XP_PARTICLE_OBJ).GetComponent<ParticleSystem>();
+		powerupReadyParticle = transform.Find(POWER_UP_PARTICLE_OBJ).gameObject;
 	}
 
 
@@ -323,7 +341,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		Selected = true;
 		selectedParticle.SetActive(true);
-		uICanvas.GetComponent<DefenderUIBehavior>().ClearSelectedColor();
+		uICanvas.GetComponent<DefenderUIBehavior>().ClearAllSelectedColor();
 
 		Debug.Assert(combatHand.Count <= uICanvas.childCount, "Too many combat cards to display!");
 
@@ -347,15 +365,17 @@ public class DefenderSandbox : MonoBehaviour {
 
 		for (int i = 0; i < combatHand.Count; i++){
 			if (combatHand[i].Available){
-				PickUpCardTask pickUpTask = new PickUpCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
-				FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Up);
-				PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
-				putDownTask.Then(new ShutOffCardsTask()); //the cards will only shut off if the player immediately hits "done" and doesn't select anyone else
+//				PickUpCardTask pickUpTask = new PickUpCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
+//				FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Up);
+//				PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(i).GetComponent<RectTransform>());
+//				putDownTask.Then(new ShutOffCardsTask()); //the cards will only shut off if the player immediately hits "done" and doesn't select anyone else
+//
+//				pickUpTask.Then(flipTask);
+//				flipTask.Then(putDownTask);
+//
+//				Services.Tasks.AddTask(pickUpTask);
+				defenderCards.FlipCardUp(i);
 
-				pickUpTask.Then(flipTask);
-				flipTask.Then(putDownTask);
-
-				Services.Tasks.AddTask(pickUpTask);
 			}
 		}
 	}
@@ -368,7 +388,8 @@ public class DefenderSandbox : MonoBehaviour {
 	public virtual void AssignChosenCard(int index){
 		if (combatHand[index].Available && combatHand[index] != ChosenCard){
 			ChosenCard = combatHand[index];
-			Services.Tasks.AddTask(new PickUpCardTask(uICanvas.GetChild(index).GetComponent<RectTransform>()));
+			//Services.Tasks.AddTask(new PickUpCardTask(uICanvas.GetChild(index).GetComponent<RectTransform>()));
+			defenderCards.TurnSelectedColor(index);
 		}
 	}
 
@@ -409,16 +430,33 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
+	/// Determine whether the time-to-upgrade particle should be displayed.
+	/// 
+	/// Note that this version does not take into account where the defender is on their upgrade tracks,
+	/// and whether there are any upgrades available. It should always be overridden!
+	/// </summary>
+	/// <returns><c>true</c> if the particle should be switched on, <c>false</c> otherwise.</returns>
+	protected virtual bool CheckUpgradeStatus(){
+		if (DefeatedSoFar >= defeatsToNextUpgrade) return true;
+		return false;
+	}
+
+
+	/// <summary>
 	/// Show the math behind combats on the extra information UI.
 	/// </summary>
 	/// <returns>A string explaining the math behind each combat.</returns>
 	/// <param name="attacker">The attacker this defender is fighting.</param>
 	/// <param name="attackerValue">The value of the attacker's card.</param>
 	protected virtual string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
+
+		damage = damage < 0 ? 0 : damage;
+
 		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
 			   ATTACKER_VALUE + attackerValue + PLUS + attacker.AttackMod + NEWLINE +
 			   HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod)).ToString() + NEWLINE + 
-			   DAMAGE + (((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod)) - attacker.Armor).ToString();
+			   DAMAGE + damage.ToString();
 	}
 
 
@@ -439,20 +477,20 @@ public class DefenderSandbox : MonoBehaviour {
 	protected virtual void FinishWithCard(){
 		ChosenCard.Available = false;
 
-		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
-		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
-		flipTask.Then(putDownTask);
+//		FlipCardTask flipTask = new FlipCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>(), FlipCardTask.UpOrDown.Down);
+//		PutDownCardTask putDownTask = new PutDownCardTask(uICanvas.GetChild(combatHand.IndexOf(ChosenCard)).GetComponent<RectTransform>());
+//		flipTask.Then(putDownTask);
+		defenderCards.FlipCardDown(combatHand.IndexOf(ChosenCard));
 
 		ChosenCard = null;
 
 		if (!StillAvailableCards()){
 			ResetCombatHand();
-			ResetHandTask resetTask = new ResetHandTask(this);
-			putDownTask.Then(resetTask);
-			resetTask.Then(new ShutOffCardsTask());
-		} else putDownTask.Then(new ShutOffCardsTask());
+//			ResetHandTask resetTask = new ResetHandTask(this);
+//			putDownTask.Then(resetTask);
+//			resetTask.Then(new ShutOffCardsTask());
 
-		Services.Tasks.AddTask(flipTask);
+		} else defenderCards.ShutCardsOff();
 	}
 
 
@@ -481,6 +519,8 @@ public class DefenderSandbox : MonoBehaviour {
 		foreach (Card card in combatHand){
 			card.Available = true;
 		}
+		defenderCards.ClearAllSelectedColor();
+		defenderCards.FlipAllCardsUp();
 	}
 
 

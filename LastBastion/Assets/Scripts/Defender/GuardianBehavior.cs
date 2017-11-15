@@ -214,11 +214,16 @@ public class GuardianBehavior : DefenderSandbox {
 
 			damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
 
+			if (damage >= attacker.Health){
+				DefeatedSoFar = DetermineDefeatedSoFar(attacker);
+				powerupReadyParticle.SetActive(CheckUpgradeStatus());
+				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+				if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
+			}
+
 			attacker.TakeDamage(damage);
+				
 			FinishWithCard();
-			DefeatedSoFar = DetermineDefeatedSoFar(attacker);
-			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-			if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
 			DoneFighting();
 		} else {
 			attacker.FailToDamage();
@@ -227,6 +232,18 @@ public class GuardianBehavior : DefenderSandbox {
 		}
 	}
 
+
+	/// <summary>
+	/// Determine whether the time-to-upgrade particle should be displayed.
+	/// </summary>
+	/// <returns><c>true</c> if the defender has defeated enough attackers and has room to upgrade, <c>false</c> otherwise.</returns>
+	protected override bool CheckUpgradeStatus(){
+		if (DefeatedSoFar >= defeatsToNextUpgrade &&
+			currentHold != HoldTrack.The_Last_Bastion &&
+			currentSingleCombat!= SingleCombatTrack.Champion) return true;
+
+		return false;
+	}
 
 
 
@@ -369,6 +386,9 @@ public class GuardianBehavior : DefenderSandbox {
 
 		Services.UI.ReviseTrack1(holdDescriptions[(int)currentHold + 1], holdDescriptions[(int)currentHold]);
 		Services.UI.ReviseTrack2(singleCombatDescriptions[(int)currentSingleCombat + 1], singleCombatDescriptions[(int)currentSingleCombat]);
+
+		//having powered up, shut off the particle indicating the player should power up
+		powerupReadyParticle.SetActive(false);
 
 		return true;
 	}
