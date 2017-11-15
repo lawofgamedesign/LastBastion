@@ -47,8 +47,6 @@ public class PettyWarlordBehavior : AttackerSandbox {
 	public override void TakeDamage (int damage){
 		base.TakeDamage(damage);
 
-		Debug.Log("Petty Warlord health is now " + Health);
-
 		healthUI.fillAmount = (float)Health/(float)pettyHealth;
 	}
 }
