@@ -153,6 +153,21 @@ public class AttackerManager {
 	/// <param name="x">The x coordinate on the board where the warlord is to be placed.</param>
 	/// <param name="z">The z coordinate on the board where the warlord is to be placed.</param>
 	private AttackerSandbox MakeWarlord(string type, int x, int z){
+		//start by getting any defender currently in the space out of there
+		if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Defender){
+			GameObject defender = Services.Board.GetThingInSpace(x, z);
+			Services.Board.TakeThingFromSpace(x, z);
+			Services.Board.PutThingInSpace(defender, x, z - 1, SpaceBehavior.ContentType.Defender);
+
+
+			defender.GetComponent<DefenderSandbox>().NewLoc(x, z - 1);
+			Services.Tasks.AddTask(new MoveDefenderTask(defender.GetComponent<Rigidbody>(),
+														defender.GetComponent<DefenderSandbox>().Speed,
+														new System.Collections.Generic.List<TwoDLoc>() { new TwoDLoc(x, z),
+														new TwoDLoc(x, z - 1)}));
+		}
+
+
 		Vector3 startLoc = Services.Board.GetWorldLocation(x, z) + new Vector3(0.0f, 0.0f, Services.Board.SpaceSize * 2); //the warlord starts off the board
 
 		GameObject newWarlord = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(type),

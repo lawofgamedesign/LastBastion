@@ -26,7 +26,7 @@ public class GuardianBehavior : DefenderSandbox {
 		"<b>Single Combat</b>\n\nWhen you defeat a Warlord, upgrade immediately.",
 		"<b>You're Mine!</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack.",
 		"<b>Challenger</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack and +5 armor.",
-		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +3 attack and +3 armor.\n\nWhen you defeat a Leader, also defeat their retinue.",
+		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +5 attack and +5 armor.\n\nWhen you defeat a Leader, also defeat their retinue.",
 		"<b>Master of single combat!</b>"
 	};
 	private SingleCombatTrack currentSingleCombat;
@@ -216,9 +216,9 @@ public class GuardianBehavior : DefenderSandbox {
 
 			if (damage >= attacker.Health){
 				DefeatedSoFar = DetermineDefeatedSoFar(attacker);
-				powerupReadyParticle.SetActive(CheckUpgradeStatus());
 				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 				if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
+				powerupReadyParticle.SetActive(CheckUpgradeStatus());
 			}
 
 			attacker.TakeDamage(damage);

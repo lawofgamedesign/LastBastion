@@ -56,6 +56,13 @@ public class TurnManager {
 	public int TotalTurns { get; private set; }
 
 
+	//feedback for when the player loses
+	private const string LOSE_MSG = "You lose! R to restart.";
+
+
+	//feedback for when the player wins
+	private const string WIN_MSG = "You win! R to restart.";
+
 
 
 	/////////////////////////////////////////////
@@ -117,6 +124,35 @@ public class TurnManager {
 	}
 
 
+	/// <summary>
+	/// Check if an attacker has reached the final row of the board, meaning the player has lost.
+	/// </summary>
+	/// <returns><c>true</c> if the player has lost, <c>false</c> otherwise.</returns>
+	private bool CheckForLoss(){
+		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++){
+			if (Services.Board.GeneralSpaceQuery(i, 0) == SpaceBehavior.ContentType.Attacker) return true;
+		}
+
+		return false;
+	}
+
+
+	/// <summary>
+	/// Handles informing the player that they've won.
+	/// </summary>
+	private void PlayerWinFeedback(){
+		Services.UI.SetExtraText(WIN_MSG);
+	}
+
+
+	/// <summary>
+	/// Handles informing the player that they've lost.
+	/// </summary>
+	private void PlayerLoseFeedback(){
+		Services.UI.SetExtraText(LOSE_MSG);
+	}
+
+
 	/////////////////////////////////////////////
 	/// States
 	/////////////////////////////////////////////
@@ -156,7 +192,12 @@ public class TurnManager {
 		//wait while the attackers move
 		public override void Tick(){
 			timer += Time.deltaTime;
-			if (timer >= Context.attackerAdvanceDuration) TransitionTo<PlayerMove>();;
+			if (timer >= Context.attackerAdvanceDuration){
+
+				//go to the Defenders Move phase, unless the player has now lost.
+				if (!Context.CheckForLoss()) TransitionTo<PlayerMove>();
+				else TransitionTo<PlayerLose>();
+			}
 		}
 	}
 
@@ -319,7 +360,7 @@ public class TurnManager {
 	/// Nothing has to happen during the end phase, but if there's some end-of-turn cleanup to be done, this state sends
 	/// out an event to tell others to do it.
 	/// </summary>
-	public class EndPhase : FSM<TurnManager>.State {
+	private class EndPhase : FSM<TurnManager>.State {
 
 
 		public override void OnEnter(){
@@ -346,7 +387,7 @@ public class TurnManager {
 	/// <summary>
 	/// When a wave is done, have the attacker manager go to the next wave and have the turn manager work out the new number of turns.
 	/// </summary>
-	public class BetweenWaves : FSM<TurnManager>.State {
+	private class BetweenWaves : FSM<TurnManager>.State {
 
 
 		public override void Tick (){
@@ -356,6 +397,35 @@ public class TurnManager {
 				Context.ResetTurnUI();
 				TransitionTo<StartOfTurn>();
 			}
+			else TransitionTo<PlayerWin>();
+		}
+	}
+
+
+	/// <summary>
+	/// The game enters this state when the player wins.
+	/// 
+	/// Right now there's no way out of this state! The player should reset the game.
+	/// </summary>
+	private class PlayerWin : FSM<TurnManager>.State {
+
+
+		public override void OnEnter (){
+			Context.PlayerWinFeedback();
+		}
+	}
+
+
+	/// <summary>
+	/// The game enters this state when the player loses.
+	/// 
+	/// Right now there's no way out of this state! The player should reset the game.
+	/// </summary>
+	private class PlayerLose : FSM<TurnManager>.State {
+
+
+		public override void OnEnter (){
+			Context.PlayerLoseFeedback();
 		}
 	}
 }
