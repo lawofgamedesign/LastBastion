@@ -51,7 +51,7 @@ public class AttackerManager {
 
 
 	//initialize variables and create the first 
-	public void Setup(){
+	public virtual void Setup(){
 		spawnPoints = CreateSpawnPoints();
 		attackerOrganizer = GameObject.Find(ATTACKER_ORGANIZER).transform;
 		MoveSpeed = 5.0f;

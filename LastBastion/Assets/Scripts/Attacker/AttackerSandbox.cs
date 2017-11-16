@@ -60,6 +60,11 @@ public class AttackerSandbox : MonoBehaviour {
 	protected string FAST_MARKER = "Fast";
 
 
+	//feedback for attacks that do no damage
+	protected ParticleSystem noDamageParticle;
+	private const string NO_DMG_PARTICLE_OBJ = "No damage particle";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -74,6 +79,7 @@ public class AttackerSandbox : MonoBehaviour {
 		Armor = 0;
 		Health = baseHealth;
 		Blocked = false;
+		noDamageParticle = transform.Find(NO_DMG_PARTICLE_OBJ).GetComponent<ParticleSystem>();
 		RegisterForEvents();
 	}
 
@@ -345,7 +351,7 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 	public void FailToDamage(){
-		Debug.Log("Attacker not damaged!");
+		noDamageParticle.Play();
 	}
 
 

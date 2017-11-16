@@ -3,7 +3,7 @@
 public class InputManager {
 
 
-	public void Tick(){
+	public virtual void Tick(){
 		if (Input.GetMouseButtonDown(0)){
 			GameObject selected = GetClickedThing();
 
@@ -18,7 +18,7 @@ public class InputManager {
 	/// Note that this returns null if nothing was selected; it's up to the calling function to check for null returns.
 	/// </summary>
 	/// <returns>The clicked thing.</returns>
-	private GameObject GetClickedThing(){
+	protected GameObject GetClickedThing(){
 		RaycastHit hit;
 		GameObject obj = null;
 
