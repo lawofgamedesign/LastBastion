@@ -356,6 +356,10 @@ public class RangerBehavior : DefenderSandbox {
 		case (int)UpgradeTracks.Trap:
 			if (currentTrap != TrapTrack.Landslide){
 				currentTrap++;
+
+				//when the Ranger starts down the Trap Track, they gain the ability to gain XP when their blocks prevent movement
+				if (currentTrap == TrapTrack.Rockfall) Services.Events.Register<BlockedEvent>(GetXPFromBlock);
+
 				Services.UI.ReviseTrack2(trapDescriptions[(int)currentTrap + 1], trapDescriptions[(int)currentTrap]);
 
 				//register for input and provide appropriate feedback
@@ -415,5 +419,13 @@ public class RangerBehavior : DefenderSandbox {
 
 		//if the inquiry gets this far, the space can be blocked
 		return true;
+	}
+
+
+	private void GetXPFromBlock(Event e){
+		Debug.Assert(e.GetType() == typeof(BlockedEvent), "Non-BlockedEvent in GetXPFromBlock");
+
+		DefeatedSoFar++;
+		xpParticle.Play();
 	}
 }
