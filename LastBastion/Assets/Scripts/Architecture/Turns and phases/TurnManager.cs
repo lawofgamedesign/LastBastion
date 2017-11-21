@@ -49,6 +49,8 @@ public class TurnManager {
 	private const string NEXT_BUTTON_OBJ = "Next phase button";
 	private const string STOP_MOVING_MSG = "Done moving";
 	private const string STOP_FIGHTING_MSG = "Done fighting";
+	private const string ARE_YOU_SURE_MSG = "Are you sure? Not all defenders moved.";
+	private bool imSure = true; //used to determine whether a player is sure that they're ready to go on when there are still defenders who can move
 
 
 	//what turn is it?
@@ -229,7 +231,14 @@ public class TurnManager {
 		private void HandlePhaseEndInput(Event e){
 			Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in HandlePhaseEndInput");
 
-			TransitionTo<PlayerFight>();
+			//go on to the Defenders Fight phase if all defenders have moved, or if the player clicks again after getting a warning that they
+			//haven't
+			if (Services.Defenders.CheckAllDoneMoving()) TransitionTo<PlayerFight>();
+			else if (Context.imSure) TransitionTo<PlayerFight>();
+			else {
+				Context.imSure = true;
+				Services.UI.SetExtraText(ARE_YOU_SURE_MSG);
+			}
 		}
 
 
@@ -243,6 +252,7 @@ public class TurnManager {
 			Context.ToggleNextPhaseButton();
 			Services.UI.ToggleUndoButton();
 			Services.Undo.PrepareToUndoMoves();
+			Context.imSure = false;
 		}
 
 

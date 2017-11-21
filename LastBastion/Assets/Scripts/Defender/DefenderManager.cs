@@ -195,6 +195,15 @@ public class DefenderManager {
 	}
 
 
+	public bool CheckAllDoneMoving(){
+		foreach (DefenderSandbox defender in defenders){
+			if (defender.CheckForRemainingMovement()) return false;
+		}
+
+		return true;
+	}
+
+
 	public void PrepareDefenderFightPhase(){
 		doneDefenders.Clear();
 		foreach(DefenderSandbox defender in defenders) defender.PrepareToFight();

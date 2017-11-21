@@ -336,6 +336,16 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	/// <summary>
+	/// Does this defender have any movement left?
+	/// </summary>
+	/// <returns><c>true</c> if this defender has movement left, <c>false</c> otherwise.</returns>
+	public bool CheckForRemainingMovement(){
+		if (remainingSpeed != 0) return true;
+		else return false;
+	}
+
+
 	#endregion movement
 
 
