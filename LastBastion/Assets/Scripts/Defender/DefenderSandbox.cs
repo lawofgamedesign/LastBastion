@@ -132,6 +132,7 @@ public class DefenderSandbox : MonoBehaviour {
 		DefeatedSoFar = START_DEFEATED;
 		xpParticle = transform.Find(XP_PARTICLE_OBJ).GetComponent<ParticleSystem>();
 		powerupReadyParticle = transform.Find(POWER_UP_PARTICLE_OBJ).gameObject;
+		Services.Undo.AddDefender(this);
 	}
 
 
@@ -211,6 +212,7 @@ public class DefenderSandbox : MonoBehaviour {
 		remainingSpeed = Speed;
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
+		Services.Undo.ReviseDefenderState(this, GridLoc, remainingSpeed);
 	}
 
 

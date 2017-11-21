@@ -90,4 +90,14 @@ public static class Services {
 		}
 		set { uI = value; }
 	}
+
+
+	private static UndoData undo;
+	public static UndoData Undo {
+		get {
+			Debug.Assert(undo != null, "No undo data. Did you forget to create the repository for it?");
+			return undo;
+		}
+		set { undo = value; }
+	}
 }

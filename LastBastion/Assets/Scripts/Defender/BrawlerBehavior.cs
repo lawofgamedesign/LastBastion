@@ -182,7 +182,8 @@ public class BrawlerBehavior : DefenderSandbox {
 		//at the Berserk level things are more complex; the Brawler can make up to two lateral attacks, but they can be the same
 		else if (currentRampage == RampageTrack.Berserk){
 			if (direction == Directions.North && attacksSoFar.Contains(direction)) temp = false;
-			else if (GetNumLateralAttacks() >= 2) temp = false;
+			else if (direction == Directions.East && GetNumLateralAttacks() >= 2 ||
+					 direction == Directions.West && GetNumLateralAttacks() >= 2) temp = false;
 		}
 
 
