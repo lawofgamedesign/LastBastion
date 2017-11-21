@@ -18,7 +18,7 @@ public class RangerBehavior : DefenderSandbox {
 
 	//character sheet
 	private const string RANGER_NAME = "Ranger";
-	private enum UpgradeTracks { Showboat, Eagle_Eye };
+	private enum UpgradeTracks { Showboat, Trap };
 
 
 	//the Showboat upgrade track
@@ -42,13 +42,22 @@ public class RangerBehavior : DefenderSandbox {
 	private const string NEXT_ATTACKS = " extra attacks next turn";
 
 
-	//the Eagle Eye upgrade track
-	private enum LandTrack { None, Lay_of_the_Land, Tricks_and_Traps, On_the_Lookout, The_Last_Chance };
-	private List<string> eagleDescriptions = new List<string>() {
-		"",
-		""
+	//the Lay Traps upgrade track
+	private enum TrapTrack { None, Rockfall, Landslide, On_the_Lookout, The_Last_Chance };
+	private List<string> trapDescriptions = new List<string>() {
+		"<b>Lay your traps</b>",
+		"<b>Rockfall</b>\n\n<size=11>When you choose this, select an empty space adjacent to you. The Horde must go around that space.\n\nGain 1 experience whenever your trap blocks the Horde.</size>",
+		"<b>Landslide</b>\n\nWhen you choose this, select a space adjacent to you. Defeat any Horde member in that space, and the Horde must go around it.\n\nGain 1 experience whenever your traps block the Horde.",
+		"<b>None shall pass!</b>"
 	};
-	private LandTrack currentLand;
+	private TrapTrack currentTrap;
+	private const string BOARD_TAG = "Board";
+	private const string BLOCK_MARKER_OBJ = "Space blocked marker";
+
+
+	//UI for the Lay Traps track
+	private const string ROCK_MSG = "Choose an adjacent, empty space to block.";
+	private const string BLOCKED_MSG = "Space blocked!";
 
 
 	/////////////////////////////////////////////
@@ -65,7 +74,7 @@ public class RangerBehavior : DefenderSandbox {
 		Armor = rangerArmor;
 
 		currentShowboat = ShowboatTrack.None;
-		currentLand = LandTrack.None;
+		currentTrap = TrapTrack.None;
 	}
 
 
@@ -85,6 +94,9 @@ public class RangerBehavior : DefenderSandbox {
 		extraText.text = BlankAttackText();
 		base.Move();
 	}
+
+
+	#region combat
 
 
 	/// <summary>
@@ -298,6 +310,9 @@ public class RangerBehavior : DefenderSandbox {
 	}
 
 
+	#endregion combat
+
+
 	/// <summary>
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
 	/// </summary>
@@ -310,8 +325,8 @@ public class RangerBehavior : DefenderSandbox {
 									  DefeatedSoFar,
 									  showboatDescriptions[(int)currentShowboat + 1],
 									  showboatDescriptions[(int)currentShowboat],
-									  eagleDescriptions[(int)currentLand + 1],
-									  eagleDescriptions[(int)currentLand]
+									  trapDescriptions[(int)currentTrap + 1],
+									  trapDescriptions[(int)currentTrap]
 		);
 	}
 
@@ -338,11 +353,67 @@ public class RangerBehavior : DefenderSandbox {
 				}
 
 				break;
+		case (int)UpgradeTracks.Trap:
+			if (currentTrap != TrapTrack.Landslide){
+				currentTrap++;
+				Services.UI.ReviseTrack2(trapDescriptions[(int)currentTrap + 1], trapDescriptions[(int)currentTrap]);
+
+				//register for input and provide appropriate feedback
+				Services.Events.Register<InputEvent>(PutDownBlock);
+				Services.UI.SetExtraText(ROCK_MSG);
+				break;
+			}
+			break;
 		}
 
 		//having powered up, shut off the particle telling the player to power up
 		powerupReadyParticle.SetActive(false);
 
+		return true;
+	}
+
+
+	private void PutDownBlock(Event e){
+		Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in PutDownBlock");
+
+		InputEvent inputEvent = e as InputEvent;
+
+		if (inputEvent.selected.tag == BOARD_TAG){
+			SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
+
+
+			//is this a block that can destroy an attacker?
+			bool destroyingBlock = false;
+			if (currentTrap == TrapTrack.Landslide) destroyingBlock = true;
+
+			//try to put down the block
+			if (CheckBlockable(space.GridLocation.x, space.GridLocation.z, destroyingBlock)){
+				space.Block = true;
+				Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, BLOCK_MARKER_OBJ));
+				Services.UI.SetExtraText(BLOCKED_MSG);
+				Services.Events.Unregister<InputEvent>(PutDownBlock);
+			}
+		}
+	}
+
+
+	private bool CheckBlockable(int x, int z, bool destroy){
+
+		//is the space adjacent?
+		if (!(Mathf.Abs(x - GridLoc.x) <= 1) ||
+			!(Mathf.Abs(z - GridLoc.z) <= 1)) return false;
+
+		//if this block can't destroy an attacker, return false if the space isn't empty
+		if (!destroy){
+			if (Services.Board.GeneralSpaceQuery(x, z) != SpaceBehavior.ContentType.None) return false;
+		} 
+		//if this block can destroy an attacker, return true if the space is empty or has an attacker in it
+		else {
+			if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.None ||
+				Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Attacker) return true;
+		}
+
+		//if the inquiry gets this far, the space can be blocked
 		return true;
 	}
 }

@@ -30,4 +30,8 @@ public class SpaceBehavior : MonoBehaviour {
 
 	//is something luring attackers into this space?
 	public bool Lure { get; set; }
+
+
+	//is there something in this space that bocks attackers?
+	public bool Block { get; set; }
 }

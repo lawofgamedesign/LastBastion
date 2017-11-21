@@ -373,6 +373,20 @@ public class BoardBehavior {
 
 
 	/// <summary>
+	/// Call this to check whether a space has something in it that blocks attackers, but not defenders;
+	/// </summary>
+	/// <returns><c>true</c> if there's something blocking attacker movement in the space, <c>false</c> otherwise.</returns>
+	/// <param name="x">The x grid coordinate of the space.</param>
+	/// <param name="z">The z grid coordinate of the space.</param>
+	public bool CheckIfBlock(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Illegal block check at x == " + x + ", z == " + z);
+
+		if (spaces[x, z].Block) return true;
+		else return false;
+	}
+
+
+	/// <summary>
 	/// Provides a list of all spaces in a given column so that, frex., they can all become lures.
 	/// </summary>
 	/// <returns>The all spaces in column.</returns>

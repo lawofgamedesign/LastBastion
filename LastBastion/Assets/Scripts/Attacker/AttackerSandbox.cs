@@ -168,6 +168,18 @@ public class AttackerSandbox : MonoBehaviour {
 			if (TryMoveLateral(EAST)) return;
 		}
 
+		//move west or east if blocked from moving forward
+		//note that this privileges westward movement; it checks westward movement first, and will therefore go west in preference to being lured east
+		if (Services.Board.CheckIfBlock(XPos, ZPos - 1)){
+			Services.Events.Fire(new BlockedEvent());
+
+			if (TryMoveLateral(WEST)) return;
+			else if (TryMoveLateral(EAST)) return;
+
+			return; //if this attacker can't move laterally around the block, it can't move at all
+		}
+
+
 		//if the attacker gets this far, it can make a normal move to the south.
 		TryMoveSouth();
 	}

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
-public class BlockFeedbackTask : Task {
-
+public class BlockSpaceFeedbackTask : Task {
 
 	/////////////////////////////////////////////
 	/// Fields
@@ -12,43 +11,32 @@ public class BlockFeedbackTask : Task {
 	private readonly Transform blockMarker;
 
 
-	//the column to be marked
-	private readonly int column;
-
-
 	//everything needed to drop the marker
 	private float startHeight = 21.5f;
 	private Vector3 dropSpeed = new Vector3(0.0f, 2.0f, 0.0f);
 	private Vector3 startLoc = new Vector3(0.0f, 0.0f, 0.0f);
 	private Vector3 endLoc = new Vector3(0.0f, 0.0f, 0.0f);
-
-
-	private const string BOARD_TAG = "Board";
+	private TwoDLoc gridSpace = new TwoDLoc(-1, -1);
 
 
 	/////////////////////////////////////////////
 	/// Functions
-	////////////////////////////////////////////
+	/////////////////////////////////////////////
 
 
 	//constructor
-	public BlockFeedbackTask(int column, string marker){
-		this.column = column;
-		blockMarker = GameObject.Find(marker).transform;
+	public BlockSpaceFeedbackTask(int x, int z, string markerName){
+		gridSpace.x = x;
+		gridSpace.z = z;
+		blockMarker = GameObject.Find(markerName).transform;
 	}
 
 
-
 	/// <summary>
-	/// Put the marker in its starting position, and establish the ending position for the marker--beneath the starting location at
-	/// y == 0.0f
+	/// Put the marker in its starting position, and determine where it will end
 	/// </summary>
-	protected override void Init (){
-		int row = Services.Board.GetFirstEmptyInColumn(column);
-
-		if (row == Services.Board.NOT_FOUND) SetStatus(TaskStatus.Aborted); //if there's no empty space in the chosen row, do nothing
-		else startLoc = Services.Board.GetWorldLocation(column, row);
-
+	protected override void Init(){
+		startLoc = Services.Board.GetWorldLocation(gridSpace.x, gridSpace.z);
 		startLoc.y += startHeight;
 
 		blockMarker.position = startLoc;

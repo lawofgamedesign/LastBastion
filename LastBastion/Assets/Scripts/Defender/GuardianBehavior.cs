@@ -56,6 +56,7 @@ public class GuardianBehavior : DefenderSandbox {
 	private int alternateTurn = 1;
 	private const string ALL_BLOCKED = "The Last Bastion blocks all columns";
 	private const string NONE_BLOCKED = "The Last Bastion inactive this turn";
+	private const string LINE_MARKER_OBJ = "Line held marker";
 
 
 	//character sheet information
@@ -172,7 +173,7 @@ public class GuardianBehavior : DefenderSandbox {
 				extraText.text = COLUMN_CHOSEN;
 
 				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask();
-				pickUpTask.Then(new BlockFeedbackTask(blockedColumn));
+				pickUpTask.Then(new BlockFeedbackTask(blockedColumn, LINE_MARKER_OBJ));
 				Services.Tasks.AddTask(pickUpTask);
 				return;
 			} else {
