@@ -132,7 +132,6 @@ public class DefenderSandbox : MonoBehaviour {
 		DefeatedSoFar = START_DEFEATED;
 		xpParticle = transform.Find(XP_PARTICLE_OBJ).GetComponent<ParticleSystem>();
 		powerupReadyParticle = transform.Find(POWER_UP_PARTICLE_OBJ).gameObject;
-		Services.Undo.AddDefender(this);
 	}
 
 
@@ -212,6 +211,11 @@ public class DefenderSandbox : MonoBehaviour {
 		remainingSpeed = Speed;
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
+	}
+
+
+	public TwoDLoc ReportGridLoc(){
+		return GridLoc;
 	}
 
 
@@ -314,6 +318,21 @@ public class DefenderSandbox : MonoBehaviour {
 	protected bool CheckAdjacent(TwoDLoc next, TwoDLoc current){
 		return ((next.x == current.x && Mathf.Abs(next.z - current.z) == 1) ||
 				(Mathf.Abs(next.x - current.x) == 1 && next.z == current.z)) ? true : false;
+	}
+
+
+	/// <summary>
+	/// Reset this defender's position and available movement when a player undoes the Defenders Move phase.
+	/// </summary>
+	public void UndoMovePhase(){
+		if (Services.Undo == null) return; //in the event that there's somehow no undo system in place, prevent null reference exceptions
+
+
+		Services.Board.TakeThingFromSpace(GridLoc.x, GridLoc.z);
+		GridLoc = new TwoDLoc(Services.Undo.GetDefenderLoc(this).x, Services.Undo.GetDefenderLoc(this).z);
+		Services.Board.PutThingInSpace(gameObject, GridLoc.x, GridLoc.z, SpaceBehavior.ContentType.Defender);
+
+		transform.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z);
 	}
 
 

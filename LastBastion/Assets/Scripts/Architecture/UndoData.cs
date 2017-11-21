@@ -45,14 +45,21 @@ public class UndoData {
 
 
 	/// <summary>
+	/// Get the current state of the defenders.
+	/// </summary>
+	public void PrepareToUndoMoves(){
+		foreach (DefenderSandbox defender in defenders.Keys) ReviseDefenderState(defender, defender.ReportGridLoc());
+	}
+
+
+	/// <summary>
 	/// Changes the information associated with a defender.
 	/// </summary>
 	/// <param name="defender">The defender.</param>
 	/// <param name="loc">The defender's current location.</param>
 	/// <param name="movement">The defender's movement available.</param>
-	public void ReviseDefenderState(DefenderSandbox defender, TwoDLoc loc, int movement){
-		defenders[defender].Loc = loc;
-		defenders[defender].Movement = movement;
+	public void ReviseDefenderState(DefenderSandbox defender, TwoDLoc loc){
+		defenders[defender].Loc = new TwoDLoc(loc.x, loc.z);
 	}
 
 
@@ -75,6 +82,14 @@ public class UndoData {
 		return defenders[defender].Movement;
 	}
 
+
+	/// <summary>
+	/// Completely rewind to the start of the Defenders Move phase.
+	/// </summary>
+	public void UndoMovePhase(){
+		foreach (DefenderSandbox defender in defenders.Keys) defender.UndoMovePhase();
+		Services.Defenders.PrepareDefenderMovePhase();
+	}
 
 
 	/// <summary>

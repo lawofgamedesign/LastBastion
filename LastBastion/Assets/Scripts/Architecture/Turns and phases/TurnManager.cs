@@ -241,6 +241,8 @@ public class TurnManager {
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
 			Context.phaseButtonText.text = STOP_MOVING_MSG;
 			Context.ToggleNextPhaseButton();
+			Services.UI.ToggleUndoButton();
+			Services.Undo.PrepareToUndoMoves();
 		}
 
 
@@ -249,6 +251,7 @@ public class TurnManager {
 			Services.Events.Unregister<InputEvent>(HandleMoveInputs);
 			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
 			Context.ToggleNextPhaseButton();
+			Services.UI.ToggleUndoButton();
 		}
 	}
 

@@ -13,10 +13,12 @@ public class UIManager {
 	private Text extraText;
 	private Text turnText;
 	private CharacterSheetBehavior charSheet;
+	private GameObject undoButton;
 	private const string EXTRA_CANVAS = "Extra info canvas";
 	private const string TURN_CANVAS = "Turn canvas";
 	private const string TEXT_OBJ = "Text";
 	private const string CHAR_SHEET_OBJ = "Defender sheet canvas";
+	private const string UNDO_BUTTON_OBJ = "Undo button";
 
 
 	//text to be written to various UI elements
@@ -35,6 +37,8 @@ public class UIManager {
 		extraText = GameObject.Find(EXTRA_CANVAS).transform.Find(TEXT_OBJ).GetComponent<Text>();
 		turnText = GameObject.Find(TURN_CANVAS).transform.Find(TEXT_OBJ).GetComponent<Text>();
 		charSheet = GameObject.Find(CHAR_SHEET_OBJ).GetComponent<CharacterSheetBehavior>();
+		undoButton = GameObject.Find(UNDO_BUTTON_OBJ);
+		ToggleUndoButton();
 	}
 
 
@@ -56,6 +60,14 @@ public class UIManager {
 		if (turn <= totalTurns){
 			turnText.text = TURN + turn.ToString() + BACKSLASH + totalTurns.ToString();
 		}
+	}
+
+
+	/// <summary>
+	/// Switch the undo button on or off.
+	/// </summary>
+	public void ToggleUndoButton(){
+		undoButton.SetActive(!undoButton.activeInHierarchy);
 	}
 
 
