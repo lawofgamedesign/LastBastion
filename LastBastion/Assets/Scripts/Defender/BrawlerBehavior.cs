@@ -24,14 +24,15 @@ public class BrawlerBehavior : DefenderSandbox {
 	private enum RampageTrack { None, Rampage, Wade_In, Berserk, The_Last_One_Standing };
 	private List<string> rampageDescriptions = new List<string>() {
 		"<b>Start rampaging</b>",
-		"<b>Rampage</b>\n\nYou can make an extra attack to the left or right each Defenders Fight phase.",
-		"<b>Wade In</b>\n\n<size=10>You can make an extra attack to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
-		"<b>Berserk</b>\n\n<size=10>You can make two extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
-		"<b>The Last One Standing</b>\n\n<size=10>You can make any number of extra attacks to the left or right each Defenders Fight phase.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>Rampage</b>\n\nYou get two attacks: one north and one east or west.",
+		"<b>Wade In</b>\n\n<size=10>You get two attacks: one north and one east or west.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>Berserk</b>\n\n<size=10>You get three attacks: one north and two east or west.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>The Last One Standing</b>\n\n<size=10>You get infinite attacks east and west, so long as each one defeats a Horde member. You get one attack north.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
 		"<b>Maximum rampage!</b>"
 	};
 	private RampageTrack currentRampage;
 	private enum Directions { North, South, West, East, Error };
+	private bool defeatedLastTarget = false;
 	private List<Directions> attacksSoFar = new List<Directions>();
 	private BoardClickedEvent.Handler boardFunc;
 	private TwoDLoc lastDefeatedLoc = null;
@@ -94,6 +95,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		if (currentRampage == RampageTrack.Wade_In) availableJumps = AVAILABLE_JUMPS_WADE_IN;
 		else if (currentRampage == RampageTrack.Berserk) availableJumps = AVAILABLE_JUMPS_BERSERK;
 		else if (currentRampage == RampageTrack.The_Last_One_Standing) availableJumps = AVAILABLE_JUMPS_LAST_STANDING;
+		defeatedLastTarget = true; //important for The Last One Standing
 	}
 
 
@@ -108,6 +110,9 @@ public class BrawlerBehavior : DefenderSandbox {
 		}
 
 		if (!UseUpAttacks(dir)) return;
+
+		if (currentRampage == RampageTrack.The_Last_One_Standing &&
+			!defeatedLastTarget) return; //the Brawler stops in The LastOneStanding mode after missing a hit
 
 		//if the Brawler gets this far, a fight will actually occur; get a card for the Attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
@@ -125,12 +130,15 @@ public class BrawlerBehavior : DefenderSandbox {
 				if (currentRampage == RampageTrack.Wade_In ||
 					currentRampage == RampageTrack.Berserk ||
 					currentRampage == RampageTrack.The_Last_One_Standing) lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+				defeatedLastTarget = true; //only important for The Last One Standing
 			}
 
 			attacker.TakeDamage(damage);
 
 			FinishWithCard();
 		} else { //the Brawler's value was too low
+			if (dir == Directions.East ||
+				dir == Directions.West) defeatedLastTarget = false; //only important for The Last One Standing
 			attacker.FailToDamage();
 			FinishWithCard();
 		}
