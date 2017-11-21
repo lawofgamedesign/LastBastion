@@ -18,9 +18,29 @@ public class UndoData {
 	/////////////////////////////////////////////
 
 
+	//initialize variables
+	public void Setup(){
+		defenders = GetDefenders();
+	}
+
+
 	//put a new defender into the dictionary
 	public void AddDefender(DefenderSandbox defender){
 		defenders.Add(defender, new DefenderData(defender));
+	}
+
+
+	/// <summary>
+	/// Automatically get all the defenders.
+	/// </summary>
+	private Dictionary<DefenderSandbox, DefenderData> GetDefenders(){
+		Dictionary<DefenderSandbox, DefenderData> temp = new Dictionary<DefenderSandbox, DefenderData>();
+
+		foreach (DefenderSandbox defender in Services.Defenders.GetAllDefenders()) temp.Add(defender, new DefenderData(defender));
+
+		Debug.Assert(temp.Count == Services.Defenders.GetAllDefenders().Count, "Failed to add all defenders to the undo dictionary.");
+
+		return temp;
 	}
 
 

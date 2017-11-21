@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviour {
 		Services.UI = new UIManager();
 		Services.UI.Setup();
 		GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
+		Services.Undo = new UndoData();
+		Services.Undo.Setup();
 	}
 
 

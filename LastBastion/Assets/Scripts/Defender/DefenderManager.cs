@@ -120,6 +120,15 @@ public class DefenderManager {
 
 
 	/// <summary>
+	/// Get the list of defenders.
+	/// </summary>
+	/// <returns>The list.</returns>
+	public List<DefenderSandbox> GetAllDefenders(){
+		return defenders;
+	}
+
+
+	/// <summary>
 	/// Selects a defender for movement or attacking. Players cannot select a new defender while one is in the middle of a move.
 	/// </summary>
 	/// <param name="selected">The selected defender.</param>

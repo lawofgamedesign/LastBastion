@@ -212,7 +212,6 @@ public class DefenderSandbox : MonoBehaviour {
 		remainingSpeed = Speed;
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
-		Services.Undo.ReviseDefenderState(this, GridLoc, remainingSpeed);
 	}
 
 
