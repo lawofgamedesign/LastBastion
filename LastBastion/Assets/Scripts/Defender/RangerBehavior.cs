@@ -47,7 +47,7 @@ public class RangerBehavior : DefenderSandbox {
 	private List<string> trapDescriptions = new List<string>() {
 		"<b>Lay your traps</b>",
 		"<b>Rockfall</b>\n\n<size=11>When you choose this, select an empty space adjacent to you. The Horde must go around that space.\n\nGain 1 experience whenever your trap blocks the Horde.</size>",
-		"<b>Landslide</b>\n\nWhen you choose this, select a space adjacent to you. Defeat any Horde member in that space, and the Horde must go around it.\n\nGain 1 experience whenever your traps block the Horde.",
+		"<b>Landslide</b>\n\nWhen you choose this, do 1 damage to every Horde member adjacent to your trap.\n\nGain 1 experience whenever your trap blocks the Horde.",
 		"<b>None shall pass!</b>"
 	};
 	private TrapTrack currentTrap;
@@ -357,14 +357,19 @@ public class RangerBehavior : DefenderSandbox {
 			if (currentTrap != TrapTrack.Landslide){
 				currentTrap++;
 
-				//when the Ranger starts down the Trap Track, they gain the ability to gain XP when their blocks prevent movement
-				if (currentTrap == TrapTrack.Rockfall) Services.Events.Register<BlockedEvent>(GetXPFromBlock);
+				//when the Ranger starts down the Trap Track, a number of things have to happen
+				if (currentTrap == TrapTrack.Rockfall) {
+
+					//they gain the ability to gain XP when their blocks prevent movement
+					Services.Events.Register<BlockedEvent>(GetXPFromBlock);
+
+					//register for input and provide appropriate feedback
+					Services.Events.Register<InputEvent>(PutDownBlock);
+					Services.UI.SetExtraText(ROCK_MSG);
+				}
 
 				Services.UI.ReviseTrack2(trapDescriptions[(int)currentTrap + 1], trapDescriptions[(int)currentTrap]);
 
-				//register for input and provide appropriate feedback
-				Services.Events.Register<InputEvent>(PutDownBlock);
-				Services.UI.SetExtraText(ROCK_MSG);
 				break;
 			}
 			break;
@@ -388,7 +393,6 @@ public class RangerBehavior : DefenderSandbox {
 
 			//is this a block that can destroy an attacker?
 			bool destroyingBlock = false;
-			if (currentTrap == TrapTrack.Landslide) destroyingBlock = true;
 
 			//try to put down the block
 			if (CheckBlockable(space.GridLocation.x, space.GridLocation.z, destroyingBlock)){
