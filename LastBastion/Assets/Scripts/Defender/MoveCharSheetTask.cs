@@ -9,9 +9,9 @@ public class MoveCharSheetTask : Task {
 
 
 	//the character sheet's positions on the screen
-	private readonly Vector3 hiddenLoc = new Vector3(35.74f, 0.1f, -7.9f);
-	private readonly Vector3 displayedLoc = new Vector3(20.0f, 14.52f, 2.3f);
-	private readonly Vector3 hiddenRot = new Vector3(90.0f, -10.7f, 0.0f);
+	private readonly Vector3 hiddenLoc = new Vector3(43.29f, 0.1f, -1.2f);
+	private readonly Vector3 displayedLoc = new Vector3(20.0f, 24.0f, 2.3f);
+	private readonly Vector3 hiddenRot = new Vector3(90.0f, 63.3f, 0.0f);
 	private readonly Vector3 displayedRot = new Vector3(70.69f, 0.0f, 0.0f);
 
 
