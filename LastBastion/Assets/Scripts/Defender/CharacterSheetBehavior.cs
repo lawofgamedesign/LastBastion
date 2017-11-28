@@ -50,8 +50,8 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 
 	//is the character sheet currently hidden or displayed?
-	private enum SheetStatus { Displayed, Hidden };
-	private SheetStatus currentStatus = SheetStatus.Hidden;
+	public enum SheetStatus { Displayed, Hidden };
+	public SheetStatus CurrentStatus { get; private set; }
 
 
 	/////////////////////////////////////////////
@@ -69,6 +69,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		Services.Events.Register<InputEvent>(HandleClicks);
+		CurrentStatus = SheetStatus.Hidden;
 		ChangeSheetState();
 	}
 
@@ -78,9 +79,9 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 		InputEvent inputEvent = e as InputEvent;
 
-		if (currentStatus == SheetStatus.Hidden &&
+		if (CurrentStatus == SheetStatus.Hidden &&
 			inputEvent.selected == gameObject) DisplayCharSheet();
-		else if (currentStatus == SheetStatus.Displayed &&
+		else if (CurrentStatus == SheetStatus.Displayed &&
 				 inputEvent.selected != gameObject) DisplayCharSheet();
 	}
 
@@ -167,16 +168,19 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	public void DisplayCharSheet(){
 		if (Services.Tasks.CheckForTaskOfType<MoveCharSheetTask>()) return; //reject attempts to move the character sheet while it's moving
 
-		switch (currentStatus){
+		switch (CurrentStatus){
 			case SheetStatus.Hidden:
 				Services.Tasks.AddTask(new MoveCharSheetTask(MoveCharSheetTask.Move.Pick_up));
-				currentStatus = SheetStatus.Displayed;
 				break;
 			case SheetStatus.Displayed:
 				Services.Tasks.AddTask(new MoveCharSheetTask(MoveCharSheetTask.Move.Put_down));
-				currentStatus = SheetStatus.Hidden;
 				break;
 		}
+	}
+
+
+	public void ChangeCurrentStatus(SheetStatus newStatus){
+		CurrentStatus = newStatus;
 	}
 
 

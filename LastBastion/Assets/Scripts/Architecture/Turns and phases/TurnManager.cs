@@ -398,7 +398,10 @@ public class TurnManager {
 
 
 	/// <summary>
-	/// When a wave is done, have the attacker manager go to the next wave and have the turn manager work out the new number of turns.
+	/// When a wave is done:
+	/// 	1. have the attacker manager go to the next wave,
+	/// 	2. have the turn manager work out the new number of turns, and
+	/// 	3. reset the visual combat deck
 	/// </summary>
 	private class BetweenWaves : FSM<TurnManager>.State {
 
@@ -408,6 +411,7 @@ public class TurnManager {
 			if (Services.Attackers.GoToNextWave()) {
 				Services.AttackDeck.Reshuffle();
 				Context.ResetTurnUI();
+				Services.UI.RecreateCombatDeck();
 				TransitionTo<StartOfTurn>();
 			}
 			else TransitionTo<PlayerWin>();

@@ -22,6 +22,7 @@ public class MoveCharSheetTask : Task {
 
 	//is the player picking up the character sheet, or putting it down?
 	public enum Move { Pick_up, Put_down };
+	private Move intendedMove;
 
 
 	//the recttransform this task moves
@@ -46,7 +47,9 @@ public class MoveCharSheetTask : Task {
 
 	//constructor
 	public MoveCharSheetTask(Move actionToTake){
-		switch(actionToTake){
+		intendedMove = actionToTake;
+
+		switch(intendedMove){
 			case Move.Pick_up:
 				startLoc = hiddenLoc;
 				endLoc = displayedLoc;
@@ -114,8 +117,13 @@ public class MoveCharSheetTask : Task {
 
 	/// <summary>
 	/// Don't let the sheet drift over time; make sure it's at the final location when the task is done.
+	/// Then change the sheet's state.
 	/// </summary>
 	protected override void Cleanup (){
 		sheet.position = endLoc;
+
+		CharacterSheetBehavior sheetBehavior = sheet.GetComponent<CharacterSheetBehavior>();
+		if (intendedMove == Move.Pick_up) sheetBehavior.ChangeCurrentStatus(CharacterSheetBehavior.SheetStatus.Displayed);
+		else sheetBehavior.ChangeCurrentStatus(CharacterSheetBehavior.SheetStatus.Hidden);
 	}
 }

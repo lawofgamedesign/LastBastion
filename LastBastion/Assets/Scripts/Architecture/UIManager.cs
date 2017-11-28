@@ -301,5 +301,14 @@ public class UIManager {
 		charSheet.ReviseTrack2(next, current);
 	}
 
+
+	/// <summary>
+	/// Get whether the character sheet is displayed or hidden.
+	/// </summary>
+	/// <returns>The character sheet's status.</returns>
+	public CharacterSheetBehavior.SheetStatus GetCharSheetStatus(){
+		return charSheet.CurrentStatus;
+	}
+
 	#endregion
 }
