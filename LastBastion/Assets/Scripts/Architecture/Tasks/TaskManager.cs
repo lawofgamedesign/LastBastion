@@ -78,4 +78,26 @@ public class TaskManager {
 
 		return false;
 	}
+
+
+	/// <summary>
+	/// Get the last of a given task. "Last," here, means a task of that type with nothing to do "Then."
+	/// 
+	/// IMPORTANT: this only works with tasks where there's only going to be one of them running at any given time,
+	/// with any additional tasks of that type assigned as a NextTask and running sequentially thereafter. It won't work
+	/// if there are ever tasks of the type running in parallel.
+	/// </summary>
+	/// <returns>The last task of the type.</returns>
+	/// <typeparam name="T">The type of the task.</typeparam>
+	public Task GetLastTaskOfType<T>(){
+		foreach (Task task in tasks){
+			if (task.GetType() == typeof(T)){
+				if (task.NextTask == null){
+					return task;
+				}
+			}
+		}
+
+		return null;
+	}
 }

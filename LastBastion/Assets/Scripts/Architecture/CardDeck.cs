@@ -44,7 +44,9 @@ public class CardDeck<T> {
 	/// <summary>
 	/// Draw a new card. If the deck is going to be empty after the draw, do whatever is appropriate for the game.
 	/// </summary>
-	public T Draw(){
+	public T Draw(out bool deckEmpty){
+		deckEmpty = false;
+
 		Debug.Assert(index < deck.Count, "Drawing from an empty deck.");
 
 		T temp = deck[index];
@@ -52,6 +54,7 @@ public class CardDeck<T> {
 
 		if (index >= deck.Count){
 			HandleEmptyDeck();
+			deckEmpty = true;
 		}
 
 		return temp;

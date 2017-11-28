@@ -17,4 +17,22 @@
 		Value = value;
 		Available = true;
 	}
+		
+
+
+	/////////////////////////////////////////////
+	/// Lifespan
+	/////////////////////////////////////////////
+
+
+	//Called when added to the deck.
+	public virtual void Added() { }
+
+
+	//Called when this card is drawn.
+	public virtual void Drawn() { }
+
+
+	//Called when this card is discarded after having its effect
+	public virtual void Discarded() { }
 }

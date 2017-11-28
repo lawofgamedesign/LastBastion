@@ -18,12 +18,14 @@ public class GameManager : MonoBehaviour {
 
 	//initialize variables and establish the game's starting state
 	private void Awake(){
-		Services.Board = new BoardBehavior();
-		Services.Board.Setup();
 		Services.Tasks = new TaskManager();
-		Services.Events = new EventManager();
 		Services.AttackDeck = new AttackerDeck();
 		Services.AttackDeck.Setup();
+		Services.UI = new UIManager();
+		Services.UI.Setup();
+		Services.Board = new BoardBehavior();
+		Services.Board.Setup();
+		Services.Events = new EventManager();
 		Services.Attackers = new AttackerManager();
 		Services.Attackers.Setup();
 		Services.Rulebook = new TurnManager();
@@ -32,8 +34,6 @@ public class GameManager : MonoBehaviour {
 		Services.Defenders.Setup();
 		GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Setup();
 		Services.Inputs = new InputManager();
-		Services.UI = new UIManager();
-		Services.UI.Setup();
 		GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
 		Services.Undo = new UndoData();
 		Services.Undo.Setup();

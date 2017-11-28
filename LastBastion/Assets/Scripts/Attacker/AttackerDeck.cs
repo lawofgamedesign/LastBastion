@@ -55,11 +55,20 @@ public class AttackerDeck {
 	/// </summary>
 	/// <returns>The drawn card.</returns>
 	public Card GetAttackerCard(){
-		Card temp = attackerDeck.Draw();
+		bool reshuffled = false; //did this draw pull the last card in the deck?
+		Card temp = attackerDeck.Draw(out reshuffled);
+
+
+		//display the drawn card
+		Services.UI.DrawCombatCard(temp.Value);
+
+		//lifespan function
+		temp.Drawn();
 
 		List<Card> remainingCards = attackerDeck.RemainingCards();
 		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
 		playedCards.text = UpdatePlayedCardsUI(temp);
+		if (reshuffled) Services.UI.RecreateCombatDeck();
 
 		return temp;
 	}
@@ -158,7 +167,12 @@ public class AttackerDeck {
 		for (int i = tempDeck.Count - 1; i >= 0; i--){
 			if (tempDeck[i].Value == value){
 				attackerDeck.RemoveCard(tempDeck[i]);
-				if (playedCardList.Contains(tempDeck[i])) playedCardList.Remove(tempDeck[i]);
+				if (playedCardList.Contains(tempDeck[i])){
+					playedCardList.Remove(tempDeck[i]);
+					Services.UI.RemoveCardFromDiscard(value);
+				} else {
+					Services.UI.RemoveCardFromDeck(value);
+				}
 				tookOut = true;
 				break;
 			}
@@ -176,6 +190,20 @@ public class AttackerDeck {
 		attackerDeck.AddCard(new Card(value));
 		List<Card> remainingCards = attackerDeck.RemainingCards();
 		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
+		Services.UI.AddCardToDeck(value);
+	}
+
+
+	/// <summary>
+	/// As above, but adds a card rather than making a new card with a given value; this allows for calling the Added() function on the card.
+	/// </summary>
+	/// <param name="card">The card to add.</param>
+	public void PutCardInDeck(Card card){
+		attackerDeck.AddCard(card);
+		card.Added();
+		List<Card> remainingCards = attackerDeck.RemainingCards();
+		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
+		Services.UI.AddCardToDeck(card.Value);
 	}
 
 
@@ -187,5 +215,15 @@ public class AttackerDeck {
 		cardsInDeck.text = UpdateCardsInDeckUI(attackerDeck.RemainingCards());
 		playedCardList.Clear();
 		playedCards.text = UpdatePlayedCardsUI();
+	}
+
+
+	/// <summary>
+	/// Makes the size of the deck accessible. Note that this is the size of the deck
+	/// with no cards drawn.
+	/// </summary>
+	/// <returns>The number of cards in the deck.</returns>
+	public int GetDeckCount(){
+		return attackerDeck.GetDeckSize();
 	}
 }
