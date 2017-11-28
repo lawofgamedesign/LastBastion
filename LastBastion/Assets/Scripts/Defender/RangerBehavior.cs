@@ -53,6 +53,8 @@ public class RangerBehavior : DefenderSandbox {
 	private TrapTrack currentTrap;
 	private const string BOARD_TAG = "Board";
 	private const string BLOCK_MARKER_OBJ = "Space blocked marker";
+	private TwoDLoc rockfallLoc;
+	private int landslideDamage = 1;
 
 
 	//UI for the Lay Traps track
@@ -357,20 +359,25 @@ public class RangerBehavior : DefenderSandbox {
 			if (currentTrap != TrapTrack.Landslide){
 				currentTrap++;
 
-				//when the Ranger starts down the Trap Track, a number of things have to happen
-				if (currentTrap == TrapTrack.Rockfall) {
+				//the Trap Track has a series of idiosyncratic abilities
+				switch (currentTrap){
+					case TrapTrack.Rockfall:
+						//they gain the ability to gain XP when their blocks prevent movement
+						Services.Events.Register<BlockedEvent>(GetXPFromBlock);
 
-					//they gain the ability to gain XP when their blocks prevent movement
-					Services.Events.Register<BlockedEvent>(GetXPFromBlock);
-
-					//register for input and provide appropriate feedback
-					Services.Events.Register<InputEvent>(PutDownBlock);
-					Services.UI.SetExtraText(ROCK_MSG);
+						//register for input and provide appropriate feedback
+						Services.Events.Register<InputEvent>(PutDownBlock);
+						Services.UI.SetExtraText(ROCK_MSG);
+						break;
+					case TrapTrack.Landslide:
+						DamageAtLoc(rockfallLoc.x, rockfallLoc.z + 1);
+						DamageAtLoc(rockfallLoc.x, rockfallLoc.z - 1);
+						DamageAtLoc(rockfallLoc.x - 1, rockfallLoc.z);
+						DamageAtLoc(rockfallLoc.x + 1, rockfallLoc.z);
+						break;
 				}
 
 				Services.UI.ReviseTrack2(trapDescriptions[(int)currentTrap + 1], trapDescriptions[(int)currentTrap]);
-
-				break;
 			}
 			break;
 		}
@@ -399,6 +406,9 @@ public class RangerBehavior : DefenderSandbox {
 				space.Block = true;
 				Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, BLOCK_MARKER_OBJ));
 				Services.UI.SetExtraText(BLOCKED_MSG);
+
+				if (currentTrap == TrapTrack.Rockfall) rockfallLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
+
 				Services.Events.Unregister<InputEvent>(PutDownBlock);
 			}
 		}
@@ -431,5 +441,21 @@ public class RangerBehavior : DefenderSandbox {
 
 		DefeatedSoFar++;
 		xpParticle.Play();
+	}
+
+
+	/// <summary>
+	/// Inflicts damage on any attacker found at a given grid location, regardless of its armor, etc.
+	/// </summary>
+	/// <param name="x">The grid x coordinate.</param>
+	/// <param name="z">The grid z coordinate.</param>
+	private void DamageAtLoc(int x, int z){
+		if (Services.Board.CheckValidSpace(x, z)){
+			if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Attacker){
+				AttackerSandbox attacker = Services.Board.GetThingInSpace(x, z).GetComponent<AttackerSandbox>();
+				if (attacker.Health <= landslideDamage) DefeatedSoFar++;
+				attacker.TakeDamage(landslideDamage);
+			}
+		}
 	}
 }
