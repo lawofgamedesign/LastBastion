@@ -68,7 +68,20 @@ public class CharacterSheetBehavior : MonoBehaviour {
 		track1Current = transform.Find(TRACK_1_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
+		Services.Events.Register<InputEvent>(HandleClicks);
 		ChangeSheetState();
+	}
+
+
+	private void HandleClicks(Event e){
+		Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in HandleClicks.");
+
+		InputEvent inputEvent = e as InputEvent;
+
+		if (currentStatus == SheetStatus.Hidden &&
+			inputEvent.selected == gameObject) DisplayCharSheet();
+		else if (currentStatus == SheetStatus.Displayed &&
+				 inputEvent.selected != gameObject) DisplayCharSheet();
 	}
 
 
