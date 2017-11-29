@@ -55,6 +55,7 @@ public class UIManager {
 		ToggleUndoButton();
 		deckOrganizer = GameObject.Find(COMBAT_CARD_ORGANIZER).transform;
 		discardOrganizer = GameObject.Find(DISCARD_ORGANIZER).transform;
+		combatDeck.Clear(); //sanity check
 		combatDeck = CreateCombatDeck();
 	}
 
@@ -66,9 +67,9 @@ public class UIManager {
 	/// Create a visible deck of cards for the attackers
 	/// </summary>
 	private List<RectTransform> CreateCombatDeck(){
-		//get rid of any cards currently in the deck
-		foreach (RectTransform card in combatDeck) MonoBehaviour.Destroy(card.gameObject);
-		combatDeck.Clear();
+		//get rid of the existing cards
+		//foreach (Transform card in deckOrganizer) MonoBehaviour.Destroy(card.gameObject);
+		foreach (Transform card in discardOrganizer) MonoBehaviour.Destroy(card.gameObject);
 
 
 		//create a fresh deck
@@ -83,14 +84,12 @@ public class UIManager {
 		}
 
 
-		Debug.Assert(temp.Count == deckOrganizer.childCount, "Discrepancy between list of cards and card organizer childcount.");
-
-
 		return temp;
 	}
 
 
 	public void RecreateCombatDeck(){
+		combatDeck.Clear();
 		combatDeck = CreateCombatDeck();
 	}
 
@@ -149,7 +148,10 @@ public class UIManager {
 
 		//if the card pulled out of the deck was the last card in the deck, reshuffle
 		//note that this only affects the visuals; AttackerDeck is responsible for reshuffling the deck within the game's logic
-		if (deckOrganizer.childCount == 0) combatDeck = CreateCombatDeck();
+		if (deckOrganizer.childCount == 0){
+			combatDeck.Clear();
+			combatDeck = CreateCombatDeck();
+		}
 
 		if (!Services.Tasks.CheckForTaskOfType<ThrowAwayCardTask>()){
 			Services.Tasks.AddTask(new ThrowAwayCardTask(deckOrganizer, value));

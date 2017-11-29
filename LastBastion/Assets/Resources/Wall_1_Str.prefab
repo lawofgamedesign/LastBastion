@@ -1342,7 +1342,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startDurability: 1
-  startStrength: 1
+  startStrength: 0
 --- !u!137 &137977509133082066
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

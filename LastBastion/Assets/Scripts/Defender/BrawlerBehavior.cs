@@ -43,6 +43,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private int jumpsSoFar = 0;
 
 
+	//drink track
+	private enum DrinkTrack { None };
+
+
 	//character sheet information
 	private const string BRAWLER_NAME = "Brawler";
 

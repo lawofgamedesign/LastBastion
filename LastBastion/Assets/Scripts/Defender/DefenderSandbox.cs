@@ -585,13 +585,14 @@ public class DefenderSandbox : MonoBehaviour {
 
 	/// <summary>
 	/// Each defender is responsible for figuring out how they power up. This base function only handles making sure the defender
-	/// has defeated enough enemies for a new upgrade.
+	/// meets the requirements to upgrade.
 	/// 
 	/// The pattern for upgrades is: the first one is free, the second costs 3, and each one thereafter costs one more than the one before it.
 	/// </summary>
 	/// <param>The upgrade tree the player wants to move along.</param>
 	public virtual bool PowerUp(int tree){
-		if (DefeatedSoFar < defeatsToNextUpgrade) return false;
+		if (DefeatedSoFar < defeatsToNextUpgrade) return false; //make sure the defender has defeated enough attackers
+		if (Services.UI.GetCharSheetStatus() != CharacterSheetBehavior.SheetStatus.Displayed) return false; //avoid misclicks on a moving character sheet
 
 		defeatsToNextUpgrade += upgradeInterval;
 		upgradeInterval++;
