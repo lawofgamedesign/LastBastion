@@ -141,7 +141,9 @@ public class UIManager {
 	/// <summary>
 	/// Take a card out of the draw deck. This only affects visuals, not the game logic.
 	/// </summary>
-	public void RemoveCardFromDeck(int value){
+	/// <param name="attacker">The attacker that's removing the card from the deck.</param>
+	/// <param name="value">The card's value.</param>
+	public void RemoveCardFromDeck(Transform attacker, int value){
 		//sanity check; if this is somehow trying to remove a card from an empty deck, stop and do nothing
 		if (deckOrganizer.childCount == 0) return;
 
@@ -155,9 +157,9 @@ public class UIManager {
 		}
 
 		if (!Services.Tasks.CheckForTaskOfType<ThrowAwayCardTask>()){
-			Services.Tasks.AddTask(new ThrowAwayCardTask(deckOrganizer, value));
+			Services.Tasks.AddTask(new ThrowAwayCardTask(deckOrganizer, attacker, value));
 		} else {
-			Services.Tasks.GetLastTaskOfType<ThrowAwayCardTask>().Then(new ThrowAwayCardTask(deckOrganizer, value));
+			Services.Tasks.GetLastTaskOfType<ThrowAwayCardTask>().Then(new ThrowAwayCardTask(deckOrganizer, attacker, value));
 		}
 	}
 
@@ -165,7 +167,9 @@ public class UIManager {
 	/// <summary>
 	/// Take a card out of the discard pile. This only affects visuals, not the game logic.
 	/// </summary>
-	public void RemoveCardFromDiscard(int value){
+	/// <param name="attacker">The attacker that's removing the card from the deck.</param>
+	/// <param name="value">The card's value.</param>
+	public void RemoveCardFromDiscard(Transform attacker, int value){
 		//sanity check; if this is somehow trying to remove a card from an empty discard, stop and do nothing
 		if (discardOrganizer.childCount == 0) return;
 
@@ -176,9 +180,9 @@ public class UIManager {
 		}
 
 		if (!Services.Tasks.CheckForTaskOfType<ThrowAwayCardTask>()){
-			Services.Tasks.AddTask(new ThrowAwayCardTask(discardOrganizer, value));
+			Services.Tasks.AddTask(new ThrowAwayCardTask(discardOrganizer, attacker, value));
 		} else {
-			Services.Tasks.GetLastTaskOfType<ThrowAwayCardTask>().Then(new ThrowAwayCardTask(discardOrganizer, value));
+			Services.Tasks.GetLastTaskOfType<ThrowAwayCardTask>().Then(new ThrowAwayCardTask(discardOrganizer, attacker, value));
 		}
 	}
 

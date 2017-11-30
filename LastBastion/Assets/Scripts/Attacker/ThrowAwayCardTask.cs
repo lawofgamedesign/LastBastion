@@ -13,6 +13,10 @@ public class ThrowAwayCardTask : Task {
 	private readonly Transform startLoc;
 
 
+	//the attacker discarding the card
+	private readonly Transform endLoc;
+
+
 	//the card to be discarded
 	private Transform card;
 	private readonly int value;
@@ -21,9 +25,10 @@ public class ThrowAwayCardTask : Task {
 
 
 	//the card's movement
-	private float speed = -50.0f;
+	private float speed = 15.0f;
 	private float rotSpeed = 135.0f; //degrees/second
 	private const float OFF_SCREEN = -200.0f;
+	private float tolerance = 0.5f; //when the card gets this close to its destination, it's done
 
 
 	/////////////////////////////////////////////
@@ -32,8 +37,9 @@ public class ThrowAwayCardTask : Task {
 
 
 	//constructor
-	public ThrowAwayCardTask(Transform startLoc, int value){
+	public ThrowAwayCardTask(Transform startLoc, Transform endLoc, int value){
 		this.startLoc = startLoc;
+		this.endLoc = endLoc;
 		this.value = value;
 	}
 
@@ -53,10 +59,11 @@ public class ThrowAwayCardTask : Task {
 	/// Move the card off the screen, spinning it as it goes.
 	/// </summary>
 	public override void Tick (){
-		card.localPosition += Vector3.right * speed * Time.deltaTime;
+		card.Translate((endLoc.position - card.position).normalized * speed * Time.deltaTime, Space.World);
+
 		card.Rotate(Vector3.forward, rotSpeed * Time.deltaTime);
 
-		if (card.localPosition.x <= OFF_SCREEN) SetStatus(TaskStatus.Success);
+		if (Vector3.Distance(card.position, endLoc.position) <= tolerance) SetStatus(TaskStatus.Success);
 	}
 
 

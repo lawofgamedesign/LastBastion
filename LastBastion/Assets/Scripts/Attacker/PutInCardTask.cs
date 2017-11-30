@@ -24,7 +24,7 @@ public class PutInCardTask : Task {
 
 
 	//the card's movement
-	private float speed = 0.25f;
+	private float speed = 15.0f;
 	private const float OFF_SCREEN = -200.0f;
 	private Vector3 direction;
 	private const float tolerance = 0.5f; //when the card is this close to the destination, it's done moving
@@ -60,7 +60,7 @@ public class PutInCardTask : Task {
 	/// Each frame, move the card toward the deck to which it's being added.
 	/// </summary>
 	public override void Tick (){
-		card.Translate(direction * speed, Space.World);
+		card.Translate(direction * speed * Time.deltaTime, Space.World);
 
 		if (Vector3.Distance(card.position, endLoc.position) <= tolerance){
 			SetStatus(TaskStatus.Success);

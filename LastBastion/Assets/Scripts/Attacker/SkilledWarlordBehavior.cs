@@ -36,7 +36,7 @@ public class SkilledWarlordBehavior : AttackerSandbox {
 		Health = skilledHealth;
 		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
 		attackerName = NAME;
-		Services.AttackDeck.RemoveCardFromDeck(1); //the Skilled Warlord takes a 1 out of the deck when it enters the board, if any are available
+		Services.AttackDeck.RemoveCardFromDeck(transform, 1); //the Skilled Warlord takes a 1 out of the deck when it enters the board, if any are available
 	}
 
 

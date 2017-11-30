@@ -146,9 +146,10 @@ public class AttackerDeck {
 	/// 
 	/// This favors later cards in the list of cards in the deck, which are more likely to still be available to draw.
 	/// </summary>
+	/// <param name="attacker">The attacker removing the card.</param>
 	/// <param name="value">The value of the card to remove.</param>
-	public void RemoveCardFromDeck(int value){
-		if (TakeOutCard(value)){
+	public void RemoveCardFromDeck(Transform attacker, int value){
+		if (TakeOutCard(attacker, value)){
 			List<Card> remainingCards = attackerDeck.RemainingCards();
 			cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
 			playedCards.text = UpdatePlayedCardsUI();
@@ -159,8 +160,9 @@ public class AttackerDeck {
 	/// Remove a single card from the deck, preferring cards still to be drawn.
 	/// </summary>
 	/// <returns><c>true</c> if a card was removed, <c>false</c> otherwise.</returns>
+	/// <param name="attacker">The attacker removing the card.</param>
 	/// <param name="value">The Value of the card to remove.</param>
-	private bool TakeOutCard(int value){
+	private bool TakeOutCard(Transform attacker, int value){
 		List<Card> tempDeck = attackerDeck.GetDeck();
 		bool tookOut = false;
 
@@ -169,9 +171,9 @@ public class AttackerDeck {
 				attackerDeck.RemoveCard(tempDeck[i]);
 				if (playedCardList.Contains(tempDeck[i])){
 					playedCardList.Remove(tempDeck[i]);
-					Services.UI.RemoveCardFromDiscard(value);
+					Services.UI.RemoveCardFromDiscard(attacker, value);
 				} else {
-					Services.UI.RemoveCardFromDeck(value);
+					Services.UI.RemoveCardFromDeck(attacker, value);
 				}
 				tookOut = true;
 				break;

@@ -16,7 +16,7 @@
 			} else if (Input.GetKeyDown(KeyCode.A)){
 				//Services.AttackDeck.PutCardInDeck(5);
 			} else if (Input.GetKeyDown(KeyCode.R)){
-				Services.AttackDeck.RemoveCardFromDeck(1);
+				//Services.AttackDeck.RemoveCardFromDeck(1);
 			} else if (Input.GetKeyDown(KeyCode.S)){
 				Services.AttackDeck.Reshuffle();
 			}
