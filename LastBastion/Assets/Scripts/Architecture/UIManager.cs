@@ -60,6 +60,16 @@ public class UIManager {
 	}
 
 
+	/// <summary>
+	/// Special setup function for the test scene; initializes only what the test scene requires
+	/// </summary>
+	public void TestSetup(){
+		deckOrganizer = GameObject.Find(COMBAT_CARD_ORGANIZER).transform;
+		discardOrganizer = GameObject.Find(DISCARD_ORGANIZER).transform;
+		combatDeck.Clear(); //sanity check
+		combatDeck = CreateCombatDeck();
+	}
+
 	#region combat deck
 
 

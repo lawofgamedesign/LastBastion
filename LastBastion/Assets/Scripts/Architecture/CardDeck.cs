@@ -153,11 +153,22 @@ public class CardDeck<T> {
 	public void RemoveCard(T card){
 		int temp = deck.LastIndexOf(card);
 
-		if (temp == NOT_FOUND) return; //stop if there was no such card
+		Debug.Log(temp);
 
-		if (index <= temp && index > 0) index--;
+		if (temp == NOT_FOUND){
+			Debug.Log("Unable to remove a card");
+			return; //stop if there was no such card
+		}
 
 		deck.RemoveAt(temp);
+
+		//if the last card in the deck was removed, it's time to reshuffle
+		//otherwise, back up the index, if necessary, to continue pointing at the same card as before
+		if (temp == deck.Count){
+			HandleEmptyDeck();
+		} else {
+			if (index <= temp && index > 0) index--;
+		}
 	}
 
 

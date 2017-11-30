@@ -7,6 +7,9 @@
 		private void Awake(){
 			Services.AttackDeck = new AttackerDeck();
 			Services.AttackDeck.Setup();
+			Services.UI = new UIManager();
+			Services.UI.TestSetup();
+			Services.Tasks = new TaskManager();
 		}
 
 
@@ -16,7 +19,7 @@
 			} else if (Input.GetKeyDown(KeyCode.A)){
 				//Services.AttackDeck.PutCardInDeck(5);
 			} else if (Input.GetKeyDown(KeyCode.R)){
-				//Services.AttackDeck.RemoveCardFromDeck(1);
+				Services.AttackDeck.RemoveCardFromDeck(GameObject.Find("Main Camera").transform, 1);
 			} else if (Input.GetKeyDown(KeyCode.S)){
 				Services.AttackDeck.Reshuffle();
 			}
