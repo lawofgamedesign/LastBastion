@@ -39,12 +39,13 @@ public class DefenderSandbox : MonoBehaviour {
 	protected LineRenderer lineRend;
 	protected Button moveButton;
 	protected Button undoButton;
+	protected Transform moveCanvas;
 	protected const string MOVE_BUTTON_OBJ = "Done moving button";
 	protected const string UNDO_BUTTON_OBJ = "Undo move button";
 	protected const string PRIVATE_UI_CANVAS = "Defender canvas";
 	[SerializeField] protected float moveSpeed = 1.0f; //movement on screen, as opposed to spaces on the grid
 	protected Rigidbody rb;
-	protected const float LINE_OFFSET = 0.1f; //picks the movement line up off the board to avoid clipping
+	protected const float LINE_OFFSET = 0.5f; //picks the movement line up off the board to avoid clipping
 
 
 	//location in the grid
@@ -122,6 +123,7 @@ public class DefenderSandbox : MonoBehaviour {
 		ClearLine();
 		moveButton = transform.Find(PRIVATE_UI_CANVAS).Find(MOVE_BUTTON_OBJ).GetComponent<Button>();
 		undoButton = transform.Find(PRIVATE_UI_CANVAS).Find(UNDO_BUTTON_OBJ).GetComponent<Button>();
+		moveCanvas = transform.Find(PRIVATE_UI_CANVAS);
 		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
 		combatHand = MakeCombatHand();
@@ -211,6 +213,7 @@ public class DefenderSandbox : MonoBehaviour {
 		remainingSpeed = Speed;
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
+		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z);
 	}
 
 
@@ -238,9 +241,11 @@ public class DefenderSandbox : MonoBehaviour {
 			remainingSpeed > 0 &&
 			!CheckAlreadyThroughSpace(loc) &&
 			Services.Board.GeneralSpaceQuery(loc.x, loc.z) == SpaceBehavior.ContentType.None){
+
 			moves.Add(loc);
 			remainingSpeed--;
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
+			moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z);
 		}
 	}
 

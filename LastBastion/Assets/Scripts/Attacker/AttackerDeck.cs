@@ -60,6 +60,7 @@ public class AttackerDeck {
 
 
 		//display the drawn card
+		if (reshuffled) Services.UI.RecreateCombatDeck();
 		Services.UI.DrawCombatCard(temp.Value);
 
 		//lifespan function
@@ -68,7 +69,6 @@ public class AttackerDeck {
 		List<Card> remainingCards = attackerDeck.RemainingCards();
 		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
 		playedCards.text = UpdatePlayedCardsUI(temp);
-		if (reshuffled) Services.UI.RecreateCombatDeck();
 
 		return temp;
 	}
