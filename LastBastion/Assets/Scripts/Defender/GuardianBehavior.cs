@@ -90,7 +90,8 @@ public class GuardianBehavior : DefenderSandbox {
 	public override void Move(){
 		base.Move();
 
-		if (currentHold != HoldTrack.None) extraText.text = CHOOSE_TO_BLOCK;
+		if (currentHold != HoldTrack.None &&
+			currentHold != HoldTrack.The_Last_Bastion) extraText.text = CHOOSE_TO_BLOCK;
 
 
 		/*
