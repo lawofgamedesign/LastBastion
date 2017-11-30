@@ -35,7 +35,7 @@ public class EnragedWarlordBehavior : AttackerSandbox {
 		Health = enragedHealth;
 		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
 		attackerName = NAME;
-		Services.AttackDeck.PutCardInDeck(5); //the Enraged Warlord puts a 5 in the deck when it enters the board
+		Services.AttackDeck.PutCardInDeck(transform, 5); //the Enraged Warlord puts a 5 in the deck when it enters the board
 	}
 
 

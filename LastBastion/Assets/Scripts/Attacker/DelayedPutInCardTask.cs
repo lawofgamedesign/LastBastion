@@ -9,6 +9,7 @@ public class DelayedPutInCardTask : Task {
 
 
 	//information to be passed to a PutInCardTask
+	private readonly Transform startLoc;
 	private readonly Transform endLoc;
 	private readonly int value;
 
@@ -19,7 +20,8 @@ public class DelayedPutInCardTask : Task {
 
 
 	//constructor
-	public DelayedPutInCardTask(Transform endLoc, int value){
+	public DelayedPutInCardTask(Transform startLoc, Transform endLoc, int value){
+		this.startLoc = startLoc;
 		this.endLoc = endLoc;
 		this.value = value;
 	}
@@ -35,7 +37,7 @@ public class DelayedPutInCardTask : Task {
 	/// </summary>
 	public override void Tick (){
 		if (Services.Tasks.GetLastTaskOfType<PutInCardTask>() != null){
-			Services.Tasks.GetLastTaskOfType<PutInCardTask>().Then(new PutInCardTask(endLoc, value));
+			Services.Tasks.GetLastTaskOfType<PutInCardTask>().Then(new PutInCardTask(startLoc, endLoc, value));
 			SetStatus(TaskStatus.Success);
 		}
 	}

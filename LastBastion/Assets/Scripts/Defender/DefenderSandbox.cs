@@ -213,7 +213,7 @@ public class DefenderSandbox : MonoBehaviour {
 		remainingSpeed = Speed;
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
-		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z);
+		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
 	}
 
 
@@ -245,7 +245,7 @@ public class DefenderSandbox : MonoBehaviour {
 			moves.Add(loc);
 			remainingSpeed--;
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
-			moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z);
+			moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
 		}
 	}
 

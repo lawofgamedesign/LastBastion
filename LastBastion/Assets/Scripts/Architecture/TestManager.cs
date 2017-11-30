@@ -14,7 +14,7 @@
 			if (Input.GetKeyDown(KeyCode.D)){
 				Services.AttackDeck.GetAttackerCard();
 			} else if (Input.GetKeyDown(KeyCode.A)){
-				Services.AttackDeck.PutCardInDeck(5);
+				//Services.AttackDeck.PutCardInDeck(5);
 			} else if (Input.GetKeyDown(KeyCode.R)){
 				Services.AttackDeck.RemoveCardFromDeck(1);
 			} else if (Input.GetKeyDown(KeyCode.S)){

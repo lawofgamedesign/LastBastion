@@ -185,25 +185,27 @@ public class AttackerDeck {
 	/// <summary>
 	/// Adds a card to the deck.
 	/// </summary>
+	/// <param name="attacker">The attacker putting the card into the deck.</param>
 	/// <param name="value">The card's value.</param>
-	public void PutCardInDeck(int value){
+	public void PutCardInDeck(Transform attacker, int value){
 		attackerDeck.AddCard(new Card(value));
 		List<Card> remainingCards = attackerDeck.RemainingCards();
 		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
-		Services.UI.AddCardToDeck(value);
+		Services.UI.AddCardToDeck(attacker, value);
 	}
 
 
 	/// <summary>
 	/// As above, but adds a card rather than making a new card with a given value; this allows for calling the Added() function on the card.
 	/// </summary>
+	/// <param name="attacker">The attacker putting the card into the deck.</param>
 	/// <param name="card">The card to add.</param>
-	public void PutCardInDeck(Card card){
+	public void PutCardInDeck(Transform attacker, Card card){
 		attackerDeck.AddCard(card);
 		card.Added();
 		List<Card> remainingCards = attackerDeck.RemainingCards();
 		cardsInDeck.text = UpdateCardsInDeckUI(remainingCards);
-		Services.UI.AddCardToDeck(card.Value);
+		Services.UI.AddCardToDeck(attacker, card.Value);
 	}
 
 

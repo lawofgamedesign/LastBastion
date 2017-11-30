@@ -112,8 +112,9 @@ public class UIManager {
 	/// Note that being on top doesn't mean that card will be drawn first--its value isn't game-relevant. The value is only used
 	/// to give the card a descriptive name. Being on top only means that this representation of a card will be the next "drawn" visually.
 	/// </summary>
+	/// <param name="attacker">The attacker that's adding the card to the deck.</param>
 	/// <param name="value">The new card's value.</param>
-	public void AddCardToDeck(int value){
+	public void AddCardToDeck(Transform attacker, int value){
 		GameObject newCard = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(COMBAT_CARD_OBJ), deckOrganizer);
 		newCard.name = COMBAT_CARD_OBJ + ADDED_CARD + value.ToString();
 		newCard.transform.localPosition = new Vector3(0.0f, 0.0f, ((deckOrganizer.childCount - 1) * CARD_VERTICAL_SPACE) * -1.0f); //because of the canvas' orientation, must * -1
@@ -122,16 +123,16 @@ public class UIManager {
 
 		//add a task that puts a card into the visibule deck
 		if (!Services.Tasks.CheckForTaskOfType<PutInCardTask>()){ //this is the first/only such task: add the relevant task
-			Services.Tasks.AddTask(new PutInCardTask(deckOrganizer, value));
+			Services.Tasks.AddTask(new PutInCardTask(attacker, deckOrganizer, value));
 		} 
 		//this is the second or third such task. If it's the second, GetLastTaskOfType() will find the first one and make a new task to follow
 		//if it's the third, GetLastTaskOfType() will NOT find the second yet (i.e., will return null).
 		//DelayedPutInCardTask will handle waiting until the second is findable, and then add the third task to follow the second
 		else {
 			if (Services.Tasks.GetLastTaskOfType<PutInCardTask>() == null){
-				Services.Tasks.AddTask(new DelayedPutInCardTask(deckOrganizer, value));
+				Services.Tasks.AddTask(new DelayedPutInCardTask(attacker, deckOrganizer, value));
 			} else {
-				Services.Tasks.GetLastTaskOfType<PutInCardTask>().Then(new PutInCardTask(deckOrganizer, value));
+				Services.Tasks.GetLastTaskOfType<PutInCardTask>().Then(new PutInCardTask(attacker, deckOrganizer, value));
 			}
 		}
 	}

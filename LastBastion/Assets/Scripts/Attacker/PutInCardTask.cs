@@ -8,6 +8,10 @@ public class PutInCardTask : Task {
 	/////////////////////////////////////////////
 
 
+	//the attacker putting the card into the deck
+	private readonly Transform startLoc;
+
+
 	//the deck this card will be put into
 	private readonly Transform endLoc;
 
@@ -20,8 +24,10 @@ public class PutInCardTask : Task {
 
 
 	//the card's movement
-	private float speed = 250.0f;
+	private float speed = 0.25f;
 	private const float OFF_SCREEN = -200.0f;
+	private Vector3 direction;
+	private const float tolerance = 0.5f; //when the card is this close to the destination, it's done moving
 
 
 	/////////////////////////////////////////////
@@ -30,7 +36,8 @@ public class PutInCardTask : Task {
 
 
 	//constructor
-	public PutInCardTask(Transform endLoc, int value){
+	public PutInCardTask(Transform startLoc, Transform endLoc, int value){
+		this.startLoc = startLoc;
 		this.endLoc = endLoc;
 		this.value = value;
 	}
@@ -42,8 +49,10 @@ public class PutInCardTask : Task {
 	protected override void Init (){
 		card = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(CARD_OBJ),
 													 endLoc).transform;
-		card.localPosition = new Vector3(OFF_SCREEN, 0.0f, 0.0f);
+		card.position = startLoc.position;
 		card.Find(VALUE_OBJ).GetComponent<Text>().text = value.ToString();
+
+		direction = (endLoc.position - startLoc.position).normalized;
 	}
 
 
@@ -51,9 +60,9 @@ public class PutInCardTask : Task {
 	/// Each frame, move the card toward the deck to which it's being added.
 	/// </summary>
 	public override void Tick (){
-		card.localPosition += Vector3.right * speed * Time.deltaTime;
+		card.Translate(direction * speed, Space.World);
 
-		if (card.localPosition.x >= 0.0f){
+		if (Vector3.Distance(card.position, endLoc.position) <= tolerance){
 			SetStatus(TaskStatus.Success);
 		}
 	}
