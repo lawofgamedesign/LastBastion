@@ -200,6 +200,7 @@ public class DefenderSandbox : MonoBehaviour {
 		moveButton.gameObject.SetActive(false);
 		undoButton.gameObject.SetActive(false);
 		noFightButton.gameObject.SetActive(false);
+		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
 		Services.Defenders.NoSelectedDefender();
 	}
 
