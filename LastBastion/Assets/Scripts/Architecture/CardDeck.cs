@@ -153,8 +153,6 @@ public class CardDeck<T> {
 	public void RemoveCard(T card){
 		int temp = deck.LastIndexOf(card);
 
-		Debug.Log(temp);
-
 		if (temp == NOT_FOUND){
 			Debug.Log("Unable to remove a card");
 			return; //stop if there was no such card

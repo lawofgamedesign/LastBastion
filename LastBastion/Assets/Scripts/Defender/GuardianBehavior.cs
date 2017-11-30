@@ -76,7 +76,7 @@ public class GuardianBehavior : DefenderSandbox {
 		AttackMod = guardianAttack;
 		Armor = guardianArmor;
 
-		currentHold = HoldTrack.None;
+		currentHold = HoldTrack.Bulwark;
 		currentSingleCombat = SingleCombatTrack.None;
 	}
 
@@ -119,7 +119,7 @@ public class GuardianBehavior : DefenderSandbox {
 	/// Handle blocking and unblocking all columns when the Guardian has reached The Last Bastion on the Hold the Line track.
 	/// </summary>
 	private void AlternateBlockingColumns(Event e){
-		Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in AlternateBlockingColumns");
+		Debug.Assert(e.GetType() == typeof(NewTurnEvent), "Non-NewTurnEvent in AlternateBlockingColumns");
 
 		alternateTurn++;
 		if (alternateTurn%2 == 0){
@@ -372,7 +372,7 @@ public class GuardianBehavior : DefenderSandbox {
 				//if not, unregister for input events--the player isn't going to need to make that choice
 				//either way, start listening for the event that the Guardian uses to decide whether to block columns
 				} else if (currentHold == HoldTrack.The_Last_Bastion) {
-					Services.Events.Register<EndPhaseEvent>(AlternateBlockingColumns);
+					Services.Events.Register<NewTurnEvent>(AlternateBlockingColumns);
 					if (blockedColumn != BLANK_COLUMN) {
 						MakeColumnLure(blockedColumn, false);
 						UnholdLine();
@@ -404,7 +404,13 @@ public class GuardianBehavior : DefenderSandbox {
 
 		AttackerDefeatedEvent defeatEvent = e as AttackerDefeatedEvent;
 
-		if (defeatEvent.location.x == blockedColumn) {
+		if (currentHold == HoldTrack.The_Last_Bastion){ //the Guardian gets 2 total experience when any attacker is defeated while at The Last Bastion
+			if (defeatEvent.location.x == GridLoc.x &&
+				defeatEvent.location.z == GridLoc.z + 1) DefeatedSoFar++;
+			else {
+				DefeatedSoFar += 2;
+			}
+		} else if (defeatEvent.location.x == blockedColumn) {
 			DefeatedSoFar++;
 
 			if (currentHold == HoldTrack.Bulwark) DefeatedSoFar++; //gain extra experience at higher levels of the Hold the Line track

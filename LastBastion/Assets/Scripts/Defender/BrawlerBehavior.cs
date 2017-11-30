@@ -27,7 +27,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		"<b>Rampage</b>\n\nYou get two attacks: one north and one east or west.",
 		"<b>Wade In</b>\n\n<size=10>You get two attacks: one north and one east or west.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
 		"<b>Berserk</b>\n\n<size=10>You get three attacks: one north and two east or west.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
-		"<b>The Last One Standing</b>\n\n<size=10>You get infinite attacks east and west, so long as each one defeats a Horde member. You get one attack north.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>The Last One Standing</b>\n\n<size=10>You get infinite attacks east and west, so long as each one inflicts damage. You get one attack north.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
 		"<b>Maximum rampage!</b>"
 	};
 	private RampageTrack currentRampage;

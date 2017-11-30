@@ -165,6 +165,7 @@ public class TurnManager {
 
 		public override void OnEnter (){
 			Context.NewTurn();
+			Services.Events.Fire(new NewTurnEvent());
 		}
 
 		public override void Tick (){
