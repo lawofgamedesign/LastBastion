@@ -1,4 +1,10 @@
 ﻿public class EndPhaseEvent : Event {
 
-	public EndPhaseEvent() { } //intentionally blank
+
+	public readonly FSM<TurnManager>.State Phase;
+
+
+	public EndPhaseEvent(FSM<TurnManager>.State phase) { 
+		this.Phase = phase;
+	}
 }

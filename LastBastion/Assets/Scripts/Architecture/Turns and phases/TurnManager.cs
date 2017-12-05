@@ -205,9 +205,9 @@ public class TurnManager {
 	}
 
 	/// <summary>
-	/// State for the defenders' movement.
+	/// State for the defenders' movement. This is public so that the momentum system can determine whether momentum has been used up.
 	/// </summary>
-	private class PlayerMove : FSM<TurnManager>.State {
+	public class PlayerMove : FSM<TurnManager>.State {
 
 
 		private void HandleMoveInputs(Event e){
@@ -378,7 +378,7 @@ public class TurnManager {
 
 
 		public override void OnEnter(){
-			Services.Events.Fire(new EndPhaseEvent());
+			Services.Events.Fire(new EndPhaseEvent(Context.TurnMachine.CurrentState));
 		}
 
 

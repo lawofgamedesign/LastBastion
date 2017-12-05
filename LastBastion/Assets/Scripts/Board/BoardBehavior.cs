@@ -28,7 +28,7 @@ public class BoardBehavior {
 
 	//how big is a space? Assumes spaces are square tiles
 	public float SpaceSize { get; private set; }
-	private const string MODEL_OBJ = "Model"; //tiles are at localscale (1, 1, 1); it's their model that gets resized
+	private const string SIZE_OBJ = "Sizer"; //tiles are at localscale (1, 1, 1); this object gets resized
 
 
 	//nonsense return value for when something is not on the board
@@ -43,7 +43,7 @@ public class BoardBehavior {
 
 	//set up the board
 	public void Setup(){
-		SpaceSize = Resources.Load<GameObject>(SPACE_OBJ).transform.Find(MODEL_OBJ).localScale.x;
+		SpaceSize = Resources.Load<GameObject>(SPACE_OBJ).transform.Find(SIZE_OBJ).localScale.x;
 		WallZPos = 2;
 		BoardOrganizer = GameObject.Find(BOARD_ORGANIZER).transform;
 		spaces = MakeBoard();

@@ -76,7 +76,7 @@ public class GuardianBehavior : DefenderSandbox {
 		AttackMod = guardianAttack;
 		Armor = guardianArmor;
 
-		currentHold = HoldTrack.Bulwark;
+		currentHold = HoldTrack.None;
 		currentSingleCombat = SingleCombatTrack.None;
 	}
 
@@ -229,6 +229,7 @@ public class GuardianBehavior : DefenderSandbox {
 			DoneFighting();
 		} else {
 			attacker.FailToDamage();
+			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 			DoneFighting();
 		}

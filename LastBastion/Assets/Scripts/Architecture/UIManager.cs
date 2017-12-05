@@ -15,17 +15,20 @@ public class UIManager {
 	private Text turnText;
 	private CharacterSheetBehavior charSheet;
 	private GameObject undoButton;
+	private Text momentumText;
 	private const string EXTRA_CANVAS = "Extra info canvas";
 	private const string TURN_CANVAS = "Turn canvas";
 	private const string TEXT_OBJ = "Text";
 	private const string CHAR_SHEET_OBJ = "Defender sheet canvas";
 	private const string UNDO_BUTTON_OBJ = "Undo button";
+	private const string MOMENTUM_OBJ = "Momentum text";
 
 
 	//text to be written to various UI elements
 	private const string TURN = "Turn ";
 	private const string BACKSLASH = "/";
 	private const string GAME_OVER = "Game over";
+	private const string MOMENTUM = "Momentum: ";
 
 
 	//the attacker's combat cards
@@ -53,6 +56,7 @@ public class UIManager {
 		charSheet = GameObject.Find(CHAR_SHEET_OBJ).GetComponent<CharacterSheetBehavior>();
 		undoButton = GameObject.Find(UNDO_BUTTON_OBJ);
 		ToggleUndoButton();
+		momentumText = GameObject.Find(MOMENTUM_OBJ).GetComponent<Text>();
 		deckOrganizer = GameObject.Find(COMBAT_CARD_ORGANIZER).transform;
 		discardOrganizer = GameObject.Find(DISCARD_ORGANIZER).transform;
 		combatDeck.Clear(); //sanity check
@@ -226,6 +230,15 @@ public class UIManager {
 	/// </summary>
 	public void ToggleUndoButton(){
 		undoButton.SetActive(!undoButton.activeInHierarchy);
+	}
+
+
+	/// <summary>
+	/// Write the amount of current momentum.
+	/// </summary>
+	/// <param name="amount">The current momentum.</param>
+	public void SetMomentumText(int amount){
+		momentumText.text = MOMENTUM + amount.ToString();
 	}
 
 

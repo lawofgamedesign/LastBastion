@@ -100,4 +100,14 @@ public static class Services {
 		}
 		set { undo = value; }
 	}
+
+
+	private static MomentumManager momentum;
+	public static MomentumManager Momentum {
+		get {
+			Debug.Assert(momentum != null, "No momentum manager. Did you forget to create one?");
+			return momentum;
+		}
+		set { momentum = value; }
+	}
 }

@@ -163,6 +163,7 @@ public class RangerBehavior : DefenderSandbox {
 			FinishWithCard();
 		} else {
 			attacker.FailToDamage();
+			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 			currentAttacks--;
 			extraText.text = ReviseAttackText();

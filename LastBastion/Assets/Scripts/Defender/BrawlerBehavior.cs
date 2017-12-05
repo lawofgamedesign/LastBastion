@@ -144,6 +144,7 @@ public class BrawlerBehavior : DefenderSandbox {
 			if (dir == Directions.East ||
 				dir == Directions.West) defeatedLastTarget = false; //only important for The Last One Standing
 			attacker.FailToDamage();
+			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 		}
 	}

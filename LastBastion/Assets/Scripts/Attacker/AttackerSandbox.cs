@@ -260,6 +260,8 @@ public class AttackerSandbox : MonoBehaviour {
 	protected virtual int GetSpeed(){
 		int temp = speed;
 
+		temp += Services.Momentum.Momentum;
+
 		if (LookForSpeedUp(XPos, ZPos + 1)) temp++;
 		if (LookForSpeedUp(XPos, ZPos - 1)) temp++;
 		if (LookForSpeedUp(XPos - 1, ZPos)) temp++;
