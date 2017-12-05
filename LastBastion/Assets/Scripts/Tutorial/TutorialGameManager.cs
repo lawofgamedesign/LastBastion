@@ -38,7 +38,7 @@
 			GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
 			Services.Undo = new UndoData();
 			Services.Undo.Setup();
-			Services.Momentum = new MomentumManager();
+			Services.Momentum = new TutorialMomentumManager();
 			Services.Momentum.Setup();
 		}
 

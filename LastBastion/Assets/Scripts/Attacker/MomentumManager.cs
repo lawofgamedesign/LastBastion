@@ -2,8 +2,8 @@
 
 public class MomentumManager {
 
-	public int Momentum { get; private set; }
-	private const int START_MOMENTUM = 0;
+	public int Momentum { get; protected set; }
+	protected const int START_MOMENTUM = 0;
 
 
 	//initialize variables
@@ -24,7 +24,7 @@ public class MomentumManager {
 	}
 
 
-	public void ResetMomentum(Event e){
+	public virtual void ResetMomentum(Event e){
 		Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in ResetMomentum");
 
 		EndPhaseEvent endEvent = e as EndPhaseEvent;
