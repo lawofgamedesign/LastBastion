@@ -17,40 +17,40 @@ public class TurnManager {
 
 
 	//the state machine that controls movement through phases of turns
-	private FSM<TurnManager> turnMachine;
-	public FSM<TurnManager> TurnMachine { get { return turnMachine; } private set { turnMachine = value; } }
+	protected FSM<TurnManager> turnMachine;
+	public FSM<TurnManager> TurnMachine { get { return turnMachine; } protected set { turnMachine = value; } }
 
 
 	//how long the system waits during each phase
-	private float attackerAdvanceDuration = 1.0f;
+	protected float attackerAdvanceDuration = 1.0f;
 
 
 	//tags for selecting and clicking on things
-	private const string DEFENDER_TAG = "Defender";
-	private const string BOARD_TAG = "Board";
-	private const string ATTACKER_TAG = "Attacker";
-	private const string LEADER_TAG = "Leader";
-	private const string MINION_TAG = "Minion";
+	protected const string DEFENDER_TAG = "Defender";
+	protected const string BOARD_TAG = "Board";
+	protected const string ATTACKER_TAG = "Attacker";
+	protected const string LEADER_TAG = "Leader";
+	protected const string MINION_TAG = "Minion";
 
 
 	//feedback for the player to help track which phase they're in
-	private Text phaseText;
-	private const string PHASE_OBJ = "Phase";
-	private const string ATTACKER_MOVE = "Horde moves";
-	private const string PLAYER_MOVE = "Defenders move";
-	private const string PLAYER_FIGHT = "Defenders fight";
-	private const string BESIEGE = "Horde besieges";
+	protected Text phaseText;
+	protected const string PHASE_OBJ = "Phase";
+	protected const string ATTACKER_MOVE = "Horde moves";
+	protected const string PLAYER_MOVE = "Defenders move";
+	protected const string PLAYER_FIGHT = "Defenders fight";
+	protected const string BESIEGE = "Horde besieges";
 
 
 	//button for ending the current phase and moving to the next
-	private GameObject nextPhaseButton;
-	private Text phaseButtonText;
-	private const string TEXT_OBJ = "Text";
-	private const string NEXT_BUTTON_OBJ = "Next phase button";
-	private const string STOP_MOVING_MSG = "Done moving";
-	private const string STOP_FIGHTING_MSG = "Done fighting";
-	private const string ARE_YOU_SURE_MSG = "Are you sure? Not all defenders moved.";
-	private bool imSure = true; //used to determine whether a player is sure that they're ready to go on when there are still defenders who can move
+	protected GameObject nextPhaseButton;
+	protected Text phaseButtonText;
+	protected const string TEXT_OBJ = "Text";
+	protected const string NEXT_BUTTON_OBJ = "Next phase button";
+	protected const string STOP_MOVING_MSG = "Done moving";
+	protected const string STOP_FIGHTING_MSG = "Done fighting";
+	protected const string ARE_YOU_SURE_MSG = "Are you sure? Not all defenders moved.";
+	protected bool imSure = true; //used to determine whether a player is sure that they're ready to go on when there are still defenders who can move
 
 
 	//what turn is it?
@@ -73,7 +73,7 @@ public class TurnManager {
 
 
 	//initialize variables
-	public void Setup(){
+	public virtual void Setup(){
 		turnMachine = new FSM<TurnManager>(this);
 		TurnMachine = turnMachine;
 		ResetTurnUI();
@@ -86,7 +86,7 @@ public class TurnManager {
 
 
 	//go through one loop of the current state
-	public void Tick(){
+	public virtual void Tick(){
 		turnMachine.Tick();
 	}
 
@@ -94,7 +94,7 @@ public class TurnManager {
 	/// <summary>
 	/// Provide feedback for changing phases by turning the rulebook's pages
 	/// </summary>
-	private void TurnRulebookPage(){
+	protected void TurnRulebookPage(){
 		TurnPageTask turnPage = new TurnPageTask();
 		if (!Services.Tasks.CheckForTaskOfType(turnPage)) Services.Tasks.AddTask(turnPage);
 	}
@@ -103,7 +103,7 @@ public class TurnManager {
 	/// <summary>
 	/// Handle all effects relating to keeping track of which turn it is.
 	/// </summary>
-	private void NewTurn(){
+	protected void NewTurn(){
 		CurrentTurn++;
 		Services.UI.SetTurnText(CurrentTurn, TotalTurns);
 	}
@@ -112,7 +112,7 @@ public class TurnManager {
 	/// <summary>
 	/// Prepare the information the turn counter UI needs for a new wave.
 	/// </summary>
-	private void ResetTurnUI(){
+	protected void ResetTurnUI(){
 		CurrentTurn = 0;
 		TotalTurns = Services.Attackers.GetTurnsThisWave();
 	}
@@ -121,7 +121,7 @@ public class TurnManager {
 	/// <summary>
 	/// Switch the next phase button on or off.
 	/// </summary>
-	private void ToggleNextPhaseButton(){
+	protected void ToggleNextPhaseButton(){
 		nextPhaseButton.SetActive(!nextPhaseButton.activeInHierarchy);
 	}
 
@@ -130,7 +130,7 @@ public class TurnManager {
 	/// Check if an attacker has reached the final row of the board, meaning the player has lost.
 	/// </summary>
 	/// <returns><c>true</c> if the player has lost, <c>false</c> otherwise.</returns>
-	private bool CheckForLoss(){
+	protected bool CheckForLoss(){
 		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++){
 			if (Services.Board.GeneralSpaceQuery(i, 0) == SpaceBehavior.ContentType.Attacker) return true;
 		}
@@ -142,7 +142,7 @@ public class TurnManager {
 	/// <summary>
 	/// Handles informing the player that they've won.
 	/// </summary>
-	private void PlayerWinFeedback(){
+	protected void PlayerWinFeedback(){
 		Services.UI.SetExtraText(WIN_MSG);
 	}
 
@@ -150,7 +150,7 @@ public class TurnManager {
 	/// <summary>
 	/// Handles informing the player that they've lost.
 	/// </summary>
-	private void PlayerLoseFeedback(){
+	protected void PlayerLoseFeedback(){
 		Services.UI.SetExtraText(LOSE_MSG);
 	}
 
@@ -161,7 +161,7 @@ public class TurnManager {
 
 
 	//update the turn counter
-	private class StartOfTurn : FSM<TurnManager>.State {
+	protected class StartOfTurn : FSM<TurnManager>.State {
 
 		public override void OnEnter (){
 			Context.NewTurn();
@@ -177,7 +177,7 @@ public class TurnManager {
 	/// <summary>
 	/// State for the attackers moving south at the start of each turn.
 	/// </summary>
-	private class AttackersAdvance : FSM<TurnManager>.State {
+	protected class AttackersAdvance : FSM<TurnManager>.State {
 		float timer;
 
 		//tell the attacker manager to move the attackers.
@@ -327,7 +327,7 @@ public class TurnManager {
 	}
 
 
-	private class BesiegeWalls : FSM<TurnManager>.State {
+	protected class BesiegeWalls : FSM<TurnManager>.State {
 		float timer;
 		List<AttackerSandbox> besiegers;
 
@@ -374,7 +374,7 @@ public class TurnManager {
 	/// Nothing has to happen during the end phase, but if there's some end-of-turn cleanup to be done, this state sends
 	/// out an event to tell others to do it.
 	/// </summary>
-	private class EndPhase : FSM<TurnManager>.State {
+	protected class EndPhase : FSM<TurnManager>.State {
 
 
 		public override void OnEnter(){
@@ -404,7 +404,7 @@ public class TurnManager {
 	/// 	2. have the turn manager work out the new number of turns, and
 	/// 	3. reset the visual combat deck
 	/// </summary>
-	private class BetweenWaves : FSM<TurnManager>.State {
+	protected class BetweenWaves : FSM<TurnManager>.State {
 
 
 		public override void Tick (){
@@ -425,7 +425,7 @@ public class TurnManager {
 	/// 
 	/// Right now there's no way out of this state! The player should reset the game.
 	/// </summary>
-	private class PlayerWin : FSM<TurnManager>.State {
+	protected class PlayerWin : FSM<TurnManager>.State {
 
 
 		public override void OnEnter (){
@@ -439,7 +439,7 @@ public class TurnManager {
 	/// 
 	/// Right now there's no way out of this state! The player should reset the game.
 	/// </summary>
-	private class PlayerLose : FSM<TurnManager>.State {
+	protected class PlayerLose : FSM<TurnManager>.State {
 
 
 		public override void OnEnter (){

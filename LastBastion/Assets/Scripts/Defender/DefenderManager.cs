@@ -9,30 +9,30 @@ public class DefenderManager {
 
 
 	//list of all defenders
-	private List<DefenderSandbox> defenders;
+	protected List<DefenderSandbox> defenders;
 
 
 	//defenders the manager can create
-	private GameObject genericDefender;
+	protected GameObject genericDefender;
 	public enum DefenderTypes { Generic_Defender, Guardian, Brawler, Ranger }
-	private Transform defenderOrganizer;
-	private const string DEFENDER_ORGANIZER = "Defenders";
+	protected Transform defenderOrganizer;
+	protected const string DEFENDER_ORGANIZER = "Defenders";
 
 
 	//spawn points
-	private TwoDLoc spawn1 = new TwoDLoc(1, Services.Board.WallZPos);
-	private TwoDLoc spawn2 = new TwoDLoc(4, Services.Board.WallZPos);
-	private TwoDLoc spawn3 = new TwoDLoc(7, Services.Board.WallZPos);
-	List<TwoDLoc> spawnPoints = new List<TwoDLoc>();
-	private const string SPAWNER_OBJ = "Defender spawn point";
+	protected TwoDLoc spawn1 = new TwoDLoc(1, Services.Board.WallZPos);
+	protected TwoDLoc spawn2 = new TwoDLoc(4, Services.Board.WallZPos);
+	protected TwoDLoc spawn3 = new TwoDLoc(7, Services.Board.WallZPos);
+	protected List<TwoDLoc> spawnPoints = new List<TwoDLoc>();
+	protected const string SPAWNER_OBJ = "Defender spawn point";
 
 
 	//the currently selected defender
-	private DefenderSandbox selectedDefender = null;
+	protected DefenderSandbox selectedDefender = null;
 
 
 	//how many defenders are finished with the current phase?
-	private List<DefenderSandbox> doneDefenders = new List<DefenderSandbox>();
+	protected List<DefenderSandbox> doneDefenders = new List<DefenderSandbox>();
 
 
 
@@ -42,7 +42,7 @@ public class DefenderManager {
 
 
 	//initialize variables
-	public void Setup(){
+	public virtual void Setup(){
 		defenderOrganizer = GameObject.Find(DEFENDER_ORGANIZER).transform;
 		spawnPoints = CreateSpawnPoints();
 		defenders = MakeProtagonists(new DefenderTypes[] { DefenderTypes.Ranger, DefenderTypes.Guardian, DefenderTypes.Brawler });
@@ -61,7 +61,7 @@ public class DefenderManager {
 	/// This intentionally marks the space as empty; attacker spawns don't take up space or prevent movement.
 	/// </summary>
 	/// <returns>The spawn points.</returns>
-	private List<TwoDLoc> CreateSpawnPoints(){
+	protected virtual List<TwoDLoc> CreateSpawnPoints(){
 		List<TwoDLoc> temp = new List<TwoDLoc>() { spawn1, spawn2, spawn3 };
 
 		GameObject spawnPoint = Resources.Load<GameObject>(SPAWNER_OBJ);
@@ -85,7 +85,7 @@ public class DefenderManager {
 	/// </summary>
 	/// <returns>The list.</returns>
 	/// <param name="defenderTypes">An array of defenders to create, listed by their in-game type (not c# class!).</param>
-	private List<DefenderSandbox> MakeProtagonists(DefenderTypes[] defenderTypes){
+	protected List<DefenderSandbox> MakeProtagonists(DefenderTypes[] defenderTypes){
 		List<DefenderSandbox> temp = new List<DefenderSandbox>();
 
 		Debug.Assert(defenderTypes.Length == spawnPoints.Count, "Mismatch between defenders to create and available spawn points.");
@@ -104,7 +104,7 @@ public class DefenderManager {
 	/// <returns>The defender's controller script.</returns>
 	/// <param name="defenderType">The in-game type of defender to create (not its c# class!).</param>
 	/// <param name="spawnPoint">The spawn point where the defender will appear.</param>
-	private DefenderSandbox MakeDefender(DefenderTypes defenderType, TwoDLoc spawnPoint){
+	protected DefenderSandbox MakeDefender(DefenderTypes defenderType, TwoDLoc spawnPoint){
 		GameObject newDefender = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(defenderType.ToString()),
 																	   Services.Board.GetWorldLocation(spawnPoint.x, spawnPoint.z),
 																	   Quaternion.identity,

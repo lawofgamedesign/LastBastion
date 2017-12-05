@@ -10,39 +10,39 @@ public class AttackerManager {
 
 
 	//attackers the manager can create, and the transform they're parented to
-	private const string EVIL_WARRIOR_OBJ = "Evil Warrior";
-	private const string PETTY_WARLORD_OBJ = "Petty Warlord";
-	private const string ARMORED_WARLORD_OBJ = "Armored Warlord";
-	private const string SKILLED_WARLORD_OBJ = "Skilled Warlord";
-	private const string ENRAGED_WARLORD_OBJ = "Enraged Warlord";
-	private const string FAST_WARLORD_OBJ = "Fast Warlord";
-	private Transform attackerOrganizer;
-	private const string ATTACKER_ORGANIZER = "Attackers";
+	protected const string EVIL_WARRIOR_OBJ = "Evil Warrior";
+	protected const string PETTY_WARLORD_OBJ = "Petty Warlord";
+	protected const string ARMORED_WARLORD_OBJ = "Armored Warlord";
+	protected const string SKILLED_WARLORD_OBJ = "Skilled Warlord";
+	protected const string ENRAGED_WARLORD_OBJ = "Enraged Warlord";
+	protected const string FAST_WARLORD_OBJ = "Fast Warlord";
+	protected Transform attackerOrganizer;
+	protected const string ATTACKER_ORGANIZER = "Attackers";
 
 
 	//list of all enemies
-	private List<AttackerSandbox> attackers = new List<AttackerSandbox>();
+	protected List<AttackerSandbox> attackers = new List<AttackerSandbox>();
 
 
 	//spawn points
-	private TwoDLoc spawn1 = new TwoDLoc(1, BoardBehavior.BOARD_HEIGHT - 1);
-	private TwoDLoc spawn2 = new TwoDLoc(4, BoardBehavior.BOARD_HEIGHT - 1);
-	private TwoDLoc spawn3 = new TwoDLoc(7, BoardBehavior.BOARD_HEIGHT - 1);
-	List<TwoDLoc> spawnPoints = new List<TwoDLoc>();
-	private const string SPAWNER_OBJ = "Spawn point";
+	protected TwoDLoc spawn1 = new TwoDLoc(1, BoardBehavior.BOARD_HEIGHT - 1);
+	protected TwoDLoc spawn2 = new TwoDLoc(4, BoardBehavior.BOARD_HEIGHT - 1);
+	protected TwoDLoc spawn3 = new TwoDLoc(7, BoardBehavior.BOARD_HEIGHT - 1);
+	protected List<TwoDLoc> spawnPoints = new List<TwoDLoc>();
+	protected const string SPAWNER_OBJ = "Spawn point";
 
 
 	//how long attackers take to move one space
-	public float MoveSpeed { get; private set; }
+	public float MoveSpeed { get; protected set; }
 
 
 	//the waves
-	private List<Wave> waves = new List<Wave>();
-	private int waveIndex = 0; //which wave in the list of waves the game is currently on
+	protected List<Wave> waves = new List<Wave>();
+	protected int waveIndex = 0; //which wave in the list of waves the game is currently on
 
 
 	//used to give each enemy a unique ID number
-	private int enemyNum = 0;
+	protected int enemyNum = 0;
 
 
 	/////////////////////////////////////////////
@@ -73,7 +73,7 @@ public class AttackerManager {
 	/// 5. Return the list of locations.
 	/// </summary>
 	/// <returns>The spawn points.</returns>
-	private List<TwoDLoc> CreateSpawnPoints(){
+	protected virtual List<TwoDLoc> CreateSpawnPoints(){
 		List<TwoDLoc> temp = new List<TwoDLoc>() { spawn1, spawn2, spawn3 };
 
 		GameObject spawnPoint = Resources.Load<GameObject>(SPAWNER_OBJ);
@@ -119,7 +119,7 @@ public class AttackerManager {
 	/// Randomly select a warlord among those that can be spawned in a given wave.
 	/// </summary>
 	/// <returns>The warlord type's name.</returns>
-	private string ChooseWarlordType(){
+	protected virtual string ChooseWarlordType(){
 		return waves[waveIndex].warlordTypes[Random.Range(0, waves[waveIndex].warlordTypes.Count)];
 	}
 
@@ -152,7 +152,7 @@ public class AttackerManager {
 	/// <param name="type">The type of warlord to make.</param>
 	/// <param name="x">The x coordinate on the board where the warlord is to be placed.</param>
 	/// <param name="z">The z coordinate on the board where the warlord is to be placed.</param>
-	private AttackerSandbox MakeWarlord(string type, int x, int z){
+	protected virtual AttackerSandbox MakeWarlord(string type, int x, int z){
 		//start by getting any defender currently in the space out of there
 		if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Defender){
 			GameObject defender = Services.Board.GetThingInSpace(x, z);
@@ -195,7 +195,7 @@ public class AttackerManager {
 	/// <returns>A list of retinue members created.</returns>
 	/// <param name="x">The warlord's x coordinate on the board.</param>
 	/// <param name="z">The warlord's z coordinate on the board.</param>
-	private List<AttackerSandbox> MakeRetinue(int x, int z){
+	protected virtual List<AttackerSandbox> MakeRetinue(int x, int z){
 		List<AttackerSandbox> temp = new List<AttackerSandbox>();
 
 		GameObject newRetinueMember = null;
