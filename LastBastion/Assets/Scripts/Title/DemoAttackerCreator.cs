@@ -5,26 +5,6 @@
 
 	public class DemoAttackerCreator : AttackerManager {
 
-		/////////////////////////////////////////////
-		/// Fields
-		/////////////////////////////////////////////
-
-
-		//attackers that will appear in the demo, and the transform they're parented to
-		private const string EVIL_WARRIOR_OBJ = "Evil Warrior";
-		private const string PETTY_WARLORD_OBJ = "Petty Warlord";
-		private const string ARMORED_WARLORD_OBJ = "Armored Warlord";
-		private Transform attackerOrganizer;
-		private const string ATTACKER_ORGANIZER = "Attackers";
-
-
-		//spawn points
-		private TwoDLoc spawn1 = new TwoDLoc(1, BoardBehavior.BOARD_HEIGHT - 1);
-		private TwoDLoc spawn2 = new TwoDLoc(4, BoardBehavior.BOARD_HEIGHT - 1);
-		private TwoDLoc spawn3 = new TwoDLoc(7, BoardBehavior.BOARD_HEIGHT - 1);
-		List<TwoDLoc> spawnPoints = new List<TwoDLoc>();
-		private const string SPAWNER_OBJ = "Spawn point";
-
 
 
 		/////////////////////////////////////////////
@@ -37,35 +17,6 @@
 			spawnPoints = CreateSpawnPoints();
 			attackerOrganizer = GameObject.Find(ATTACKER_ORGANIZER).transform;
 			SpawnDemoAttackers();
-		}
-
-
-
-		/// <summary>
-		/// Create spawn points by following these steps:
-		/// 1. Create a list of all the spawn point locations for this map.
-		/// 2. Load the spawn point from the Resources folder.
-		/// 3. Instantiate a copy of the loaded spawn point, and put it in the first space in the list.
-		/// 4. Repeat (3) for all the spawn point locations in the list.
-		/// 5. Return the list of locations.
-		/// </summary>
-		/// <returns>The spawn points.</returns>
-		private List<TwoDLoc> CreateSpawnPoints(){
-			List<TwoDLoc> temp = new List<TwoDLoc>() { spawn1, spawn2, spawn3 };
-
-			GameObject spawnPoint = Resources.Load<GameObject>(SPAWNER_OBJ);
-
-			foreach (TwoDLoc point in temp){
-				Services.Board.PutThingInSpace(MonoBehaviour.Instantiate<GameObject>(spawnPoint,
-					Services.Board.GetWorldLocation(point.x, point.z),
-					spawnPoint.transform.rotation,
-					Services.Board.BoardOrganizer),
-					point.x,
-					point.z,
-					SpaceBehavior.ContentType.Spawn);
-			}
-
-			return temp;
 		}
 
 
@@ -88,13 +39,13 @@
 
 
 		/// <summary>
-		/// Make a warlord.
+		/// This override puts the warlord directly in its starting space, rather than having it move onto the board.
 		/// </summary>
 		/// <returns>The warlord's AttackerSandbox (or inheriting script).</returns>
 		/// <param name="type">The type of warlord to make.</param>
 		/// <param name="x">The x coordinate on the board where the warlord is to be placed.</param>
 		/// <param name="z">The z coordinate on the board where the warlord is to be placed.</param>
-		private AttackerSandbox MakeWarlord(string type, int x, int z){
+		protected override AttackerSandbox MakeWarlord(string type, int x, int z){
 			Vector3 startLoc = Services.Board.GetWorldLocation(x, z);
 
 			GameObject newWarlord = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(type),
@@ -119,7 +70,7 @@
 		/// <returns>A list of retinue members created.</returns>
 		/// <param name="x">The warlord's x coordinate on the board.</param>
 		/// <param name="z">The warlord's z coordinate on the board.</param>
-		private List<AttackerSandbox> MakeRetinue(int x, int z){
+		protected override List<AttackerSandbox> MakeRetinue(int x, int z){
 			List<AttackerSandbox> temp = new List<AttackerSandbox>();
 
 			GameObject newRetinueMember = null;
@@ -187,7 +138,7 @@
 		/// Randomly select a warlord among those that can be spawned in the demo.
 		/// </summary>
 		/// <returns>The warlord type's name.</returns>
-		private string ChooseWarlordType(){
+		protected override string ChooseWarlordType(){
 			string[] warlords = new string[2] { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ };
 
 			return warlords[Random.Range(0, warlords.Length)];
