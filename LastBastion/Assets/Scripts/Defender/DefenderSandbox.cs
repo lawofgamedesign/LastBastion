@@ -237,7 +237,7 @@ public class DefenderSandbox : MonoBehaviour {
 	/// 2. the space is occupied.
 	/// </summary>
 	/// <param name="loc">Location.</param>
-	public virtual void TryPlanMove(TwoDLoc loc){
+	public virtual bool TryPlanMove(TwoDLoc loc){
 		if (CheckAdjacent(moves[Speed - remainingSpeed], loc) &&
 			remainingSpeed > 0 &&
 			!CheckAlreadyThroughSpace(loc) &&
@@ -247,7 +247,11 @@ public class DefenderSandbox : MonoBehaviour {
 			remainingSpeed--;
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
 			moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+
+			return true;
 		}
+
+		return false;
 	}
 
 
@@ -283,6 +287,7 @@ public class DefenderSandbox : MonoBehaviour {
 	public void UndoMove(){
 		ClearLine();
 		PrepareToMove();
+		Services.Events.Fire(new UndoMoveEvent());
 	}
 
 

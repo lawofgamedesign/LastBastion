@@ -245,6 +245,17 @@
 			}
 
 
+			private void ResetMoveTutorial(global::Event e){
+				Debug.Assert(e.GetType() == typeof(UndoMoveEvent), "Non-UndoMoveEvent in ResetMoveTutorial");
+
+				moveIndex = 0;
+				moveHighlight.position = Services.Board.GetWorldLocation(requiredMoves[moveIndex].x, requiredMoves[moveIndex].z) + 
+																		 vertOffset;
+				Context.SetTutorialText(PLAN_MSG);
+				if (Context.advanceButton.activeInHierarchy) Context.ToggleAdvanceButton();
+			}
+
+
 			private void HandlePhaseEndInput(global::Event e){
 				Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in HandlePhaseEndInput");
 
@@ -258,6 +269,7 @@
 				Context.TurnRulebookPage();
 				Services.Events.Register<InputEvent>(HandleMoveInputs);
 				Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
+				Services.Events.Register<UndoMoveEvent>(ResetMoveTutorial);
 				Context.phaseButtonText.text = STOP_MOVING_MSG;
 				Context.ToggleNextPhaseButton();
 				Context.imSure = false;
@@ -274,6 +286,7 @@
 				Services.Defenders.CompleteMovePhase();
 				Services.Events.Unregister<InputEvent>(HandleMoveInputs);
 				Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
+				Services.Events.Unregister<UndoMoveEvent>(ResetMoveTutorial);
 				Context.ToggleNextPhaseButton();
 				Services.Events.Unregister<TutorialClick>(OnButtonClick);
 			}
