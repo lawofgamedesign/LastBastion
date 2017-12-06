@@ -109,6 +109,8 @@ public class UIManager {
 
 
 	public void DrawCombatCard(int value){
+		Debug.Assert(deckOrganizer.childCount > 0, "No visual card to draw.");
+
 		Transform topCard = deckOrganizer.GetChild(deckOrganizer.childCount - 1);
 
 		topCard.SetParent(discardOrganizer);

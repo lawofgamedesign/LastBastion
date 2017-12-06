@@ -201,7 +201,7 @@ public class AttackerSandbox : MonoBehaviour {
 				if ((Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) != SpaceBehavior.ContentType.None && //blocked by something in the space
 					 Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) != SpaceBehavior.ContentType.Defender) ||
 					(ZPos - attemptedMove <= Services.Board.WallZPos && //blocked by the wall
-					 Services.Board.GetWallDurability(XPos) >0)) {
+					 Services.Board.GetWallDurability(XPos) > 0)) {
 					attemptedMove--;
 				}
 				else break;
@@ -229,17 +229,27 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 			//if this attacker is pushing a defender back, move the defender
-			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender){
-				GameObject defender = Services.Board.GetThingInSpace(XPos, ZPos - attemptedMove);
-				Services.Board.TakeThingFromSpace(XPos, ZPos - attemptedMove);
-				Services.Board.PutThingInSpace(defender, XPos, ZPos - attemptedMove - 1, SpaceBehavior.ContentType.Defender);
+
+			int temp = attemptedMove;
+
+			while (temp > 0){
+				if (Services.Board.GeneralSpaceQuery(XPos, ZPos - temp) == SpaceBehavior.ContentType.Defender){
+
+					if (ZPos - temp - 1 >= 0){ //don't try to push defenders back off the board
+						GameObject defender = Services.Board.GetThingInSpace(XPos, ZPos - temp);
+						Services.Board.TakeThingFromSpace(XPos, ZPos - temp);
+						Services.Board.PutThingInSpace(defender, XPos, ZPos - attemptedMove - 1, SpaceBehavior.ContentType.Defender);
 
 
-				defender.GetComponent<DefenderSandbox>().NewLoc(XPos, ZPos - attemptedMove - 1);
-				Services.Tasks.AddTask(new MoveDefenderTask(defender.GetComponent<Rigidbody>(),
-					defender.GetComponent<DefenderSandbox>().Speed,
-					new System.Collections.Generic.List<TwoDLoc>() { new TwoDLoc(XPos, ZPos - attemptedMove),
-						new TwoDLoc(XPos, ZPos - attemptedMove - 1)}));
+						defender.GetComponent<DefenderSandbox>().NewLoc(XPos, ZPos - attemptedMove - 1);
+						Services.Tasks.AddTask(new MoveDefenderTask(defender.GetComponent<Rigidbody>(),
+											   defender.GetComponent<DefenderSandbox>().Speed,
+											   new System.Collections.Generic.List<TwoDLoc>() { new TwoDLoc(XPos, ZPos - temp),
+											   new TwoDLoc(XPos, ZPos - attemptedMove - 1)}));
+					}
+				}
+
+				temp--;
 			}
 
 			//OK, not moving through a wall and any defender is out of the way.
