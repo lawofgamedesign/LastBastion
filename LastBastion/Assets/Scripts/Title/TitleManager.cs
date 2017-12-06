@@ -15,8 +15,9 @@
 		private CameraRotator camScript;
 
 
-		//the next scene to load
-		private const string NEXT_SCENE = "Game";
+		//scenes to load
+		private const string GAME_SCENE = "Game";
+		private const string TUTORIAL_SCENE = "Tutorial";
 
 
 		/////////////////////////////////////////////
@@ -32,22 +33,20 @@
 			Services.Attackers.Setup();
 			Services.Defenders = new DefenderManager();
 			Services.Defenders.Setup();
-			Services.Inputs = new DetectAnyInput();
 			camScript = new CameraRotator();
 			camScript.Setup();
-			Services.Events.Register<InputEvent>(GoToGame);
 		}
 
 
 		private void Update(){
 			camScript.Tick();
-			Services.Inputs.Tick();
+			ListenForClick();
 		}
 
 
-		private void GoToGame(global::Event e){
-			Services.Events.Unregister<InputEvent>(GoToGame);
-			SceneManager.LoadScene(NEXT_SCENE);
+		private void ListenForClick(){
+			if (Input.GetMouseButtonDown(0)) SceneManager.LoadScene(TUTORIAL_SCENE);
+			else if (Input.GetMouseButtonDown(1)) SceneManager.LoadScene(GAME_SCENE);
 		}
 	}
 }
