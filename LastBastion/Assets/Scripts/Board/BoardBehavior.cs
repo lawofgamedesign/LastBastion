@@ -389,8 +389,8 @@ public class BoardBehavior {
 	/// <summary>
 	/// Provides a list of all spaces in a given column so that, frex., they can all become lures.
 	/// </summary>
-	/// <returns>The all spaces in column.</returns>
-	/// <param name="x">The x coordinate.</param>
+	/// <returns>A list of the spaces in the column.</returns>
+	/// <param name="x">The x coordinate of the column in the grid.</param>
 	public List<SpaceBehavior> GetAllSpacesInColumn(int x){
 		Debug.Assert(CheckValidColumn(x), "Invalid column in GetAllSpacesInColumn: " + x);
 
@@ -401,6 +401,26 @@ public class BoardBehavior {
 		}
 
 		Debug.Assert(temp.Count == BOARD_HEIGHT); //make sure all spaces in the column were added
+
+		return temp;
+	}
+
+
+	/// <summary>
+	/// Provides a list of all spaces in a given row so that, frex., the tutorial can change their color.
+	/// </summary>
+	/// <returns>A list of the spaces in the row.</returns>
+	/// <param name="x">The z coordinate of the row in the grid.</param>
+	public List<SpaceBehavior> GetAllSpacesInRow(int z){
+		Debug.Assert(CheckValidRow(z), "Invalid row in GetAllSpacesInRow: " + z);
+
+		List<SpaceBehavior> temp = new List<SpaceBehavior>();
+
+		for (int x = 0; x < BOARD_WIDTH; x++){
+			temp.Add(spaces[x, z]);
+		}
+
+		Debug.Assert(temp.Count == BOARD_WIDTH, "Did not add all spaces in row.");
 
 		return temp;
 	}

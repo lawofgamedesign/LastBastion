@@ -182,7 +182,7 @@
 
 			private const string YOUR_TURN_MSG = "After my horde advances, it's your turn to move your defenders.";
 			private const string OK_MSG = "Got it.";
-			private const string SELECT_MSG = "Plan your move by clicking the spaces you want to move to. Click your defender, in the center of the board.";
+			private const string SELECT_MSG = "Plan your move by clicking the spaces you want to move to. First, click your defender.";
 			private const string PLAN_MSG = "Now choose your move by clicking each highlighted space.";
 			private const string DONE_MSG = "Right, now lock in your move with the \"Done\" button.";
 			private const string THERE_MSG = "I'm there.";
@@ -435,8 +435,8 @@
 			private const string CHOOSE_MSG = "Choose an upgrade by clicking either of the choices in the top row.";
 			private const string FREE_MSG = "Great! You can upgrade your defenders at the start of the game for free.";
 			private const string WHEN_MSG = "And after that?";
-			private const string HOPE_MSG = "Each time your defenders defeat a member of my horde, they gain Inspiration. You can spend it for upgrades.";
-			private const string HOW_MUCH_MSG = "How much?";
+			private const string HOPE_MSG = "Defenders earn upgrades by defeating my horde. The next one takes three victories, then four, etc.";
+			private const string HOW_MUCH_MSG = "If I forget?";
 			private const string NEXT_UPGRADE_MSG = "Check the defender's character sheet. It will tell you.";
 			private const string HIDE_MSG = "Click the board to put the character sheet back down.";
 			private const string READY_MSG = "Ready.";
