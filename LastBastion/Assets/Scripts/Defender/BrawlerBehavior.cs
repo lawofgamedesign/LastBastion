@@ -343,7 +343,10 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		switch (tree){
 			case (int)UpgradeTracks.Rampage:
-				if (currentRampage != RampageTrack.The_Last_One_Standing) currentRampage++;
+				if (currentRampage != RampageTrack.The_Last_One_Standing){
+					currentRampage++;
+					Services.Events.Fire(new UpgradeEvent(gameObject, currentRampage.ToString()));
+				}
 				break;
 		}
 

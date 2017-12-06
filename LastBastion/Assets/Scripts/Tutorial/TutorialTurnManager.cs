@@ -1,6 +1,8 @@
 ﻿namespace Tutorial
 {
+	using System.Collections.Generic;
 	using UnityEngine;
+	using UnityEngine.SceneManagement;
 	using UnityEngine.UI;
 
 	public class TutorialTurnManager : TurnManager {
@@ -409,6 +411,196 @@
 		/// </summary>
 		public class PowerUp : FSM<TutorialTurnManager>.State {
 
+
+			private const string UI_TAG = "UI";
+			private const string POWER_MSG = "Let's stop for a second, and make your defender more awesome.";
+			private const string AWESOME_MSG = "Awesome is good.";
+			private const string SHEET_MSG = "Select your defender, then click the character sheet in the lower-right.";
+			private const string NEXT_CURRENT_MSG = "The upgrades you have so far are on the bottom row. You can choose from upgrades on the top row.";
+			private const string OK_MSG = "OK.";
+			private const string TRACKS_MSG = "Each column is a different set of upgrades. You can choose either column each time you upgrade.";
+			private const string CHOOSE_MSG = "Choose an upgrade by clicking either of the choices in the top row.";
+			private const string FREE_MSG = "Great! You can upgrade your defenders at the start of the game for free.";
+			private const string WHEN_MSG = "And after that?";
+			private const string HOPE_MSG = "Each time your defenders defeat a member of my horde, they gain Inspiration. You can spend it for upgrades.";
+			private const string HOW_MUCH_MSG = "How much?";
+			private const string NEXT_UPGRADE_MSG = "Check the defender's character sheet. It will tell you.";
+			private const string HIDE_MSG = "Click the board to put the character sheet back down.";
+			private const string READY_MSG = "Ready.";
+
+
+			public override void OnEnter (){
+				Context.SetTutorialText(POWER_MSG);
+				Context.SetButtonText(AWESOME_MSG);
+				Context.ToggleAdvanceButton();
+				Services.Events.Register<UpgradeEvent>(HandlePowerUpgrade);
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<UpgradeEvent>(HandlePowerUpgrade);
+				Services.Events.Unregister<InputEvent>(HandlePowerInputs);
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+			}
+
+
+			private void OnButtonClick(global::Event e){
+				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in PowerUp's OnButtonClick");
+
+				switch (Context.GetTutorialText()){
+					case POWER_MSG:
+						Context.SetTutorialText(SHEET_MSG);
+						Context.ToggleAdvanceButton();
+						Services.Events.Register<InputEvent>(HandlePowerInputs);
+						break;
+					case NEXT_CURRENT_MSG:
+						Context.SetTutorialText(TRACKS_MSG);
+						break;
+					case TRACKS_MSG:
+						Context.SetTutorialText(CHOOSE_MSG);
+						Context.ToggleAdvanceButton();
+						break;
+					case FREE_MSG:
+						Context.SetTutorialText(HOPE_MSG);
+						Context.SetButtonText(HOW_MUCH_MSG);
+						break;
+					case HOPE_MSG:
+						Context.SetTutorialText(NEXT_UPGRADE_MSG);
+						Context.SetButtonText(OK_MSG);
+						break;
+					case NEXT_UPGRADE_MSG:
+						Context.SetTutorialText(HIDE_MSG);
+						Context.SetButtonText(READY_MSG);
+						break;
+					case HIDE_MSG:
+						TransitionTo<BesiegeWalls>();
+						break;
+				}
+			}
+
+
+			private void HandlePowerInputs(global::Event e){
+				Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in PowerUp's HandlePowerEvents");
+
+				InputEvent inputEvent = e as InputEvent;
+
+				if (inputEvent.selected.tag == UI_TAG){
+					if (Context.GetTutorialText() == SHEET_MSG){
+						Context.SetTutorialText(NEXT_CURRENT_MSG);
+						Context.SetButtonText(OK_MSG);
+						Context.ToggleAdvanceButton();
+					}
+				}
+
+				if (inputEvent.selected.tag == DEFENDER_TAG){
+					if (Context.GetTutorialText() == SHEET_MSG){
+						Services.Defenders.PrepareDefenderFightPhase();
+						Services.Defenders.SelectDefenderForFight(inputEvent.selected.GetComponent<DefenderSandbox>());
+					}
+				}
+			}
+
+			private void HandlePowerUpgrade(global::Event e){
+				Debug.Assert(e.GetType() == typeof(UpgradeEvent), "Non-UpgradeEvent in HandlePowerUpgrade");
+
+				if (Context.GetTutorialText() == CHOOSE_MSG){
+					Context.SetTutorialText(FREE_MSG);
+					Context.SetButtonText(WHEN_MSG);
+					Context.ToggleAdvanceButton();
+				} else if (Context.GetTutorialText() == NEXT_CURRENT_MSG ||
+						   Context.GetTutorialText() == TRACKS_MSG){
+					Context.SetTutorialText(FREE_MSG);
+					Context.SetButtonText(WHEN_MSG);
+				}
+			}
+		}
+
+
+		protected class BesiegeWalls : FSM<TutorialTurnManager>.State {
+
+
+			private const string BESIEGE_MSG = "The last thing that happens each turn is my horde besieges the wall.";
+			private const string BACK_MSG = "Back off!";
+			private const string ADJACENT_MSG = "Any piece I have that's in front of the wall plays a card and defeats its guard.";
+			private const string POOR_MSG = "Poor guard!";
+			private const string HAHA_MSG = "Behold, the power of my skeleton!";
+			private const string REVENGE_MSG = "I'll get you!";
+			private const string READY_MSG = "That's enough to get started. Let's reset the board and start playing. Good luck, have fun!";
+			private const string GLHF_MSG = "You too!";
+			private const string GAME_SCENE = "Game";
+
+
+			List<AttackerSandbox> besiegers;
+
+
+			private void OnButtonClick(global::Event e){
+				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in BesiegeWalls' OnButtonClick");
+
+				switch (Context.GetTutorialText()){
+				case BESIEGE_MSG:
+					Context.SetTutorialText(ADJACENT_MSG);
+					Context.SetButtonText(POOR_MSG);
+					break;
+				case ADJACENT_MSG:
+					Context.SetTutorialText(HAHA_MSG);
+					Context.SetButtonText(REVENGE_MSG);
+					Besiege();
+					break;
+				case HAHA_MSG:
+					Context.SetTutorialText(READY_MSG);
+					Context.SetButtonText(GLHF_MSG);
+					break;
+				case READY_MSG:
+					SceneManager.LoadScene(GAME_SCENE);
+					break;
+				}
+			}
+
+
+			//are any enemies besieging the wall? Get a list of them
+			public override void OnEnter (){
+				besiegers = Services.Board.GetBesiegingAttackers();
+				Context.phaseText.text = BESIEGE;
+				Context.TurnRulebookPage();
+				Context.SetTutorialText(BESIEGE_MSG);
+				Context.SetButtonText(BACK_MSG);
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+			}
+
+
+			/// <summary>
+			/// Besiege the wall, knocking out any guards adjacent to attackers.
+			/// </summary>
+			private void Besiege() {
+				if (besiegers.Count > 0){
+					int combatValue = Services.AttackDeck.GetAttackerCard().Value;
+
+					if (combatValue > Services.Board.GetWallStrength(besiegers[0].GetColumn())){
+						Services.Board.ChangeWallDurability(besiegers[0].GetColumn(), -besiegers[0].SiegeStrength);
+					} else {
+						Services.Board.FailToDamageWall(besiegers[0].GetColumn());
+					}
+
+					besiegers.RemoveAt(0);
+				}
+			}
+
+
+			/// <summary>
+			/// Shut off the defender's combat cards and character sheet when it's safe to do so.
+			/// </summary>
+			public override void Tick (){
+				if (!Services.Tasks.CheckForTaskOfType<MoveCharSheetTask>() &&
+					Services.UI.GetCharSheetStatus() == CharacterSheetBehavior.SheetStatus.Hidden){
+					Services.Defenders.CompleteFightPhase();
+				}
+			}
 		}
 	}
 }

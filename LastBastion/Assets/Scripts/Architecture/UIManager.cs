@@ -313,6 +313,14 @@ public class UIManager {
 
 
 	/// <summary>
+	/// Pick up or put down the character sheet.
+	/// </summary>
+	public void ShowOrHideSheet(){
+		charSheet.DisplayCharSheet();
+	}
+
+
+	/// <summary>
 	/// Change the text of the upgrade track on the left.
 	/// </summary>
 	/// <param name="next">The next upgrade on the left-side track.</param>

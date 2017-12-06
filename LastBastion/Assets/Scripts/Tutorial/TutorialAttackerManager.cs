@@ -36,7 +36,7 @@
 		/// </summary>
 		/// <returns>The spawn points.</returns>
 		protected override List<TwoDLoc> CreateSpawnPoints(){
-			List<TwoDLoc> temp = new List<TwoDLoc>() { spawn2 };
+			List<TwoDLoc> temp = new List<TwoDLoc>() { spawn1, spawn2 };
 
 			GameObject spawnPoint = Resources.Load<GameObject>(SPAWNER_OBJ);
 

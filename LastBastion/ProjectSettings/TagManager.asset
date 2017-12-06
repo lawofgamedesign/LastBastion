@@ -9,6 +9,7 @@ TagManager:
   - Attacker
   - Leader
   - Minion
+  - UI
   layers:
   - Default
   - TransparentFX
