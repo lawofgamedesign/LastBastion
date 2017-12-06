@@ -299,6 +299,10 @@
 			private const string CAREFUL_MSG = "Dangerous!";
 			private const string CARD_RULES_MSG = "A defender has to use all their cards once before they can use any again.";
 			private const string RESET_OK_MSG = "All three, OK.";
+			private const string ARMOR_RULES_MSG = "Skeletons are easy to beat, but the warlords are tough. Click my pieces to see their stats.";
+			private const string EXTRA_INFO_MSG = "In the lower left.";
+			private const string MATH_MSG = "The lower-left sheet will also show the math behind each combat, if you want precise information.";
+			private const string HELPFUL_MSG = "That's a help.";
 			private const string DONE_FIGHT_MSG = "Click \"Done fighting\" in the upper-right when you're finished.";
 
 
@@ -327,6 +331,14 @@
 						Context.SetButtonText(RESET_OK_MSG);
 						break;
 					case CARD_RULES_MSG:
+						Context.SetTutorialText(ARMOR_RULES_MSG);
+						Context.SetButtonText(EXTRA_INFO_MSG);
+						break;
+					case ARMOR_RULES_MSG:
+						Context.SetTutorialText(MATH_MSG);
+						Context.SetButtonText(HELPFUL_MSG);
+						break;
+					case MATH_MSG:
 						Context.SetTutorialText(DONE_FIGHT_MSG);
 						Context.ToggleAdvanceButton();
 						break;
@@ -357,8 +369,7 @@
 
 
 			/// <summary>
-			/// End the phase, but only if the cards aren't moving. This is a bodge to protect the Brawler, who otherwise might fail to
-			/// unregister for InputEvents if they return from their DoneFighting() early.
+			/// End the phase, but only if the player has reached the end of the tutorial for the phase.
 			/// </summary>
 			/// <param name="e">E.</param>
 			private void HandlePhaseEndInput(global::Event e){
