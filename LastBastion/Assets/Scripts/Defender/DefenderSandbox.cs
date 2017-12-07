@@ -295,8 +295,7 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Called by the UI to move the defender.
 	/// </summary>
 	public virtual void Move(){
-		MoveDefenderTask moveTask = new MoveDefenderTask(rb, moveSpeed, moves);
-		Services.Tasks.AddTask(moveTask);
+		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
 		ClearLine();
 
 
@@ -460,7 +459,7 @@ public class DefenderSandbox : MonoBehaviour {
 		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){
 			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
 			FinishWithCard();
-			DefeatedSoFar++;
+			DefeatAttacker();
 			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 			DoneFighting();
 		} else {
@@ -581,6 +580,15 @@ public class DefenderSandbox : MonoBehaviour {
 		if (!Services.Tasks.CheckForTaskOfType<PickUpCardTask>() &&
 			!Services.Tasks.CheckForTaskOfType<FlipCardTask>() &&
 			!Services.Tasks.CheckForTaskOfType<PutDownCardTask>()) Services.Tasks.AddTask(new ShutOffCardsTask());
+	}
+
+
+	/// <summary>
+	/// Call this when an attacker is defeated to track the defeat and display appropriate feedback.
+	/// </summary>
+	public virtual void DefeatAttacker(){
+		DefeatedSoFar++;
+		powerupReadyParticle.SetActive(CheckUpgradeStatus());
 	}
 
 

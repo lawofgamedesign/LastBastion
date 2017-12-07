@@ -60,6 +60,8 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const string DRINK_MSG = "The party's starting!";
 	private const string KICK_DIRECTIONS = "Pick an adjacent space to kick the tankard to.";
 	private const string KICK_MSG = "Gave it the boot!";
+	private int drinkDamage;
+	private const int START_DRINK_DAMAGE = 1;
 
 
 	//character sheet information
@@ -147,8 +149,7 @@ public class BrawlerBehavior : DefenderSandbox {
 			damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
 
 			if (damage >= attacker.Health){
-				DefeatedSoFar++;
-				powerupReadyParticle.SetActive(CheckUpgradeStatus());
+				DefeatAttacker();
 				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 				if (currentRampage == RampageTrack.Wade_In ||
 					currentRampage == RampageTrack.Berserk ||
@@ -379,6 +380,7 @@ public class BrawlerBehavior : DefenderSandbox {
 						case DrinkTrack.Liquid_Courage:
 							Services.Events.Register<InputEvent>(DropTankard);
 							Services.UI.SetExtraText(DROP_DIRECTIONS);
+							drinkDamage = START_DRINK_DAMAGE;
 							break;
 					}
 				}
@@ -443,7 +445,11 @@ public class BrawlerBehavior : DefenderSandbox {
 				MoveObjectTask moveTask = new MoveObjectTask(GameObject.Find(TANKARD_OBJ).transform,
 															 new TwoDLoc(GridLoc.x, GridLoc.z),
 															 new TwoDLoc(space.GridLocation.x, space.GridLocation.z));
+				DamageRemotelyTask damageTask = new DamageRemotelyTask(new TwoDLoc(space.GridLocation.x, space.GridLocation.z),
+																	   drinkDamage,
+																	   this);
 				waitTask.Then(moveTask);
+				moveTask.Then(damageTask);
 				Services.Tasks.AddTask(waitTask);
 				Services.UI.SetExtraText(KICK_MSG);
 				Services.Events.Unregister<InputEvent>(ChooseTankardKick);
