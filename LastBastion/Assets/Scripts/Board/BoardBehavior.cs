@@ -35,6 +35,10 @@ public class BoardBehavior {
 	public readonly int NOT_FOUND = -1;
 
 
+	//nonsense return value for an illegal space
+	public readonly Vector3 illegalLoc = new Vector3(-999.0f, 0.0f, 0.0f);
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -117,7 +121,8 @@ public class BoardBehavior {
 
 
 	public Vector3 GetWorldLocation(int x, int z){
-		return spaces[x, z].WorldLocation;
+		if (!CheckValidSpace(x, z)) return illegalLoc;
+		else return spaces[x, z].WorldLocation;
 	}
 
 
@@ -373,7 +378,7 @@ public class BoardBehavior {
 
 
 	/// <summary>
-	/// Call this to check whether a space has something in it that blocks attackers, but not defenders;
+	/// Call this to check whether a space has something in it that blocks attackers, but not defenders.
 	/// </summary>
 	/// <returns><c>true</c> if there's something blocking attacker movement in the space, <c>false</c> otherwise.</returns>
 	/// <param name="x">The x grid coordinate of the space.</param>
@@ -382,6 +387,20 @@ public class BoardBehavior {
 		Debug.Assert(CheckValidSpace(x, z), "Illegal block check at x == " + x + ", z == " + z);
 
 		if (spaces[x, z].Block) return true;
+		else return false;
+	}
+
+
+	/// <summary>
+	/// Call this to check whether a space has a tankard.
+	/// </summary>
+	/// <returns><c>true</c> if there's a tankard in the space, <c>false</c> otherwise.</returns>
+	/// <param name="x">The x grid coordinate of the space.</param>
+	/// <param name="z">The z grid coordinate of the space.</param>
+	public bool CheckIfTankard(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Illegal tankard check at x == " + x + ", z == " + z);
+
+		if (spaces[x, z].Tankard) return true;
 		else return false;
 	}
 

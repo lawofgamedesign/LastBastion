@@ -295,7 +295,8 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Called by the UI to move the defender.
 	/// </summary>
 	public virtual void Move(){
-		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
+		MoveDefenderTask moveTask = new MoveDefenderTask(rb, moveSpeed, moves);
+		Services.Tasks.AddTask(moveTask);
 		ClearLine();
 
 

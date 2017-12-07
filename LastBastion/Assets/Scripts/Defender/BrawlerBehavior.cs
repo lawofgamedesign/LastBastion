@@ -17,7 +17,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	//upgrade tracks
-	private enum UpgradeTracks { Rampage, Boasting };
+	private enum UpgradeTracks { Rampage, Drink };
 
 
 	//rampage track
@@ -44,7 +44,22 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	//drink track
-	private enum DrinkTrack { None };
+	private enum DrinkTrack { None, Liquid_Courage, Party_Foul, Open_The_Tap, Buy_A_Round };
+	private List<string> drinkDescriptions = new List<string>() {
+		"<b>Start drinking</b>",
+		"<b>Liquid Courage</b>\n\nPut a tankard on the field. When you stop on it, take a drink and then kick it.\n\nAny Horde member it hits takes 1 damage.",
+		"<b>Party Foul</b>\n\nWhen you drink, gain 1 Inspiration and kick the tankard. Any Horde member it hits takes 1 damage.",
+		"<b>Open the Tap</b>\n\nWhen you drink, gain 2 Inspiration and kick the tankard. Any Horde member it hits takes 2 damage.",
+		"<b>Buy a Round</b>\n\nTwo more tankards land on the field. All defenders can drink for 2 Inspiration. When you drink, kick the tankard. Any Horde member it hits takes 2 damage.",
+		"<b>Here we go!</b>"
+	};
+	private DrinkTrack currentDrink;
+	private const string BOARD_TAG = "Board";
+	private const string TANKARD_OBJ = "Tankard";
+	private const string DROP_DIRECTIONS = "Choose an empty space for your tankard.";
+	private const string DRINK_MSG = "The party's starting!";
+	private const string KICK_DIRECTIONS = "Pick an adjacent space to kick the tankard to.";
+	private const string KICK_MSG = "Gave it the boot!";
 
 
 	//character sheet information
@@ -69,6 +84,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 		currentRampage = RampageTrack.None;
+		currentDrink = DrinkTrack.None;
 	}
 
 
@@ -79,6 +95,9 @@ public class BrawlerBehavior : DefenderSandbox {
 	protected override List<Card> MakeCombatHand(){
 		return new List<Card>() { new Card(4), new Card(6), new Card(7) };
 	}
+
+
+	#region combat
 
 
 	/// <summary>
@@ -316,6 +335,9 @@ public class BrawlerBehavior : DefenderSandbox {
 	}
 
 
+	#endregion combat
+
+
 	/// <summary>
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
 	/// </summary>
@@ -328,8 +350,8 @@ public class BrawlerBehavior : DefenderSandbox {
 									  DefeatedSoFar,
 									  rampageDescriptions[(int)currentRampage + 1],
 									  rampageDescriptions[(int)currentRampage],
-									  "",
-									  "");
+									  drinkDescriptions[(int)currentDrink + 1],
+									  drinkDescriptions[(int)currentDrink]);
 	}
 
 
@@ -348,6 +370,19 @@ public class BrawlerBehavior : DefenderSandbox {
 					Services.Events.Fire(new UpgradeEvent(gameObject, currentRampage.ToString()));
 				}
 				break;
+			case (int)UpgradeTracks.Drink:
+				if (currentDrink != DrinkTrack.Buy_A_Round){
+					currentDrink++;
+					Services.Events.Fire(new UpgradeEvent(gameObject, currentDrink.ToString()));
+
+					switch(currentDrink){
+						case DrinkTrack.Liquid_Courage:
+							Services.Events.Register<InputEvent>(DropTankard);
+							Services.UI.SetExtraText(DROP_DIRECTIONS);
+							break;
+					}
+				}
+				break;
 		}
 
 		Services.UI.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
@@ -357,4 +392,77 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		return true;
 	}
+
+
+	#region drinking
+
+
+	/// <summary>
+	/// Drop a tankard in a chosen empty space. Also set the space's state accordingly, and provide feedback.
+	/// </summary>
+	/// <param name="e">An InputEvent with the relevant space.</param>
+	private void DropTankard(Event e){
+		Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in DropTankard.");
+
+		InputEvent inputEvent = e as InputEvent;
+
+		if (inputEvent.selected.tag == BOARD_TAG &&
+			Services.UI.GetCharSheetStatus() == CharacterSheetBehavior.SheetStatus.Hidden){
+			SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
+
+			if (Services.Board.GeneralSpaceQuery(space.GridLocation.x, space.GridLocation.z) != SpaceBehavior.ContentType.None) return;
+
+			Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, TANKARD_OBJ));
+			space.Tankard = true;
+			Services.UI.SetExtraText(DRINK_MSG);
+			Services.Events.Unregister<InputEvent>(DropTankard);
+		}
+	}
+
+
+	public override void Move(){
+		base.Move();
+
+		if (Services.Board.CheckIfTankard(GridLoc.x, GridLoc.z)){
+			Services.UI.SetExtraText(KICK_DIRECTIONS);
+			Services.Events.Register<InputEvent>(ChooseTankardKick);
+		}
+	}
+
+
+	private void ChooseTankardKick(Event e){
+		Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in ChooseTankardKick.");
+
+		InputEvent inputEvent = e as InputEvent;
+
+		if (inputEvent.selected.tag == BOARD_TAG){
+			SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
+
+			if (CheckAllAdjacent(GridLoc, space.GridLocation)){
+				WaitToArriveTask waitTask = new WaitToArriveTask(transform, new TwoDLoc(GridLoc.x, GridLoc.z));
+				MoveObjectTask moveTask = new MoveObjectTask(GameObject.Find(TANKARD_OBJ).transform,
+															 new TwoDLoc(GridLoc.x, GridLoc.z),
+															 new TwoDLoc(space.GridLocation.x, space.GridLocation.z));
+				waitTask.Then(moveTask);
+				Services.Tasks.AddTask(waitTask);
+				Services.UI.SetExtraText(KICK_MSG);
+				Services.Events.Unregister<InputEvent>(ChooseTankardKick);
+			}
+		}
+	}
+
+
+	/// <summary>
+	/// Checks adjacency of two spaces on the grid, including diagonal adjacency.
+	/// </summary>
+	/// <returns><c>true</c> if the spaces are adjacent, <c>false</c> otherwise.</returns>
+	/// <param name="one">The first space to check.</param>
+	/// <param name="two">The space the first is being checked against.</param>
+	private bool CheckAllAdjacent(TwoDLoc one, TwoDLoc two){
+		return (Mathf.Abs(one.x - two.x) <= 1 &&
+				Mathf.Abs(one.z - two.z) <= 1) ? true : false;
+	}
+
+
+	#endregion drinking
 }

@@ -34,4 +34,8 @@ public class SpaceBehavior : MonoBehaviour {
 
 	//is there something in this space that bocks attackers?
 	public bool Block { get; set; }
+
+
+	//does this space contain one of the Brawler's tankards?
+	public bool Tankard { get; set; }
 }
