@@ -44,24 +44,32 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	//drink track
-	private enum DrinkTrack { None, Liquid_Courage, Party_Foul, Open_The_Tap, Buy_A_Round };
+	private enum DrinkTrack { None, Party_Foul, Liquid_Courage, Open_The_Tap, Buy_A_Round };
 	private List<string> drinkDescriptions = new List<string>() {
 		"<b>Start drinking</b>",
-		"<b>Liquid Courage</b>\n\nPut a tankard on the field. When you stop on it, take a drink and then kick it.\n\nAny Horde member it hits takes 1 damage.",
-		"<b>Party Foul</b>\n\nWhen you drink, gain 1 Inspiration and kick the tankard. Any Horde member it hits takes 1 damage.",
+		"<b>Party Foul</b>\n\nPut a tankard on the field. When you stop on it, take a drink and then kick it.\n\nAny Horde member it hits takes 1 damage.",
+		"<b>Liquid Courage</b>\n\nWhen you drink, gain 1 Inspiration and kick the tankard. Any Horde member it hits takes 1 damage.",
 		"<b>Open the Tap</b>\n\nWhen you drink, gain 2 Inspiration and kick the tankard. Any Horde member it hits takes 2 damage.",
-		"<b>Buy a Round</b>\n\nTwo more tankards land on the field. All defenders can drink for 2 Inspiration. When you drink, kick the tankard. Any Horde member it hits takes 2 damage.",
+		"<b>Buy a Round</b>\n\nPut two more tankards on the field. All defenders can drink for 2 Inspiration. When you drink, kick the tankard. Any Horde member it hits takes 2 damage.",
 		"<b>Here we go!</b>"
 	};
 	private DrinkTrack currentDrink;
 	private const string BOARD_TAG = "Board";
-	private const string TANKARD_OBJ = "Tankard";
+	private const string TANKARD_1_OBJ = "Tankard 1";
+	private const string TANKARD_2_OBJ = "Tankard 2";
+	private const string TANKARD_3_OBJ = "Tankard 3";
+	private const string TANKARD_TAG = "Tankard";
 	private const string DROP_DIRECTIONS = "Choose an empty space for your tankard.";
 	private const string DRINK_MSG = "The party's starting!";
 	private const string KICK_DIRECTIONS = "Pick an adjacent space to kick the tankard to.";
 	private const string KICK_MSG = "Gave it the boot!";
-	private int drinkDamage;
+	private int drinkDamage = 0;
+	private int drinkInspiration = 0;
 	private const int START_DRINK_DAMAGE = 1;
+	private const int BETTER_DRINK_DAMAGE = 2;
+	private const int START_DRINK_INSP = 1;
+	private const int BETTER_DRINK_INSP = 2;
+	private int tankardsToDrop = 0;
 
 
 	//character sheet information
@@ -377,10 +385,26 @@ public class BrawlerBehavior : DefenderSandbox {
 					Services.Events.Fire(new UpgradeEvent(gameObject, currentDrink.ToString()));
 
 					switch(currentDrink){
-						case DrinkTrack.Liquid_Courage:
+						case DrinkTrack.Party_Foul:
+							foreach (TankardBehavior tankard in GetAllTankards()){
+								tankard.GridLoc = new TwoDLoc(-999, -999); //nonsense value to indicate off the board
+							}
 							Services.Events.Register<InputEvent>(DropTankard);
+							tankardsToDrop = 1;
 							Services.UI.SetExtraText(DROP_DIRECTIONS);
 							drinkDamage = START_DRINK_DAMAGE;
+							break;
+						case DrinkTrack.Liquid_Courage:
+							drinkInspiration = START_DRINK_INSP;
+							break;
+						case DrinkTrack.Open_The_Tap:
+							drinkDamage = BETTER_DRINK_DAMAGE;
+							drinkInspiration = BETTER_DRINK_INSP;
+							break;
+						case DrinkTrack.Buy_A_Round:
+							Services.Events.Register<InputEvent>(DropTankard);
+							Services.Events.Register<EndPhaseEvent>(GiveInspiration);
+							tankardsToDrop = 2;
 							break;
 					}
 				}
@@ -388,6 +412,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		}
 
 		Services.UI.ReviseTrack1(rampageDescriptions[(int)currentRampage + 1], rampageDescriptions[(int)currentRampage]);
+		Services.UI.ReviseTrack2(drinkDescriptions[(int)currentDrink + 1], drinkDescriptions[(int)currentDrink]);
 
 		//shut off the particle telling the player to power up
 		powerupReadyParticle.SetActive(false);
@@ -414,20 +439,65 @@ public class BrawlerBehavior : DefenderSandbox {
 
 			if (Services.Board.GeneralSpaceQuery(space.GridLocation.x, space.GridLocation.z) != SpaceBehavior.ContentType.None) return;
 
-			Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, TANKARD_OBJ));
+			Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, GetTankard()));
 			space.Tankard = true;
-			Services.UI.SetExtraText(DRINK_MSG);
+			GameObject.Find(GetTankard()).GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
+				
+			tankardsToDrop--;
+		}
+
+		if (tankardsToDrop <= 0){
 			Services.Events.Unregister<InputEvent>(DropTankard);
+			Services.UI.SetExtraText(DRINK_MSG);
 		}
 	}
 
 
+	/// <summary>
+	/// Provide the appropriate tankard for DropTankard to drop.
+	/// </summary>
+	/// <returns>The tankard's name, as a string.</returns>
+	private string GetTankard(){
+		if (currentDrink == DrinkTrack.Party_Foul) return TANKARD_1_OBJ;
+		else if (tankardsToDrop == 2) return TANKARD_2_OBJ;
+		else return TANKARD_3_OBJ;
+	}
+
+
+	private List<TankardBehavior> GetAllTankards(){
+		GameObject[] objs = GameObject.FindGameObjectsWithTag(TANKARD_TAG);
+
+		Debug.Assert(objs.Length > 0, "Failed to find any tankards");
+
+		List<TankardBehavior> tankards = new List<TankardBehavior>();
+
+		foreach (GameObject obj in objs){
+			tankards.Add(obj.GetComponent<TankardBehavior>());
+		}
+
+		Debug.Assert(tankards.Count == objs.Length, "Failed to add all tankards to list.");
+
+		return tankards;
+	}
+
+
+	/// <summary>
+	/// This override handles the Drink track, in which the Brawler kicks around a tankard and gains Inspiration for drinking at
+	/// higher Drink track levels.
+	/// </summary>
 	public override void Move(){
 		base.Move();
 
+		//try to kick the tankard
 		if (Services.Board.CheckIfTankard(GridLoc.x, GridLoc.z)){
 			Services.UI.SetExtraText(KICK_DIRECTIONS);
 			Services.Events.Register<InputEvent>(ChooseTankardKick);
+		}
+
+		//gain inspiration for drinking, if at that point in the track
+		if ((int)currentDrink > (int)DrinkTrack.Party_Foul){
+			DefeatedSoFar += drinkInspiration;
+			powerupReadyParticle.SetActive(CheckUpgradeStatus());
 		}
 	}
 
@@ -442,7 +512,12 @@ public class BrawlerBehavior : DefenderSandbox {
 
 			if (CheckAllAdjacent(GridLoc, space.GridLocation)){
 				WaitToArriveTask waitTask = new WaitToArriveTask(transform, new TwoDLoc(GridLoc.x, GridLoc.z));
-				MoveObjectTask moveTask = new MoveObjectTask(GameObject.Find(TANKARD_OBJ).transform,
+
+				Transform localTankard = GetTankardInSpace(GridLoc);
+
+				Debug.Assert(localTankard != transform, "Didn't find local tankard.");
+
+				MoveObjectTask moveTask = new MoveObjectTask(localTankard,
 															 new TwoDLoc(GridLoc.x, GridLoc.z),
 															 new TwoDLoc(space.GridLocation.x, space.GridLocation.z));
 				DamageRemotelyTask damageTask = new DamageRemotelyTask(new TwoDLoc(space.GridLocation.x, space.GridLocation.z),
@@ -450,6 +525,9 @@ public class BrawlerBehavior : DefenderSandbox {
 																	   this);
 				waitTask.Then(moveTask);
 				moveTask.Then(damageTask);
+				space.Tankard = true;
+				Services.Board.GetSpace(GridLoc.x, GridLoc.z).Tankard = false;
+				localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
 				Services.Tasks.AddTask(waitTask);
 				Services.UI.SetExtraText(KICK_MSG);
 				Services.Events.Unregister<InputEvent>(ChooseTankardKick);
@@ -467,6 +545,41 @@ public class BrawlerBehavior : DefenderSandbox {
 	private bool CheckAllAdjacent(TwoDLoc one, TwoDLoc two){
 		return (Mathf.Abs(one.x - two.x) <= 1 &&
 				Mathf.Abs(one.z - two.z) <= 1) ? true : false;
+	}
+
+
+	private Transform GetTankardInSpace(TwoDLoc loc){
+		foreach (TankardBehavior tankard in GetAllTankards()){
+			if (tankard.GridLoc.x == GridLoc.x &&
+				tankard.GridLoc.z == GridLoc.z) return tankard.transform;
+		}
+
+		return transform; //nonsense return value for error-checking.
+	}
+
+
+	/// <summary>
+	/// Give each defender in a space with a tankard at the end of the Defenders Move phase inspiration.
+	/// </summary>
+	/// <param name="e">An EndPhaseEvent.</param>
+	private void GiveInspiration(Event e){
+		Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in GiveInspiration");
+
+		EndPhaseEvent endEvent = e as EndPhaseEvent;
+
+		if (endEvent.Phase.GetType() == typeof(TurnManager.PlayerMove)){
+			foreach (DefenderSandbox defender in Services.Defenders.GetAllDefenders()){
+				if (defender != this){
+					TwoDLoc loc = defender.ReportGridLoc();
+
+					if (Services.Board.CheckIfTankard(loc.x, loc.z)){
+						for (int i = 0; i < BETTER_DRINK_INSP; i++){
+							defender.DefeatAttacker();
+						}
+					}
+				}
+			}
+		}
 	}
 
 

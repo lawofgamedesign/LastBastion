@@ -443,4 +443,17 @@ public class BoardBehavior {
 
 		return temp;
 	}
+
+
+	/// <summary>
+	/// Function for getting a space's script. Useful for, e.g., setting a script not to have a tankard.
+	/// </summary>
+	/// <returns>The space's SpaceBehavior.</returns>
+	/// <param name="x">The x coordinate of the space in the grid.</param>
+	/// <param name="z">The z coordinate of the space in the grid.</param>
+	public SpaceBehavior GetSpace(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Trying to get invalid space.");
+
+		return spaces[x, z];
+	}
 }
