@@ -393,6 +393,7 @@ public class BrawlerBehavior : DefenderSandbox {
 							tankardsToDrop = 1;
 							Services.UI.SetExtraText(DROP_DIRECTIONS);
 							drinkDamage = START_DRINK_DAMAGE;
+							Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.On);
 							break;
 						case DrinkTrack.Liquid_Courage:
 							drinkInspiration = START_DRINK_INSP;
@@ -405,6 +406,7 @@ public class BrawlerBehavior : DefenderSandbox {
 							Services.Events.Register<InputEvent>(DropTankard);
 							Services.Events.Register<EndPhaseEvent>(GiveInspiration);
 							tankardsToDrop = 2;
+							Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.On);
 							break;
 					}
 				}
@@ -449,6 +451,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		if (tankardsToDrop <= 0){
 			Services.Events.Unregister<InputEvent>(DropTankard);
 			Services.UI.SetExtraText(DRINK_MSG);
+			Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.Off);
 		}
 	}
 

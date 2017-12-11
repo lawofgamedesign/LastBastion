@@ -480,6 +480,26 @@ public class BoardBehavior {
 
 
 	/// <summary>
+	/// As above, but will not highlight the space if there's something in it.
+	/// </summary>
+	/// <param name="x">The x coordinate of the space in the grid.</param>
+	/// <param name="z">The z coordinate of the space in the grid.</param>
+	/// <param name="onOrOff">Should hte highlight be turned on or switched off?</param>
+	/// <param name="empty"><c>true</c> if the space must be empty to be highlighted.</param>
+	public void HighlightSpace(int x, int z, OnOrOff onOrOff, bool empty){
+		Debug.Assert(CheckValidSpace(x, z), "Attempting to highlight invalid space: x == " + x + ", z == " + z);
+
+		if (empty &&
+			onOrOff == OnOrOff.On &&
+			GeneralSpaceQuery(x, z) != SpaceBehavior.ContentType.None) return;
+
+		bool state = onOrOff == OnOrOff.On ? true : false;
+
+		spaces[x, z].transform.Find(HIGHLIGHT_OBJ).gameObject.SetActive(state);
+	}
+
+
+	/// <summary>
 	/// Convenience function for highlighting the spaces around a space. Does not highlight the central space.
 	/// </summary>
 	/// <param name="x">The x coordinate in the grid of the central space.</param>
@@ -511,8 +531,7 @@ public class BoardBehavior {
 				if (xMod == 0 && zMod == 0 ) { 
 					//don't highlight the central space
 				} else if (CheckValidSpace(x + xMod, z + zMod)){
-					if (!empty ||
-						GeneralSpaceQuery(x + xMod, z + zMod) == SpaceBehavior.ContentType.None) HighlightSpace(x + xMod, z + zMod, onOrOff);
+					HighlightSpace(x + xMod, z + zMod, onOrOff, empty);
 				}
 			}
 		}
@@ -551,6 +570,19 @@ public class BoardBehavior {
 	public void HighlightRow(int z, OnOrOff onOrOff){
 		if (CheckValidRow(z)){
 			for (int x = 0; x < BOARD_WIDTH; x++) HighlightSpace(x, z, onOrOff);
+		}
+	}
+
+
+	/// <summary>
+	/// Highlight all empty spaces on the board.
+	/// </summary>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	public void HighlightAllEmpty(OnOrOff onOrOff){
+		for (int x = 0; x < BOARD_WIDTH; x++){
+			for (int z = 0; z < BOARD_HEIGHT; z++){
+				HighlightSpace(x, z, onOrOff, true);
+			}
 		}
 	}
 }
