@@ -153,7 +153,7 @@ public class AttackerManager {
 	/// <param name="x">The x coordinate on the board where the warlord is to be placed.</param>
 	/// <param name="z">The z coordinate on the board where the warlord is to be placed.</param>
 	protected virtual AttackerSandbox MakeWarlord(string type, int x, int z){
-		//start by getting any defender currently in the space out of there
+		//start by getting any defender and/or tankard currently in the space out of there
 		if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Defender){
 			GameObject defender = Services.Board.GetThingInSpace(x, z);
 			Services.Board.TakeThingFromSpace(x, z);
@@ -184,6 +184,8 @@ public class AttackerManager {
 		newWarlord.name = type + enemyNum;
 		enemyNum++;
 		Services.Tasks.AddTask(new MoveTask(newWarlord.transform, x, z, MoveSpeed)); //create the task that moves the warlord onto the board
+
+		if (Services.Board.GetSpace(x, z).Tankard) MoveTankard(x, z);
 
 		return newWarlord.GetComponent<AttackerSandbox>();
 	}
@@ -219,6 +221,8 @@ public class AttackerManager {
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x - 1, z, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
+
+			if (Services.Board.GetSpace(x - 1, z).Tankard) MoveTankard(x - 1, z);
 		}
 
 		//try to make the retinue member to the south
@@ -240,6 +244,8 @@ public class AttackerManager {
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x, z - 1, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
+
+			if (Services.Board.GetSpace(x, z - 1).Tankard) MoveTankard(x, z - 1);
 		}
 
 
@@ -262,9 +268,37 @@ public class AttackerManager {
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x + 1, z, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
+
+			if (Services.Board.GetSpace(x + 1, z).Tankard) MoveTankard(x + 1, z);
 		}
 
 		return temp;
+	}
+
+
+	/// <summary>
+	/// Move a tankard in a space the first available open space to the south.
+	/// </summary>
+	/// <param name="x">The x coordinate in the grid of the starting space.</param>
+	/// <param name="z">The z coordinate in the grid of the starting space.</param>
+	private void MoveTankard(int x, int z){
+		for (int currentZ = z - 1; currentZ >= 0; currentZ--){
+			if (Services.Board.GeneralSpaceQuery(x, currentZ) == SpaceBehavior.ContentType.None){
+				Debug.Log("Trying to move tankard to " + x + ", " + currentZ);
+				Services.Board.GetSpace(x, z).Tankard = false;
+				Services.Board.GetSpace(x, currentZ).Tankard = true;
+
+				Transform localTankard = Services.Board.GetTankardInSpace(new TwoDLoc(x, z));
+
+				Debug.Assert(localTankard != null, "Failed to find local tankard.");
+
+				localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(x, currentZ);
+				Services.Tasks.AddTask(new MoveObjectTask(localTankard,
+														  new TwoDLoc(x, z),
+														  new TwoDLoc(x, currentZ)));
+				break;
+			}
+		}
 	}
 
 

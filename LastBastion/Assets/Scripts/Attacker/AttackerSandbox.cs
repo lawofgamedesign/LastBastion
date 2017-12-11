@@ -237,7 +237,7 @@ public class AttackerSandbox : MonoBehaviour {
 			while (temp > 0){
 				if (Services.Board.GeneralSpaceQuery(XPos, ZPos - temp) == SpaceBehavior.ContentType.Defender){
 
-					if (ZPos - temp - 1 >= 0){ //don't try to push defenders back off the board
+					if (ZPos - attemptedMove - 1 >= 0){ //don't try to push defenders back off the board
 						GameObject defender = Services.Board.GetThingInSpace(XPos, ZPos - temp);
 						Services.Board.TakeThingFromSpace(XPos, ZPos - temp);
 						Services.Board.PutThingInSpace(defender, XPos, ZPos - attemptedMove - 1, SpaceBehavior.ContentType.Defender);
@@ -252,7 +252,7 @@ public class AttackerSandbox : MonoBehaviour {
 				}
 
 				if (Services.Board.CheckIfTankard(XPos, ZPos - temp) == true){
-					if (ZPos - temp - 1 >= 0){ //don't try to push tankards back off the board, either
+					if (ZPos - attemptedMove - 1 >= 0){ //don't try to push tankards back off the board, either
 						Services.Board.GetSpace(XPos, ZPos - temp).Tankard = false;
 						Services.Board.GetSpace(XPos, ZPos - attemptedMove - 1).Tankard = true;
 

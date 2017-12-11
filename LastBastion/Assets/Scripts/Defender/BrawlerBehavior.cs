@@ -502,7 +502,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 				Transform localTankard = Services.Board.GetTankardInSpace(GridLoc);
 
-				Debug.Assert(localTankard != transform, "Didn't find local tankard.");
+				Debug.Assert(localTankard != null, "Didn't find local tankard.");
 
 				MoveObjectTask moveTask = new MoveObjectTask(localTankard,
 															 new TwoDLoc(GridLoc.x, GridLoc.z),

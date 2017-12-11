@@ -63,7 +63,11 @@ public class MomentumManager {
 			GameObject[] momentumMarkers = GameObject.FindGameObjectsWithTag(MARKER_OBJ);
 
 			foreach (GameObject marker in momentumMarkers){
-				Services.Tasks.AddTask(new EjectAttackerTask(marker.GetComponent<Rigidbody>()));
+
+				//use tasks written for attackers; they work fine for this purpose
+				EjectAttackerTask ejectTask = new EjectAttackerTask(marker.GetComponent<Rigidbody>());
+				ejectTask.Then(new DestroyAttackerTask(marker));
+				Services.Tasks.AddTask(ejectTask);
 			}
 		}
 	}
