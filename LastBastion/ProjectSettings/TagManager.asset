@@ -11,6 +11,7 @@ TagManager:
   - Minion
   - UI
   - Tankard
+  - Momentum marker
   layers:
   - Default
   - TransparentFX

@@ -177,7 +177,7 @@ public class TurnManager {
 	/// <summary>
 	/// State for the attackers moving south at the start of each turn.
 	/// </summary>
-	protected class AttackersAdvance : FSM<TurnManager>.State {
+	public class AttackersAdvance : FSM<TurnManager>.State {
 		float timer;
 
 		//tell the attacker manager to move the attackers.
@@ -201,6 +201,11 @@ public class TurnManager {
 				if (!Context.CheckForLoss()) TransitionTo<PlayerMove>();
 				else TransitionTo<PlayerLose>();
 			}
+		}
+
+
+		public override void OnExit (){
+			Services.Events.Fire(new EndPhaseEvent(Context.TurnMachine.CurrentState));
 		}
 	}
 

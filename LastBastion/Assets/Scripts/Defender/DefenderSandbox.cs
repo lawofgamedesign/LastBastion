@@ -464,6 +464,7 @@ public class DefenderSandbox : MonoBehaviour {
 			DoneFighting();
 		} else {
 			attacker.FailToDamage();
+			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 			DoneFighting();
 		}
