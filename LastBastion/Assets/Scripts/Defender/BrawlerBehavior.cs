@@ -386,7 +386,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 					switch(currentDrink){
 						case DrinkTrack.Party_Foul:
-							foreach (TankardBehavior tankard in GetAllTankards()){
+							foreach (TankardBehavior tankard in Services.Board.GetAllTankards()){
 								tankard.GridLoc = new TwoDLoc(-999, -999); //nonsense value to indicate off the board
 							}
 							Services.Events.Register<InputEvent>(DropTankard);
@@ -467,23 +467,6 @@ public class BrawlerBehavior : DefenderSandbox {
 	}
 
 
-	private List<TankardBehavior> GetAllTankards(){
-		GameObject[] objs = GameObject.FindGameObjectsWithTag(TANKARD_TAG);
-
-		Debug.Assert(objs.Length > 0, "Failed to find any tankards");
-
-		List<TankardBehavior> tankards = new List<TankardBehavior>();
-
-		foreach (GameObject obj in objs){
-			tankards.Add(obj.GetComponent<TankardBehavior>());
-		}
-
-		Debug.Assert(tankards.Count == objs.Length, "Failed to add all tankards to list.");
-
-		return tankards;
-	}
-
-
 	/// <summary>
 	/// This override handles the Drink track, in which the Brawler kicks around a tankard and gains Inspiration for drinking at
 	/// higher Drink track levels.
@@ -517,7 +500,7 @@ public class BrawlerBehavior : DefenderSandbox {
 			if (CheckAllAdjacent(GridLoc, space.GridLocation)){
 				WaitToArriveTask waitTask = new WaitToArriveTask(transform, new TwoDLoc(GridLoc.x, GridLoc.z));
 
-				Transform localTankard = GetTankardInSpace(GridLoc);
+				Transform localTankard = Services.Board.GetTankardInSpace(GridLoc);
 
 				Debug.Assert(localTankard != transform, "Didn't find local tankard.");
 
@@ -550,16 +533,6 @@ public class BrawlerBehavior : DefenderSandbox {
 	private bool CheckAllAdjacent(TwoDLoc one, TwoDLoc two){
 		return (Mathf.Abs(one.x - two.x) <= 1 &&
 				Mathf.Abs(one.z - two.z) <= 1) ? true : false;
-	}
-
-
-	private Transform GetTankardInSpace(TwoDLoc loc){
-		foreach (TankardBehavior tankard in GetAllTankards()){
-			if (tankard.GridLoc.x == GridLoc.x &&
-				tankard.GridLoc.z == GridLoc.z) return tankard.transform;
-		}
-
-		return transform; //nonsense return value for error-checking.
 	}
 
 

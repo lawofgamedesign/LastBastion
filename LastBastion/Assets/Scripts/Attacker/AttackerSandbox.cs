@@ -229,6 +229,8 @@ public class AttackerSandbox : MonoBehaviour {
 
 
 			//if this attacker is pushing a defender back, move the defender
+			//while the attacker is at it, also push any tankards back so that they end up, if possible,
+			//in a space where they can be used
 
 			int temp = attemptedMove;
 
@@ -246,6 +248,21 @@ public class AttackerSandbox : MonoBehaviour {
 											   defender.GetComponent<DefenderSandbox>().Speed,
 											   new System.Collections.Generic.List<TwoDLoc>() { new TwoDLoc(XPos, ZPos - temp),
 											   new TwoDLoc(XPos, ZPos - attemptedMove - 1)}));
+					}
+				}
+
+				if (Services.Board.CheckIfTankard(XPos, ZPos - temp) == true){
+					if (ZPos - temp - 1 >= 0){ //don't try to push tankards back off the board, either
+						Services.Board.GetSpace(XPos, ZPos - temp).Tankard = false;
+						Services.Board.GetSpace(XPos, ZPos - attemptedMove - 1).Tankard = true;
+
+						Transform localTankard = Services.Board.GetTankardInSpace(new TwoDLoc(XPos, ZPos - temp));
+						Debug.Assert(localTankard != null, "Didn't find local tankard.");
+
+						Services.Tasks.AddTask(new MoveObjectTask(localTankard,
+																  new TwoDLoc(XPos, ZPos - temp),
+																  new TwoDLoc(XPos, ZPos - attemptedMove - 1)));
+						localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(XPos, ZPos - attemptedMove - 1);
 					}
 				}
 

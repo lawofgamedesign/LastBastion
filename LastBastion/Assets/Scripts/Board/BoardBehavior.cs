@@ -44,6 +44,10 @@ public class BoardBehavior {
 	public enum OnOrOff { On, Off };
 
 
+	//the Brawler's tankards
+	private const string TANKARD_TAG = "Tankard";
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -584,5 +588,32 @@ public class BoardBehavior {
 				HighlightSpace(x, z, onOrOff, true);
 			}
 		}
+	}
+
+
+	public List<TankardBehavior> GetAllTankards(){
+		GameObject[] objs = GameObject.FindGameObjectsWithTag(TANKARD_TAG);
+
+		Debug.Assert(objs.Length > 0, "Failed to find any tankards");
+
+		List<TankardBehavior> tankards = new List<TankardBehavior>();
+
+		foreach (GameObject obj in objs){
+			tankards.Add(obj.GetComponent<TankardBehavior>());
+		}
+
+		Debug.Assert(tankards.Count == objs.Length, "Failed to add all tankards to list.");
+
+		return tankards;
+	}
+
+
+	public Transform GetTankardInSpace(TwoDLoc loc){
+		foreach (TankardBehavior tankard in GetAllTankards()){
+			if (tankard.GridLoc.x == loc.x &&
+				tankard.GridLoc.z ==loc.z) return tankard.transform;
+		}
+
+		return null; //nonsense return value for error-checking.
 	}
 }
