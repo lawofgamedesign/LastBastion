@@ -102,10 +102,12 @@
 					case WELCOME_MSG:
 						Context.SetTutorialText(THEME_MSG);
 						Context.SetButtonText(NEVER_MSG);
+						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.On);
 						break;
 					case THEME_MSG:
 						Context.SetTutorialText(HORDE_MSG);
 						Context.SetButtonText(NONE_MSG);
+						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.Off);
 						break;
 					case HORDE_MSG:
 						Context.SetTutorialText(WAVES_MSG);

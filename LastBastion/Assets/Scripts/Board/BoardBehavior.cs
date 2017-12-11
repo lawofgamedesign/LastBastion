@@ -541,4 +541,16 @@ public class BoardBehavior {
 			for (int z = 0; z < BOARD_HEIGHT; z++) HighlightSpace(x, z, onOrOff);
 		}
 	}
+
+
+	/// <summary>
+	/// Highlight all spaces in a row.
+	/// </summary>
+	/// <param name="z">The z coordinate in the grid of the row to be highlighted, zero-indexed.</param>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	public void HighlightRow(int z, OnOrOff onOrOff){
+		if (CheckValidRow(z)){
+			for (int x = 0; x < BOARD_WIDTH; x++) HighlightSpace(x, z, onOrOff);
+		}
+	}
 }
