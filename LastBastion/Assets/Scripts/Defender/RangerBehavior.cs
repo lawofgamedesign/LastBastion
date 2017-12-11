@@ -369,6 +369,7 @@ public class RangerBehavior : DefenderSandbox {
 						//register for input and provide appropriate feedback
 						Services.Events.Register<InputEvent>(PutDownBlock);
 						Services.UI.SetExtraText(ROCK_MSG);
+						Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On, true);
 						break;
 					case TrapTrack.Landslide:
 						DamageAtLoc(rockfallLoc.x, rockfallLoc.z + 1);
@@ -414,6 +415,7 @@ public class RangerBehavior : DefenderSandbox {
 				if (currentTrap == TrapTrack.Rockfall) rockfallLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
 
 				Services.Events.Unregister<InputEvent>(PutDownBlock);
+				Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.Off, true);
 			}
 		}
 	}

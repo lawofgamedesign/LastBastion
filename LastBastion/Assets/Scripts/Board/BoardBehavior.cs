@@ -39,6 +39,11 @@ public class BoardBehavior {
 	public readonly Vector3 illegalLoc = new Vector3(-999.0f, 0.0f, 0.0f);
 
 
+	//used to switch the highlight for a space on and off
+	private const string HIGHLIGHT_OBJ = "Highlight";
+	public enum OnOrOff { On, Off };
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -455,5 +460,85 @@ public class BoardBehavior {
 		Debug.Assert(CheckValidSpace(x, z), "Trying to get invalid space.");
 
 		return spaces[x, z];
+	}
+
+
+	/// <summary>
+	/// Change the state of a space's highlight, on or off.
+	/// </summary>
+	/// <param name="x">The x coordinate of the space in the grid.</param>
+	/// <param name="z">The z coordinate of the space in the grid.</param>
+	/// <param name="onOrOff">Should hte highlight be turned on or switched off?</param>
+	public void HighlightSpace(int x, int z, OnOrOff onOrOff){
+		Debug.Assert(CheckValidSpace(x, z), "Attempting to highlight invalid space: x == " + x + ", z == " + z);
+
+
+		bool state = onOrOff == OnOrOff.On ? true : false;
+
+		spaces[x, z].transform.Find(HIGHLIGHT_OBJ).gameObject.SetActive(state);
+	}
+
+
+	/// <summary>
+	/// Convenience function for highlighting the spaces around a space. Does not highlight the central space.
+	/// </summary>
+	/// <param name="x">The x coordinate in the grid of the central space.</param>
+	/// <param name="z">The z coordinate in the grid of the central space.</param>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	public void HighlightAllAroundSpace(int x, int z, OnOrOff onOrOff){
+		for (int xMod = -1; xMod < 2; xMod++){
+			for (int zMod = -1; zMod < 2; zMod++){
+				if (xMod == 0 && zMod == 0 ) { 
+					//don't highlight the central space
+				} else if (CheckValidSpace(x + xMod, z + zMod)){
+					HighlightSpace(x + xMod, z + zMod, onOrOff);
+				}
+			}
+		}
+	}
+
+
+	/// <summary>
+	/// As above, but provides ability to not highlight spaces with something in them.
+	/// </summary>
+	/// <param name="x">The x coordinate in the grid of the central space.</param>
+	/// <param name="z">The z coordinate in the grid of the central space.</param>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	/// <param name="empty"><c>true</c> if the space must be empty to be highlighted.</param>
+	public void HighlightAllAroundSpace(int x, int z, OnOrOff onOrOff, bool empty){
+		for (int xMod = -1; xMod < 2; xMod++){
+			for (int zMod = -1; zMod < 2; zMod++){
+				if (xMod == 0 && zMod == 0 ) { 
+					//don't highlight the central space
+				} else if (CheckValidSpace(x + xMod, z + zMod)){
+					if (!empty ||
+						GeneralSpaceQuery(x + xMod, z + zMod) == SpaceBehavior.ContentType.None) HighlightSpace(x + xMod, z + zMod, onOrOff);
+				}
+			}
+		}
+	}
+
+
+	/// <summary>
+	/// Highlight next to a given space.
+	/// </summary>
+	/// <param name="x">The x coordinate in the grid of the central space.</param>
+	/// <param name="z">The z coordinate in the grid of the central space.</param>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	public void HighlightNextToSpace(int x, int z, OnOrOff onOrOff){
+		if (CheckValidSpace(x - 1, z)) HighlightSpace(x - 1, z, onOrOff);
+		if (CheckValidSpace(x + 1, z)) HighlightSpace(x - 1, z, onOrOff);
+	}
+
+
+	/// <summary>
+	/// Highlight all spaces in a column.
+	/// </summary>
+	/// <param name="x">The x coordinate of the column to be highlighted, zero-indexed.</param>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	public void HighlightColumn(int x, OnOrOff onOrOff){
+		if (CheckValidColumn(x)){
+			for (int z = 0; z < BOARD_HEIGHT; z++) HighlightSpace(x, z, onOrOff);
+		}
 	}
 }

@@ -492,6 +492,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		if (Services.Board.CheckIfTankard(GridLoc.x, GridLoc.z)){
 			Services.UI.SetExtraText(KICK_DIRECTIONS);
 			Services.Events.Register<InputEvent>(ChooseTankardKick);
+			Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On);
 		}
 
 		//gain inspiration for drinking, if at that point in the track
@@ -531,6 +532,7 @@ public class BrawlerBehavior : DefenderSandbox {
 				Services.Tasks.AddTask(waitTask);
 				Services.UI.SetExtraText(KICK_MSG);
 				Services.Events.Unregister<InputEvent>(ChooseTankardKick);
+				Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.Off);
 			}
 		}
 	}

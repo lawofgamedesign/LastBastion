@@ -112,6 +112,8 @@ public class GuardianBehavior : DefenderSandbox {
 			if (blockedColumn != JUST_STARTED) MakeColumnLure(blockedColumn, false);
 			UnholdLine();
 			Services.Events.Register<InputEvent>(ChooseColumn);
+			Services.Board.HighlightColumn(GridLoc.x - 1, BoardBehavior.OnOrOff.On);
+			Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.On);
 		}
 	}
 
@@ -176,6 +178,8 @@ public class GuardianBehavior : DefenderSandbox {
 				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask();
 				pickUpTask.Then(new BlockFeedbackTask(blockedColumn, LINE_MARKER_OBJ));
 				Services.Tasks.AddTask(pickUpTask);
+				Services.Board.HighlightColumn(GridLoc.x - 1, BoardBehavior.OnOrOff.Off);
+				Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.Off);
 				return;
 			} else {
 				extraText.text = INVALID_COLUMN;
