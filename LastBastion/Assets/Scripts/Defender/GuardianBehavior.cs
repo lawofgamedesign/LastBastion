@@ -57,6 +57,7 @@ public class GuardianBehavior : DefenderSandbox {
 	private const string ALL_BLOCKED = "The Last Bastion blocks all columns";
 	private const string NONE_BLOCKED = "The Last Bastion inactive this turn";
 	private const string LINE_MARKER_OBJ = "Line held marker";
+	private const string MARKER_ORGANIZER = "Markers and tokens";
 
 
 	//character sheet information
@@ -147,12 +148,18 @@ public class GuardianBehavior : DefenderSandbox {
 
 
 	private void BlockAllColumns(){
-		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++) Services.Events.Fire(new BlockColumnEvent(i));
+		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++){
+			Services.Events.Fire(new BlockColumnEvent(i));
+			Services.Tasks.AddTask(new BlockFeedbackTask(i, LINE_MARKER_OBJ + i.ToString()));
+		}
 	}
 
 
 	private void UnblockAllColumns(){
-		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++) Services.Events.Fire(new UnblockColumnEvent(i));
+		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++){
+			Services.Events.Fire(new UnblockColumnEvent(i));
+			Services.Tasks.AddTask(new RemoveBlockFeedbackTask(LINE_MARKER_OBJ + i.ToString()));
+		}
 	}
 
 
@@ -175,7 +182,7 @@ public class GuardianBehavior : DefenderSandbox {
 				Services.Events.Unregister<InputEvent>(ChooseColumn);
 				extraText.text = COLUMN_CHOSEN;
 
-				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask();
+				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask(LINE_MARKER_OBJ);
 				pickUpTask.Then(new BlockFeedbackTask(blockedColumn, LINE_MARKER_OBJ));
 				Services.Tasks.AddTask(pickUpTask);
 				Services.Board.HighlightColumn(GridLoc.x - 1, BoardBehavior.OnOrOff.Off);
@@ -382,7 +389,8 @@ public class GuardianBehavior : DefenderSandbox {
 					if (blockedColumn != BLANK_COLUMN) {
 						MakeColumnLure(blockedColumn, false);
 						UnholdLine();
-						Services.Tasks.AddTask(new RemoveBlockFeedbackTask());
+						CreateLastBastionMarkers(); //create markers for The Last Bastion
+						Services.Tasks.AddTask(new RemoveBlockFeedbackTask(LINE_MARKER_OBJ));
 					} else Services.Events.Unregister<InputEvent>(ChooseColumn);
 				}
 				break;
@@ -420,6 +428,18 @@ public class GuardianBehavior : DefenderSandbox {
 			DefeatedSoFar++;
 
 			if (currentHold == HoldTrack.Bulwark) DefeatedSoFar++; //gain extra experience at higher levels of the Hold the Line track
+		}
+	}
+
+
+	/// <summary>
+	/// Create the markers that will be used to show that all columns are blocked.
+	/// </summary>
+	private void CreateLastBastionMarkers(){
+		for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++){
+			GameObject marker = Instantiate<GameObject>(Resources.Load<GameObject>(LINE_MARKER_OBJ), GameObject.Find(MARKER_ORGANIZER).transform);
+
+			marker.name = LINE_MARKER_OBJ + i.ToString();
 		}
 	}
 }

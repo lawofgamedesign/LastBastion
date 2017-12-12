@@ -10,12 +10,11 @@ public class RemoveBlockFeedbackTask : Task {
 
 	//the marker that will move
 	private readonly Transform blockMarker;
-	private const string BLOCK_MARKER_OBJ = "Line held marker";
 
 
 	//how far and fast the marker moves
 	private Vector3 pickUpSpeed = new Vector3(0.0f, 2.0f, 0.0f);
-	private float offScreenHeight = 21.5f;
+	private float offScreenHeight = 90.0f; //high enough to get even the shadow out of view
 
 
 	//the marker's position at the very beginning of the game; if the marker is at this location, it's not on the board and can just be dropped
@@ -29,8 +28,8 @@ public class RemoveBlockFeedbackTask : Task {
 
 
 	//constructor
-	public RemoveBlockFeedbackTask() {
-		blockMarker = GameObject.Find(BLOCK_MARKER_OBJ).transform;
+	public RemoveBlockFeedbackTask(string marker) {
+		blockMarker = GameObject.Find(marker).transform;
 	}
 
 
