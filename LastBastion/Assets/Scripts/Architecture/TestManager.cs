@@ -22,6 +22,9 @@
 				Services.AttackDeck.RemoveCardFromDeck(GameObject.Find("Main Camera").transform, 1);
 			} else if (Input.GetKeyDown(KeyCode.S)){
 				Services.AttackDeck.Reshuffle();
+			} else if (Input.GetKeyDown(KeyCode.Alpha2)){
+				Services.AttackDeck.RemoveCardFromDeck(GameObject.Find("Main Camera").transform, 1);
+				Services.AttackDeck.RemoveCardFromDeck(GameObject.Find("Main Camera").transform, 1);
 			}
 		}
 	}

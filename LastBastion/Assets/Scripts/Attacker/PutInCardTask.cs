@@ -23,6 +23,10 @@ public class PutInCardTask : Task {
 	private const string VALUE_OBJ = "Value";
 
 
+	//a canvas to display the card, but where it won't be subject to destruction by AttackerDeck's RemoveCard functions
+	private const string DECK_CANVAS = "Attacker deck canvas";
+
+
 	//the card's movement
 	private float speed = 15.0f;
 	private const float OFF_SCREEN = -200.0f;
@@ -48,7 +52,7 @@ public class PutInCardTask : Task {
 	/// </summary>
 	protected override void Init (){
 		card = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(CARD_OBJ),
-													 endLoc).transform;
+													 GameObject.Find(DECK_CANVAS).transform).transform;
 		card.position = startLoc.position;
 		card.Find(VALUE_OBJ).GetComponent<Text>().text = value.ToString();
 

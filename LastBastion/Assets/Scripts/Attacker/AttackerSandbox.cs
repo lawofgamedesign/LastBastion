@@ -201,7 +201,11 @@ public class AttackerSandbox : MonoBehaviour {
 				if ((Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) != SpaceBehavior.ContentType.None && //blocked by something in the space
 					 Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) != SpaceBehavior.ContentType.Defender) ||
 					(ZPos - attemptedMove <= Services.Board.WallZPos && //blocked by the wall
-					 Services.Board.GetWallDurability(XPos) > 0)) {
+					 Services.Board.GetWallDurability(XPos) > 0) ||
+					(ZPos - attemptedMove == 0 && //want to move to last row, but there's a defender holding that position
+					 Services.Board.GeneralSpaceQuery(XPos, 0) == SpaceBehavior.ContentType.Defender) ||
+					(Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender && //defender is blocked from being pushed
+					 Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove - 1) != SpaceBehavior.ContentType.None)) {
 					attemptedMove--;
 				}
 				else break;
@@ -213,13 +217,6 @@ public class AttackerSandbox : MonoBehaviour {
 		//this moves by spaces in the grid; MoveTask is responsible for having grid positions turned into world coordinates
 		if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.None ||
 			Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender){
-
-			//does this enemy need to push past a defender who's on the last row? if so, the attacker can't move
-			//in addition, if there's something behind the defender preventing them from getting pushed back the attacker can't move
-			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender){
-				if (ZPos - attemptedMove == 0) return;
-				if (Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove - 1) != SpaceBehavior.ContentType.None) return;
-			}
 				
 
 			//is this enemy trying to move through the wall? If so, block the move.

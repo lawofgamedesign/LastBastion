@@ -621,16 +621,18 @@ public class BoardBehavior {
 	/// <summary>
 	/// Determine whether there's a defender to the south of a given space.
 	/// </summary>
-	/// <returns><c>true</c> if there is a defender south of the space, <c>false</c> otherwise.</returns>
+	/// <returns>The number of defenders to the south.</returns>
 	/// <param name="x">The x coordinate in the grid of the space to check from.</param>
 	/// <param name="z">The z coordinate in the grid of the space to check from.</param>
-	public bool CheckDefenderToSouth(int x, int z){
+	public int CheckDefenderToSouth(int x, int z){
 		Debug.Assert(CheckValidSpace(x, z), "Checking for a defender to the south from an invalid space.");
 
+		int temp = 0;
+
 		for (int i = z - 1; i >= 0; i--){
-			if (GeneralSpaceQuery(x, i) == SpaceBehavior.ContentType.Defender) return true;
+			if (GeneralSpaceQuery(x, i) == SpaceBehavior.ContentType.Defender) temp++;
 		}
 
-		return false;
+		return temp;
 	}
 }
