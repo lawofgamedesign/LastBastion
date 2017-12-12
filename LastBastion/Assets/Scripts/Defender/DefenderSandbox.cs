@@ -335,7 +335,7 @@ public class DefenderSandbox : MonoBehaviour {
 	/// <summary>
 	/// Reset this defender's position and available movement when a player undoes the Defenders Move phase.
 	/// </summary>
-	public void UndoMovePhase(){
+	public virtual void UndoMovePhase(){
 		if (Services.Undo == null) return; //in the event that there's somehow no undo system in place, prevent null reference exceptions
 
 

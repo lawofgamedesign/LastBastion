@@ -109,4 +109,11 @@ public class UndoData {
 			Movement = -1;
 		}
 	}
+
+
+	private class BoardData {
+		public bool Lure { get; set; }
+		public bool Block { get; set; }
+		public bool Tankard { get; set; }
+	}
 }

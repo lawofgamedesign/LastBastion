@@ -41,6 +41,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const int AVAILABLE_JUMPS_LAST_STANDING = 9999; //effectively unlimited
 	private int availableJumps;
 	private int jumpsSoFar = 0;
+	//UI for extra attacks
+	private Transform dirFeedback;
+	private const string DIR_FEEDBACK_ORGANIZER = "Available attacks";
+	private const string SECOND_ATTACK = " 2";
 
 
 	//drink track
@@ -91,7 +95,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		AttackMod = brawlerAttackMod;
 		Armor = brawlerArmor;
 
-
+		dirFeedback = transform.Find(PRIVATE_UI_CANVAS).Find(DIR_FEEDBACK_ORGANIZER);
 
 		currentRampage = RampageTrack.None;
 		currentDrink = DrinkTrack.None;
@@ -107,6 +111,27 @@ public class BrawlerBehavior : DefenderSandbox {
 	}
 
 
+	public override void BeUnselected(){
+		base.BeUnselected();
+
+		dirFeedback.gameObject.SetActive(false);
+	}
+
+
+	/// <summary>
+	/// This override protects against the situation where the player is in the middle of choosing where to kick a tankard
+	/// when they undo the move phase, resulting in errors as the system tries to kick a non-existent tankard in the
+	/// Brawler's original space. If the Brawler is in a space with a tankard, they are necessarily in the process of kicking
+	/// it--the Brawler can never coexist with a tankard for any length of time. In that case, the undo doesn't work on the Brawler,
+	/// preventing the error.
+	/// </summary>
+	public override void UndoMovePhase(){
+		if (Services.Board.GetSpace(GridLoc.x, GridLoc.z).Tankard) return;
+
+		base.UndoMovePhase();
+	}
+
+
 	#region combat
 
 
@@ -119,7 +144,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		attacksSoFar.Clear();
 		lastDefeatedLoc = null;
 
-		if (currentRampage == RampageTrack.Wade_In || currentRampage == RampageTrack.Berserk || currentRampage == RampageTrack.The_Last_One_Standing){
+		if ((int)currentRampage >= (int)RampageTrack.Wade_In){
 			boardFunc = JumpToSpace;
 			Services.Events.Register<BoardClickedEvent>(boardFunc);
 			jumpsSoFar = 0;
@@ -129,6 +154,70 @@ public class BrawlerBehavior : DefenderSandbox {
 		else if (currentRampage == RampageTrack.Berserk) availableJumps = AVAILABLE_JUMPS_BERSERK;
 		else if (currentRampage == RampageTrack.The_Last_One_Standing) availableJumps = AVAILABLE_JUMPS_LAST_STANDING;
 		defeatedLastTarget = true; //important for The Last One Standing
+	}
+
+
+	public override void BeSelectedForFight(){
+		base.BeSelectedForFight();
+
+		if (currentRampage != RampageTrack.None){
+			dirFeedback.gameObject.SetActive(true);
+			SetAvailableFeedback();
+		}
+	}
+
+
+	private void SetAvailableFeedback(){
+		//in all cases, the Brawler gets one attack to the north
+		if (!attacksSoFar.Contains(Directions.North)){
+			dirFeedback.Find(Directions.North.ToString()).gameObject.SetActive(true);
+		} else {
+			dirFeedback.Find(Directions.North.ToString()).gameObject.SetActive(false);
+		}
+
+		//Rampage and Wade In give the Brawler one attack east or west
+		if (currentRampage == RampageTrack.Rampage || currentRampage == RampageTrack.Wade_In){
+			if (GetNumLateralAttacks() == 0){
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
+			} else {
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(false);
+			}
+
+		//Berserk gives the Brawler 2 total lateral attacks
+		} else if (currentRampage == RampageTrack.Berserk){
+			if (GetNumLateralAttacks() == 0){
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
+			} else if (GetNumLateralAttacks() == 1){
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
+			} else {
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
+			}
+
+		//The Last One Standing gives the Brawler infinite lateral attacks, so long as the Brawler keeps inflicting damage
+		} else if (currentRampage == RampageTrack.The_Last_One_Standing){
+			if (defeatedLastTarget){
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
+				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
+			} else {
+				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(false);
+				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
+			}
+		}
 	}
 
 
@@ -145,6 +234,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		if (!UseUpAttacks(dir)) return;
 
 		if (currentRampage == RampageTrack.The_Last_One_Standing &&
+			dir != Directions.North &&
 			!defeatedLastTarget) return; //the Brawler stops in The LastOneStanding mode after missing a hit
 
 		//if the Brawler gets this far, a fight will actually occur; get a card for the Attacker
@@ -175,6 +265,8 @@ public class BrawlerBehavior : DefenderSandbox {
 			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 		}
+
+		if (currentRampage != RampageTrack.None) SetAvailableFeedback();
 	}
 
 
