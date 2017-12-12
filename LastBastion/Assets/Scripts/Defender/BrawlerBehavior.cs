@@ -517,7 +517,7 @@ public class BrawlerBehavior : DefenderSandbox {
 	}
 
 
-	#region drinking
+	#region tankard
 
 
 	/// <summary>
@@ -573,12 +573,11 @@ public class BrawlerBehavior : DefenderSandbox {
 			Services.UI.SetExtraText(KICK_DIRECTIONS);
 			Services.Events.Register<InputEvent>(ChooseTankardKick);
 			Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On);
-		}
-
-		//gain inspiration for drinking, if at that point in the track
-		if ((int)currentDrink > (int)DrinkTrack.Party_Foul){
-			DefeatedSoFar += drinkInspiration;
-			powerupReadyParticle.SetActive(CheckUpgradeStatus());
+			//gain inspiration for drinking, if at that point in the track
+			if ((int)currentDrink > (int)DrinkTrack.Party_Foul){
+				DefeatedSoFar += drinkInspiration;
+				powerupReadyParticle.SetActive(CheckUpgradeStatus());
+			}
 		}
 	}
 
@@ -655,5 +654,5 @@ public class BrawlerBehavior : DefenderSandbox {
 	}
 
 
-	#endregion drinking
+	#endregion tankard
 }

@@ -13,7 +13,7 @@ public class RemoveBlockFeedbackTask : Task {
 
 
 	//how far and fast the marker moves
-	private Vector3 pickUpSpeed = new Vector3(0.0f, 2.0f, 0.0f);
+	private Vector3 pickUpSpeed = new Vector3(0.0f, 5.0f, 0.0f);
 	private float offScreenHeight = 90.0f; //high enough to get even the shadow out of view
 
 

@@ -284,7 +284,6 @@ public class AttackerManager {
 	private void MoveTankard(int x, int z){
 		for (int currentZ = z - 1; currentZ >= 0; currentZ--){
 			if (Services.Board.GeneralSpaceQuery(x, currentZ) == SpaceBehavior.ContentType.None){
-				Debug.Log("Trying to move tankard to " + x + ", " + currentZ);
 				Services.Board.GetSpace(x, z).Tankard = false;
 				Services.Board.GetSpace(x, currentZ).Tankard = true;
 
