@@ -345,8 +345,9 @@ public class BoardBehavior {
 		int temp = NOT_FOUND;
 
 		for (int z = 0; z <= BOARD_HEIGHT - 1; z++){
-			if (GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.None &&
-				z > temp) temp = z;
+			if (GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.None ||
+				GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Defender) temp = z;
+			else break;
 		}
 
 		return temp;
