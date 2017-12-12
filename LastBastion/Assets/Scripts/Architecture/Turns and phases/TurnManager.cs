@@ -218,6 +218,9 @@ public class TurnManager {
 		private void HandleMoveInputs(Event e){
 			InputEvent inputEvent = e as InputEvent;
 
+			//don't double-count inputs that are intended to hide the character sheet
+			if (Services.UI.GetCharSheetStatus() == CharacterSheetBehavior.SheetStatus.Displayed) return;
+
 			if (inputEvent.selected.tag == DEFENDER_TAG){
 				Services.Defenders.SelectDefenderForMovement(inputEvent.selected.GetComponent<DefenderSandbox>());
 			} else if (inputEvent.selected.tag == BOARD_TAG){
