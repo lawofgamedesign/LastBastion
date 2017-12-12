@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CharacterSheetBehavior : MonoBehaviour {
@@ -49,6 +50,13 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private const string TRACK_2_CURRENT_OBJ = "Track 2 current";
 
 
+	//available cards
+	private Text availCards;
+	private const string AVAILABLE_CARDS_OBJ = "Available cards";
+	private const string AVAIL_MSG = "Cards available: ";
+	private const string COMMA = ", ";
+
+
 	//is the character sheet currently hidden or displayed?
 	public enum SheetStatus { Displayed, Hidden };
 	public SheetStatus CurrentStatus { get; private set; }
@@ -68,6 +76,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 		track1Current = transform.Find(TRACK_1_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
 		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
+		availCards = transform.Find(AVAILABLE_CARDS_OBJ).GetComponent<Text>();
 		Services.Events.Register<InputEvent>(HandleClicks);
 		CurrentStatus = SheetStatus.Hidden;
 		ChangeSheetState();
@@ -159,6 +168,23 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	public void ReviseTrack2(string next, string current){
 		track2Next.text = next;
 		track2Current.text = current;
+	}
+
+
+	/// <summary>
+	/// Show the cards this defender currrently has available.
+	/// </summary>
+	/// <param name="values">A list of the values of the defender's available cards.</param>
+	public void ReviseAvailCards(List<int> values){
+		string temp = "";
+
+		for (int i = 0; i < values.Count; i++){
+			temp += values[i].ToString();
+
+			if (i != values.Count - 1) temp += COMMA;
+		}
+
+		availCards.text = AVAIL_MSG + temp;
 	}
 
 

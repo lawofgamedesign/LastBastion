@@ -468,6 +468,8 @@ public class DefenderSandbox : MonoBehaviour {
 			FinishWithCard();
 			DoneFighting();
 		}
+
+		Services.UI.ReviseCardsAvail(GetAvailableValues());
 	}
 
 
@@ -600,7 +602,23 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Each defender calls their own TakeOverCharSheet, which gives them the chance to substitute in their own text for the upgrade paths.
 	/// </summary>
 	public virtual void TakeOverCharSheet(){
-		Services.UI.TakeOverCharSheet(name, Speed, AttackMod, Armor, defeatsToNextUpgrade, DefeatedSoFar);
+		Services.UI.TakeOverCharSheet(name, Speed, AttackMod, Armor, defeatsToNextUpgrade, DefeatedSoFar, GetAvailableValues());
+	}
+
+
+	/// <summary>
+	/// Get a list of the values of available combat cards.
+	/// </summary>
+	/// <returns>The list.</returns>
+	protected List<int> GetAvailableValues(){
+		List<int> values = new List<int>();
+
+
+		foreach (Card card in combatHand){
+			if (card.Available) values.Add(card.Value);
+		}
+
+		return values;
 	}
 
 

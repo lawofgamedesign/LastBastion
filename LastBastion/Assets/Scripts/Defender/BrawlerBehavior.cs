@@ -267,6 +267,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		}
 
 		if (currentRampage != RampageTrack.None) SetAvailableFeedback();
+		Services.UI.ReviseCardsAvail(GetAvailableValues());
 	}
 
 
@@ -452,7 +453,8 @@ public class BrawlerBehavior : DefenderSandbox {
 									  rampageDescriptions[(int)currentRampage + 1],
 									  rampageDescriptions[(int)currentRampage],
 									  drinkDescriptions[(int)currentDrink + 1],
-									  drinkDescriptions[(int)currentDrink]);
+									  drinkDescriptions[(int)currentDrink],
+									  GetAvailableValues());
 	}
 
 

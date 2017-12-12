@@ -244,6 +244,8 @@ public class GuardianBehavior : DefenderSandbox {
 			FinishWithCard();
 			DoneFighting();
 		}
+
+		Services.UI.ReviseCardsAvail(GetAvailableValues());
 	}
 
 
@@ -361,7 +363,8 @@ public class GuardianBehavior : DefenderSandbox {
 									  holdDescriptions[(int)currentHold + 1],
 									  holdDescriptions[(int)currentHold],
 									  singleCombatDescriptions[(int)currentSingleCombat + 1],
-									  singleCombatDescriptions[(int)currentSingleCombat]
+									  singleCombatDescriptions[(int)currentSingleCombat],
+									  GetAvailableValues()
 		);
 	}
 

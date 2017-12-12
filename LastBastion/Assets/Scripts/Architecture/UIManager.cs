@@ -256,10 +256,12 @@ public class UIManager {
 	/// <param name="armor">The defender's armor.</param>
 	/// <param name="defeatsToNextUpgrade">The number of attackers the defender must defeat to upgrade.</param>
 	/// <param name="defeatsSoFar">The defender's current progress toward the next upgrade.</param>
-	public void TakeOverCharSheet(string name, int speed, int attackMod, int armor, int defeatsToNextUpgrade, int defeatsSoFar){
+	/// <param name="values">The values of the defender's currently available combat cards.</param>
+	public void TakeOverCharSheet(string name, int speed, int attackMod, int armor, int defeatsToNextUpgrade, int defeatsSoFar, List<int> values){
 		charSheet.RenameSheet(name);
 		charSheet.ReviseStatBlock(speed, attackMod, armor);
 		charSheet.ReviseNextLabel(defeatsToNextUpgrade - defeatsSoFar);
+		charSheet.ReviseAvailCards(values);
 		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
 	}
 
@@ -271,6 +273,7 @@ public class UIManager {
 	/// <param name="track1Current">The defender's current upgrade on the left-side track.</param>
 	/// <param name="track2Next">The next upgrade on the right-side track.</param>
 	/// <param name="track2Current">The defender's current upgrade on the right-side track.</param>
+	/// <param name="values">The values of the defender's currently available combat cards.</param>
 	public void TakeOverCharSheet(string name,
 								  int speed,
 								  int attackMod,
@@ -280,10 +283,11 @@ public class UIManager {
 								  string track1Next,
 								  string track1Current,
 								  string track2Next,
-								  string track2Current){
+								  string track2Current,
+								  List<int> values){
 		charSheet.ReviseTrack1(track1Next, track1Current);
 		charSheet.ReviseTrack2(track2Next, track2Current);
-		TakeOverCharSheet(name, speed, attackMod, armor, defeatsToNextUpgrade, defeatsSoFar);
+		TakeOverCharSheet(name, speed, attackMod, armor, defeatsToNextUpgrade, defeatsSoFar, values);
 	}
 
 
@@ -295,6 +299,15 @@ public class UIManager {
 	/// <param name="defeatsSoFar">The defender's current progress toward the next upgrade.</param>
 	public void ReviseNextLabel(int defeatsToNextUpgrade, int defeatsSoFar){
 		charSheet.ReviseNextLabel(defeatsToNextUpgrade - defeatsSoFar);
+	}
+
+
+	/// <summary>
+	/// Update the character sheet's statement what combat cards are available.
+	/// </summary>
+	/// <param name="values">A list of the values of the defender's currently available cards.</param>
+	public void ReviseCardsAvail(List<int> values){
+		charSheet.ReviseAvailCards(values);
 	}
 
 

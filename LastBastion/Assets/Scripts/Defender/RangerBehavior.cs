@@ -171,6 +171,7 @@ public class RangerBehavior : DefenderSandbox {
 
 		//the Ranger can keep fighting until they run out of attacks
 		if (currentAttacks <= 0) DoneFighting();
+		Services.UI.ReviseCardsAvail(GetAvailableValues());
 	}
 
 
@@ -329,7 +330,8 @@ public class RangerBehavior : DefenderSandbox {
 									  showboatDescriptions[(int)currentShowboat + 1],
 									  showboatDescriptions[(int)currentShowboat],
 									  trapDescriptions[(int)currentTrap + 1],
-									  trapDescriptions[(int)currentTrap]
+									  trapDescriptions[(int)currentTrap],
+									  GetAvailableValues()
 		);
 	}
 

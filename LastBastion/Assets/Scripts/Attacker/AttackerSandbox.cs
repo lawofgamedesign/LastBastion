@@ -205,7 +205,8 @@ public class AttackerSandbox : MonoBehaviour {
 					(ZPos - attemptedMove == 0 && //want to move to last row, but there's a defender holding that position
 					 Services.Board.GeneralSpaceQuery(XPos, 0) == SpaceBehavior.ContentType.Defender) ||
 					(Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender && //defender is blocked from being pushed
-					 Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove - 1) != SpaceBehavior.ContentType.None)) {
+					 Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove - 1) != SpaceBehavior.ContentType.None) ||
+					(Services.Board.GetSpace(XPos, ZPos - attemptedMove).Block)) { //the space is blocked for movement by, e.g., a rockfall
 					attemptedMove--;
 				}
 				else break;
