@@ -47,7 +47,7 @@ public class RangerBehavior : DefenderSandbox {
 	private List<string> trapDescriptions = new List<string>() {
 		"<b>Lay your traps</b>",
 		"<b>Rockfall</b>\n\n<size=11>When you choose this, select an empty space adjacent to you. The Horde must go around that space.\n\nGain 1 experience whenever your rockfall blocks the Horde.</size>",
-		"<b>Landslide</b>\n\nWhen you choose this, do 1 damage to every Horde member adjacent to your rockfall.\n\nGain 1 experience whenever your rockfall blocks the Horde.",
+		"<b>Landslide</b>\n\n<size=11>When you choose this, do 1 damage to every Horde member adjacent to your rockfall.\n\nGain 1 experience whenever your rockfall blocks the Horde.</size>",
 		"<b>None shall pass!</b>"
 	};
 	private TrapTrack currentTrap;

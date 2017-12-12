@@ -11,7 +11,7 @@ public class MoveReferenceSheetTask : Task {
 	//the reference sheet's positions on the screen
 	private readonly Vector3 hiddenLoc = new Vector3(47.98f, -1.5f, 23.7f);
 	private readonly Vector3 hiddenRot = new Vector3(90.0f, 1.4f, 0.0f);
-	private readonly Vector3 displayLoc = new Vector3(19.7f, 11.38f, 4.2f);
+	private readonly Vector3 displayLoc = new Vector3(19.7f, 22.85f, 3.6f);
 	private readonly Vector3 displayRot = new Vector3(79.5f, 0.0f, 0.0f);
 
 

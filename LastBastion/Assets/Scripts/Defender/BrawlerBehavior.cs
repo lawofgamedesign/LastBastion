@@ -562,8 +562,8 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	/// <summary>
-	/// This override handles the Drink track, in which the Brawler kicks around a tankard and gains Inspiration for drinking at
-	/// higher Drink track levels.
+	/// This override handles the Tankard track, in which the Brawler kicks around a tankard and gains Inspiration for drinking at
+	/// higher Tankard track levels.
 	/// </summary>
 	public override void Move(){
 		base.Move();
