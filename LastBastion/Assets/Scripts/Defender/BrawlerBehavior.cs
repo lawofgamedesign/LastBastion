@@ -74,6 +74,9 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const int START_DRINK_INSP = 1;
 	private const int BETTER_DRINK_INSP = 2;
 	private int tankardsToDrop = 0;
+	protected const string ATTACKER_TAG = "Attacker";
+	protected const string LEADER_TAG = "Leader";
+	protected const string MINION_TAG = "Minion";
 
 
 	//character sheet information
@@ -591,29 +594,42 @@ public class BrawlerBehavior : DefenderSandbox {
 			SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
 
 			if (CheckAllAdjacent(GridLoc, space.GridLocation)){
-				WaitToArriveTask waitTask = new WaitToArriveTask(transform, new TwoDLoc(GridLoc.x, GridLoc.z));
+				KickTankard(space);	
+			}
+		} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == LEADER_TAG || inputEvent.selected.tag == MINION_TAG){
+			AttackerSandbox attacker = inputEvent.selected.GetComponent<AttackerSandbox>();
 
-				Transform localTankard = Services.Board.GetTankardInSpace(GridLoc);
+			SpaceBehavior space = Services.Board.GetSpace(attacker.XPos, attacker.ZPos);
 
-				Debug.Assert(localTankard != null, "Didn't find local tankard.");
-
-				MoveObjectTask moveTask = new MoveObjectTask(localTankard,
-															 new TwoDLoc(GridLoc.x, GridLoc.z),
-															 new TwoDLoc(space.GridLocation.x, space.GridLocation.z));
-				DamageRemotelyTask damageTask = new DamageRemotelyTask(new TwoDLoc(space.GridLocation.x, space.GridLocation.z),
-																	   drinkDamage,
-																	   this);
-				waitTask.Then(moveTask);
-				moveTask.Then(damageTask);
-				space.Tankard = true;
-				Services.Board.GetSpace(GridLoc.x, GridLoc.z).Tankard = false;
-				localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
-				Services.Tasks.AddTask(waitTask);
-				Services.UI.SetExtraText(KICK_MSG);
-				Services.Events.Unregister<InputEvent>(ChooseTankardKick);
-				Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.Off);
+			if (CheckAllAdjacent(GridLoc, space.GridLocation)){
+				KickTankard(space);
 			}
 		}
+	}
+
+
+	private void KickTankard(SpaceBehavior space){
+		WaitToArriveTask waitTask = new WaitToArriveTask(transform, new TwoDLoc(GridLoc.x, GridLoc.z));
+
+		Transform localTankard = Services.Board.GetTankardInSpace(GridLoc);
+
+		Debug.Assert(localTankard != null, "Didn't find local tankard.");
+
+		MoveObjectTask moveTask = new MoveObjectTask(localTankard,
+			new TwoDLoc(GridLoc.x, GridLoc.z),
+			new TwoDLoc(space.GridLocation.x, space.GridLocation.z));
+		DamageRemotelyTask damageTask = new DamageRemotelyTask(new TwoDLoc(space.GridLocation.x, space.GridLocation.z),
+			drinkDamage,
+			this);
+		waitTask.Then(moveTask);
+		moveTask.Then(damageTask);
+		space.Tankard = true;
+		Services.Board.GetSpace(GridLoc.x, GridLoc.z).Tankard = false;
+		localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
+		Services.Tasks.AddTask(waitTask);
+		Services.UI.SetExtraText(KICK_MSG);
+		Services.Events.Unregister<InputEvent>(ChooseTankardKick);
+		Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.Off);
 	}
 
 
