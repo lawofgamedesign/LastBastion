@@ -33,6 +33,8 @@
 			Services.Attackers.Setup();
 			Services.Defenders = new DefenderManager();
 			Services.Defenders.Setup();
+			Services.Sound = new AudioManager();
+			Services.Sound.Setup();
 			camScript = new CameraRotator();
 			camScript.Setup();
 		}

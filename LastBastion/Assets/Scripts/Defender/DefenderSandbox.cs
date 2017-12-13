@@ -199,7 +199,7 @@ public class DefenderSandbox : MonoBehaviour {
 		ChosenCard = null; //relevant for the fight phase
 		moveButton.gameObject.SetActive(false);
 		undoButton.gameObject.SetActive(false);
-		noFightButton.gameObject.SetActive(false);
+		//noFightButton.gameObject.SetActive(false);
 		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
 		Services.Defenders.NoSelectedDefender();
 	}
@@ -393,7 +393,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		ChosenCard = null;
 
-		noFightButton.gameObject.SetActive(true);
+		//noFightButton.gameObject.SetActive(true);
 
 		TurnOverAvailableCards();
 
