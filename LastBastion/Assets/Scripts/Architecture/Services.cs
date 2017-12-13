@@ -110,4 +110,14 @@ public static class Services {
 		}
 		set { momentum = value; }
 	}
+
+
+	private static AudioManager sound;
+	public static AudioManager Sound {
+		get {
+			Debug.Assert(sound != null, "No audio manager. Are services being created out of order?");
+			return sound;
+		}
+		set { sound = value; }
+	}
 }

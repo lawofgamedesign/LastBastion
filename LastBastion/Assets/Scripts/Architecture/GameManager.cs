@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviour {
 		Services.Undo.Setup();
 		Services.Momentum = new MomentumManager();
 		Services.Momentum.Setup();
+		Services.Sound = new AudioManager();
+		Services.Sound.Setup();
 	}
 
 

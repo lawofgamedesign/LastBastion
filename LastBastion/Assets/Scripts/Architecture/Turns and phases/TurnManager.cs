@@ -66,6 +66,15 @@ public class TurnManager {
 	private const string WIN_MSG = "You win! R to restart.";
 
 
+	//help text, and related variables
+	protected GameObject tutorialCanvas;
+	protected Text tutorialText;
+	protected const string TUTORIAL_CANVAS_OBJ = "Tutorial canvas";
+	protected const string TUTORIAL_TEXT_OBJ = "Tutorial text";
+	protected const string MOVE_REMINDER_MSG = "Remember, click a defender, then click the path you want them to take (no diagonals!).";
+	protected const string FIGHT_REMINDER_MSG = "Click a defender, choose one of their cards, and then click a skeleton in front of them to attack.";
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -81,6 +90,9 @@ public class TurnManager {
 		phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
 		nextPhaseButton = GameObject.Find(NEXT_BUTTON_OBJ);
 		phaseButtonText = nextPhaseButton.transform.Find(TEXT_OBJ).GetComponent<Text>();
+		tutorialCanvas = GameObject.Find(TUTORIAL_CANVAS_OBJ);
+		tutorialText = tutorialCanvas.transform.Find(TUTORIAL_TEXT_OBJ).GetComponent<Text>();
+		tutorialCanvas.SetActive(false);
 		ToggleNextPhaseButton();
 	}
 
@@ -153,6 +165,38 @@ public class TurnManager {
 	protected void PlayerLoseFeedback(){
 		Services.UI.SetExtraText(LOSE_MSG);
 	}
+
+
+	#region reminders
+
+
+	/// <summary>
+	/// Show a brief reminder of how to move at the top of the screen.
+	/// </summary>
+	protected void StartMoveReminder(){
+		tutorialText.text = MOVE_REMINDER_MSG;
+		tutorialCanvas.SetActive(true);
+	}
+
+
+	/// <summary>
+	/// Show a reminder of how to fight at the top of the screen.
+	/// </summary>
+	protected void StartFightReminder(){
+		tutorialText.text = FIGHT_REMINDER_MSG;
+		tutorialCanvas.SetActive(true);
+	}
+
+
+	/// <summary>
+	/// Shut the reminder text off.
+	/// </summary>
+	protected void EndReminder(){
+		tutorialCanvas.SetActive(false);
+	}
+
+
+	#endregion reminders
 
 
 	/////////////////////////////////////////////
@@ -262,6 +306,9 @@ public class TurnManager {
 			Services.UI.ToggleUndoButton();
 			Services.Undo.PrepareToUndoMoves();
 			Context.imSure = false;
+			//display help text for the first move phase
+			if (Services.Attackers.GetCurrentWave() == 0 &&
+				Context.CurrentTurn == 1) Context.StartMoveReminder();
 		}
 
 
@@ -323,6 +370,9 @@ public class TurnManager {
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
 			Context.phaseButtonText.text = STOP_FIGHTING_MSG;
 			Context.ToggleNextPhaseButton();
+			//display help text for the first fight phase
+			if (Services.Attackers.GetCurrentWave() == 0 &&
+				Context.CurrentTurn == 1) Context.StartFightReminder();
 		}
 
 
@@ -331,6 +381,8 @@ public class TurnManager {
 			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
 			Services.Defenders.CompleteFightPhase();
 			Context.ToggleNextPhaseButton();
+			if (Services.Attackers.GetCurrentWave() == 0 &&
+				Context.CurrentTurn == 1) Context.EndReminder();
 		}
 	}
 

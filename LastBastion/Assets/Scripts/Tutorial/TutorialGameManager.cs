@@ -40,6 +40,8 @@
 			Services.Undo.Setup();
 			Services.Momentum = new TutorialMomentumManager();
 			Services.Momentum.Setup();
+			Services.Sound = new AudioManager();
+			Services.Sound.Setup();
 		}
 
 

@@ -146,6 +146,15 @@ public class AttackerManager {
 
 
 	/// <summary>
+	/// Get which wave the game is on.
+	/// </summary>
+	/// <returns>The current wave, zero-indexed.</returns>
+	public int GetCurrentWave(){
+		return waveIndex;
+	}
+
+
+	/// <summary>
 	/// Make a warlord.
 	/// </summary>
 	/// <returns>The warlord's AttackerSandbox (or inheriting script).</returns>
