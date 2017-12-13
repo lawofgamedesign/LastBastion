@@ -89,8 +89,8 @@
 			private const string HORDE_MSG = "My skeletal horde is endless. You have to hold out until daybreak, which dispels my necromancy.";
 			private const string NONE_MSG = "None shall pass!";
 			private const string WAVES_MSG = "My horde attacks in waves. Each wave lasts a certain number of turns.";
-			private const string UNDERSTAND_MSG = "I understand";
-			private const string ONE_THREE_MSG = "We start with the first wave. It will last three turns.";
+			private const string UNDERSTAND_MSG = "I understand.";
+			private const string ONE_THREE_MSG = "We start with the first wave. It lasts three turns.";
 			private const string END_OF_WAVE_MSG = "You win by surviving through the last turn of the third wave. That's when daybreak happens.";
 			private const string VALIANT_MSG = "Great!";
 			private const string ADVANCE_MSG = "Each turn begins with my horde advancing.";
@@ -186,7 +186,7 @@
 			private const string OK_MSG = "Got it.";
 			private const string SELECT_MSG = "Plan your move by clicking the spaces you want to move to. First, click your defender.";
 			private const string PLAN_MSG = "Now choose your move by clicking each highlighted space.";
-			private const string DONE_MSG = "Right, now lock in your move with the \"Done\" button.";
+			private const string DONE_MSG = "Right, now lock in your move with the \"Go here\" button.";
 			private const string THERE_MSG = "I'm there.";
 			private const string GO_ON_MSG = "When you've moved your defender, hit \"Done moving\" in the upper-right to fight.";
 			private TwoDLoc[] requiredMoves = new TwoDLoc[2] { new TwoDLoc(3, 2), new TwoDLoc(3, 3) };
@@ -306,7 +306,7 @@
 			private const string OK_MSG = "In front, OK.";
 			private const string CARD_MSG = "When we fight we each play a card and add any modifier our characters have. High value wins.";
 			private const string CARD_WHERE_MSG = "What cards?";
-			private const string ATK_CARD_MSG = "You can see my cards in the upper-left. It shows what cards I have in my deck, and what I've played.";
+			private const string ATK_CARD_MSG = "I have a deck of cards in the upper-left. Next to it is a list of cards still in my deck, and what I've played.";
 			private const string SEE_ATK_MSG = "I see the list.";
 			private const string DEF_CARD_MSG = "Click on your defender to see your cards.";
 			private const string HOW_FIGHT_MSG = "Choose a card, then click the skeleton in front of your defender.";
