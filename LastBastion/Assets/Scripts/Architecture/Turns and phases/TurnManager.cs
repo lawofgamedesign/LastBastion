@@ -274,10 +274,6 @@ public class TurnManager {
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG){
 				Services.UI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			}
-
-
-			//each time the player clicks, ask if everyone is finished. If so, move on
-			//if (Services.Defenders.IsEveryoneDone()) OnExit();
 		}
 
 
@@ -341,7 +337,18 @@ public class TurnManager {
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) {
 				Services.UI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			} else if (inputEvent.selected.tag == BOARD_TAG){
-				Services.Events.Fire(new BoardClickedEvent(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation));
+				SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
+
+				//if the player clicked the board when it seems like they must be trying to fight an enemy there, let them do so
+				if (Services.Board.GeneralSpaceQuery(space.GridLocation.x, space.GridLocation.z) == SpaceBehavior.ContentType.Attacker){
+					if (Services.Defenders.IsAnyoneSelected() &&
+						Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
+						Services.Defenders.GetSelectedDefender().TryFight(Services.Board.GetThingInSpace(space.GridLocation.x,
+																										 space.GridLocation.z).GetComponent<AttackerSandbox>());
+					}
+				} else {
+					Services.Events.Fire(new BoardClickedEvent(space.GridLocation));
+				}
 			}
 
 			if (Services.Defenders.IsEveryoneDone()) TransitionTo<BesiegeWalls>();;

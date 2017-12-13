@@ -225,6 +225,10 @@ public class AttackerSandbox : MonoBehaviour {
 				if (Services.Board.GetWallDurability(XPos) > 0) return;
 			}
 
+			//last check; if trying to take the last step to the last row, and there's a defender there, block the move
+			if (ZPos - attemptedMove == 0 &&
+				Services.Board.GeneralSpaceQuery(XPos, ZPos - attemptedMove) == SpaceBehavior.ContentType.Defender) return;
+
 
 			//if this attacker is pushing a defender back, move the defender
 			//while the attacker is at it, also push any tankards back so that they end up, if possible,
