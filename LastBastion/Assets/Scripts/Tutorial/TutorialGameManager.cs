@@ -9,16 +9,6 @@
 		/////////////////////////////////////////////
 
 
-		private static UIManager oldUI;
-		public static UIManager OldUI{
-			get {
-				Debug.Assert(oldUI != null, "No UIManager. Did you forget to create one?");
-				return oldUI;
-			}
-			set { oldUI = value; }
-		}
-
-
 		//the canvas defenders use for their UI
 		private const string DEFENDER_UI = "Defender card canvas";
 
@@ -32,11 +22,11 @@
 			Services.Tasks = new TaskManager();
 			Services.AttackDeck = new AttackerDeck();
 			Services.AttackDeck.Setup();
-			OldUI = new UIManager();
-			OldUI.Setup();
+			Services.Events = new EventManager();
+			Services.UI = new TutorialChatUI();
+			Services.UI.Setup();
 			Services.Board = new BoardBehavior();
 			Services.Board.Setup();
-			Services.Events = new EventManager();
 			Services.Attackers = new TutorialAttackerManager();
 			Services.Attackers.Setup();
 			Services.Rulebook = new TutorialTurnManager();
@@ -48,7 +38,7 @@
 			GameObject.Find(CHAR_SHEET_UI).GetComponent<CharacterSheetBehavior>().Setup();
 			Services.Undo = new UndoData();
 			Services.Undo.Setup();
-			Services.Momentum = new TutorialMomentumManager();
+			Services.Momentum = new MomentumManager();
 			Services.Momentum.Setup();
 			Services.Sound = new AudioManager();
 			Services.Sound.Setup();

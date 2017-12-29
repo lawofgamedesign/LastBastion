@@ -12,54 +12,54 @@ public class ChatUI {
 
 
 	//the speech balloons used to transmit information to the player
-	private GameObject speechBalloon;
-	private const string BALLOON_OBJ = "Speech Balloon";
-	private const string TEXT_OBJ = "Text";
+	protected GameObject speechBalloon;
+	protected const string BALLOON_OBJ = "Speech Balloon";
+	protected const string TEXT_OBJ = "Text";
 
 
 	//the scroll rect where the chat text appears
-	private Transform chatContent;
-	private const string CHAT_OBJ = "Chat window";
-	private const string VIEWPORT_OBJ = "Viewport";
-	private const string CONTENT_OBJ = "Content";
+	protected Transform chatContent;
+	protected const string CHAT_OBJ = "Chat window";
+	protected const string VIEWPORT_OBJ = "Viewport";
+	protected const string CONTENT_OBJ = "Content";
 
 
 	//buttons the player can press
-	private GameObject phaseOverButton;
-	private GameObject undoButton;
-	private TextMeshProUGUI phaseText;
-	private const string PHASE_BUTTON_OBJ = "Phase over button";
-	private const string UNDO_BUTTON_OBJ = "Phase undo button";
+	protected GameObject phaseOverButton;
+	protected GameObject undoButton;
+	protected TextMeshProUGUI phaseText;
+	protected const string PHASE_BUTTON_OBJ = "Phase over button";
+	protected const string UNDO_BUTTON_OBJ = "Phase undo button";
 
 
 	//common statements
-	private const string MOVE_DONE_MSG = "I'm done moving. My defenders will fight now";
-	private const string FIGHT_DONE_MSG = "My defenders are done fighting.";
+	protected const string MOVE_DONE_MSG = "I'm done moving. My defenders will fight now";
+	protected const string FIGHT_DONE_MSG = "My defenders are done fighting.";
 
 
 	//the character sheet 
-	private CharacterSheetBehavior charSheet;
-	private const string CHAR_SHEET_OBJ = "Defender sheet canvas";
+	protected CharacterSheetBehavior charSheet;
+	protected const string CHAR_SHEET_OBJ = "Defender sheet canvas";
 
 
 	//the attacker's combat cards
-	private Transform deckOrganizer;
-	private Transform discardOrganizer;
-	private List<RectTransform> combatDeck = new List<RectTransform>();
-	private const string COMBAT_CARD_OBJ = "Combat card";
-	private const string COMBAT_CARD_ORGANIZER = "Draw deck";
-	private const string DISCARD_ORGANIZER = "Discard pile";
-	private const string ADDED_CARD = " added with value of ";
-	private const string VALUE_OBJ = "Value";
-	private const float CARD_VERTICAL_SPACE = 0.2f;
-	private const float Y_AXIS_MESSINESS = 45.0f;
+	protected Transform deckOrganizer;
+	protected Transform discardOrganizer;
+	protected List<RectTransform> combatDeck = new List<RectTransform>();
+	protected const string COMBAT_CARD_OBJ = "Combat card";
+	protected const string COMBAT_CARD_ORGANIZER = "Draw deck";
+	protected const string DISCARD_ORGANIZER = "Discard pile";
+	protected const string ADDED_CARD = " added with value of ";
+	protected const string VALUE_OBJ = "Value";
+	protected const float CARD_VERTICAL_SPACE = 0.2f;
+	protected const float Y_AXIS_MESSINESS = 45.0f;
 
 
 	//turn UI
-	private Text turnText;
-	private const string TURN_CANVAS = "Turn canvas";
-	private const string TURN = "Turn ";
-	private const string BACKSLASH = "/";
+	protected Text turnText;
+	protected const string TURN_CANVAS = "Turn canvas";
+	protected const string TURN = "Turn ";
+	protected const string BACKSLASH = "/";
 
 
 	//phase reminder
@@ -91,7 +91,7 @@ public class ChatUI {
 
 
 	//initialize variables and listen for phase-end events, so that the phase-end button behaves properly.
-	public void Setup(){
+	public virtual void Setup(){
 		speechBalloon = Resources.Load<GameObject>(BALLOON_OBJ);
 		chatContent = GameObject.Find(CHAT_OBJ).transform.Find(VIEWPORT_OBJ).Find(CONTENT_OBJ);
 		phaseOverButton = GameObject.Find(PHASE_BUTTON_OBJ);
@@ -146,11 +146,37 @@ public class ChatUI {
 
 
 	/// <summary>
+	/// For organizing statements when both parties are "talking" at once.
+	/// </summary>
+	/// <param name="opponentStmt">Opponent statement.</param>
+	/// <param name="playerStmt">Player statement.</param>
+	public void SimultaneousStatements(string opponentStmt, string playerStmt){
+		MakeStatementTask opponentTask = new MakeStatementTask(opponentStmt, MoveBalloonTask.GrowOrShrink.Grow);
+		MakeStatementTask playerTask = new MakeStatementTask(playerStmt, MoveBalloonTask.GrowOrShrink.Grow);
+
+		WaitTask waitTask = new WaitTask();
+		opponentTask.Then(waitTask);
+		waitTask.Then(playerTask);
+
+		Services.Tasks.AddTask(opponentTask);
+	}
+
+
+	/// <summary>
 	/// Call this when the opponent is conceptually saying something.
 	/// </summary>
 	/// <param name="statement">The statement the opponent makes.</param>
 	public void OpponentStatement(string statement){
 		Services.Tasks.AddTask(new MoveBalloonTask(attackerBalloonStart, statement, MoveBalloonTask.GrowOrShrink.Grow));
+	}
+
+
+	/// <summary>
+	/// Call this when the player "says" something using the button normally used for phase end.
+	/// </summary>
+	/// <param name="statement">The statement the player makes.</param>
+	public void PlayerPhaseStatement(string statement){
+		Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, statement, MoveBalloonTask.GrowOrShrink.Grow));
 	}
 
 
@@ -239,17 +265,17 @@ public class ChatUI {
 	/// Frex., the first click on the button doesn't end the Defenders Move phase if all defenders have not yet moved.
 	/// </summary>
 	/// <param name="e">A PhaseStartEvent.</param>
-	private void PhaseStartHandling(Event e){
+	protected virtual void PhaseStartHandling(Event e){
 		Debug.Assert(e.GetType() == typeof(PhaseStartEvent));
 
 		PhaseStartEvent startEvent = e as PhaseStartEvent;
 
 		if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerMove)){
-			phaseText.text = MOVE_DONE_MSG;
+			SetButtonText(MOVE_DONE_MSG);
 			phaseOverButton.SetActive(true);
 			undoButton.SetActive(true);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerFight)){
-			phaseText.text = FIGHT_DONE_MSG;
+			SetButtonText(FIGHT_DONE_MSG);
 			Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, MOVE_DONE_MSG, MoveBalloonTask.GrowOrShrink.Shrink));
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
 			phaseOverButton.SetActive(false);
@@ -263,10 +289,12 @@ public class ChatUI {
 	/// Create a speech balloon, sized appropriately for its text.
 	/// </summary>
 	/// <returns>The balloon's TextMeshPro component, so that its text can be set.</returns>
-	private TextMeshProUGUI AddBalloon(string message){
+	protected TextMeshProUGUI AddBalloon(string message){
 		TextMeshProUGUI balloon = MonoBehaviour.Instantiate<GameObject>(speechBalloon, chatContent).transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
 
 		int rows = message.Length/SIZE_PER_ROW;
+
+		rows = rows < 1 ? 1 : rows; //don't let rows be 0;
 
 		int height = TEXT_ROW_SIZE * rows;
 
@@ -278,6 +306,15 @@ public class ChatUI {
 
 
 		return balloon;
+	}
+
+
+	/// <summary>
+	/// This sets the text of the main UI button, mostly used to end phases.
+	/// </summary>
+	/// <param name="message">The text the button should display.</param>
+	public virtual void SetButtonText(string message){
+		phaseText.text = message;
 	}
 
 
@@ -410,7 +447,7 @@ public class ChatUI {
 	/// <summary>
 	/// Create a visible deck of cards for the attackers
 	/// </summary>
-	private List<RectTransform> CreateCombatDeck(){
+	protected List<RectTransform> CreateCombatDeck(){
 		//get rid of the existing cards
 		//foreach (Transform card in deckOrganizer) MonoBehaviour.Destroy(card.gameObject);
 		foreach (Transform card in discardOrganizer) MonoBehaviour.Destroy(card.gameObject);

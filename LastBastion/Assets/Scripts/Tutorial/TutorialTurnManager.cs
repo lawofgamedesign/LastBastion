@@ -1,167 +1,151 @@
 ﻿namespace Tutorial
 {
-//	using System.Collections.Generic;
-//	using UnityEngine;
-//	using UnityEngine.SceneManagement;
-//	using UnityEngine.UI;
-//
+	using UnityEngine;
+	using UnityEngine.UI;
+
 	public class TutorialTurnManager : TurnManager {
-//
-//
-//		/////////////////////////////////////////////
-//		/// Fields
-//		/////////////////////////////////////////////
-//
-//
-//		//the specialized state machine for the tutorial
-//		private FSM<TutorialTurnManager> tutMachine;
-//		public FSM<TutorialTurnManager> TutMachine { get { return tutMachine; } protected set { tutMachine = value; } }
-//
-//
-//		//the special UI for the tutorial
-//		private Text tutText;
-//		private Text nextText;
-//		private Text phaseText;
-//		private GameObject advanceButton;
-//		private const string TUTORIAL_TEXT_OBJ = "Tutorial text";
-//		private const string ADVANCE_BUTTON_OBJ = "Advance button";
-//		private const string PHASE_OBJ = "Phase button";
-//
-//		//button for ending the current phase and moving to the next
-//		protected GameObject nextPhaseButton;
-//		protected Text phaseButtonText;
-//		protected const string TEXT_OBJ = "Text";
-//		protected const string NEXT_BUTTON_OBJ = "Next phase button";
-//		protected const string ATTACKER_MOVE = "Horde moves";
-//		protected const string PLAYER_MOVE = "Defenders move";
-//		protected const string PLAYER_FIGHT = "Defenders fight";
-//		protected const string BESIEGE = "Horde besieges";
-//
-//
-//		/////////////////////////////////////////////
-//		/// Functions
-//		/////////////////////////////////////////////
-//
-//
-//		//initialize variables
-//		public override void Setup(){
-//			tutMachine = new FSM<TutorialTurnManager>(this);
-//			TutMachine = tutMachine;
-//			ResetTurnUI();
-//			phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
-//			nextPhaseButton = GameObject.Find(NEXT_BUTTON_OBJ);
-//			phaseButtonText = nextPhaseButton.transform.Find(TEXT_OBJ).GetComponent<Text>();
-//			ToggleNextPhaseButton();
-//			tutText = GameObject.Find(TUTORIAL_TEXT_OBJ).GetComponent<Text>();
-//			advanceButton = GameObject.Find(ADVANCE_BUTTON_OBJ);
-//			nextText = advanceButton.transform.Find(TEXT_OBJ).GetComponent<Text>();
-//			tutMachine.TransitionTo<StartOfTutorial>();
-//		}
-//
-//
-//		//go through one loop of the current state
-//		public override void Tick(){
-//			tutMachine.Tick();
-//		}
-//
-//
-//		public void SetTutorialText(string info){
-//			tutText.text = info;
-//		}
-//
-//
-//		public string GetTutorialText(){
-//			return tutText.text;
-//		}
-//
-//
-//		public void SetButtonText(string info){
-//			nextText.text = info;
-//		}
-//
-//
-//		public void ToggleAdvanceButton(){
-//			advanceButton.SetActive(!advanceButton.activeInHierarchy);
-//		}
-//
-//
-//		/////////////////////////////////////////////
-//		/// States
-//		/////////////////////////////////////////////
-//
-//
-//		//update the turn counter
-//		private class StartOfTutorial : FSM<TutorialTurnManager>.State {
-//
-//
-//			private const string WELCOME_MSG = "OK, we're all set up.";
-//			private const string HOW_MSG = "How do we play?";
-//			private const string THEME_MSG = "I'm the evil Necromancer. I try to get my horde to the bottom row of tiles.";
-//			private const string NEVER_MSG = "Never!";
-//			private const string HORDE_MSG = "My skeletal horde is endless. You have to hold out until daybreak, which dispels my necromancy.";
-//			private const string NONE_MSG = "None shall pass!";
-//			private const string WAVES_MSG = "My horde attacks in waves. Each wave lasts a certain number of turns.";
-//			private const string UNDERSTAND_MSG = "I understand.";
-//			private const string ONE_THREE_MSG = "We start with the first wave. It lasts three turns.";
-//			private const string END_OF_WAVE_MSG = "You win by surviving through the last turn of the third wave. That's when daybreak happens.";
-//			private const string VALIANT_MSG = "Great!";
-//			private const string ADVANCE_MSG = "Each turn begins with my horde advancing.";
-//			private const string DASTARDLY_MSG = "Stop that!";
-//
-//
-//			private void OnButtonClick(global::Event e){
-//				switch (Context.GetTutorialText()){
-//					case WELCOME_MSG:
-//						Context.SetTutorialText(THEME_MSG);
-//						Context.SetButtonText(NEVER_MSG);
-//						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.On);
-//						break;
-//					case THEME_MSG:
-//						Context.SetTutorialText(HORDE_MSG);
-//						Context.SetButtonText(NONE_MSG);
-//						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.Off);
-//						break;
-//					case HORDE_MSG:
-//						Context.SetTutorialText(WAVES_MSG);
-//						Context.SetButtonText(UNDERSTAND_MSG);
-//						break;
-//					case WAVES_MSG:
-//						Context.SetTutorialText(ONE_THREE_MSG);
-//						break;
-//					case ONE_THREE_MSG:
-//						Context.SetTutorialText(END_OF_WAVE_MSG);
-//						Context.SetButtonText(VALIANT_MSG);
-//						break;
-//					case END_OF_WAVE_MSG:
-//						Context.SetTutorialText(ADVANCE_MSG);
-//						Context.SetButtonText(DASTARDLY_MSG);
-//						break;
-//					case ADVANCE_MSG:
-//						TransitionTo<AttackersAdvance>();
-//						break;
-//				}
-//			}
-//
-//
-//			public override void OnEnter (){
-//				Context.NewTurn();
-//				Context.SetTutorialText(WELCOME_MSG);
-//				Context.SetButtonText(HOW_MSG);
-//				Services.Events.Register<TutorialClick>(OnButtonClick);
-//			}
-//
-//
-//			public override void OnExit (){
-//				Services.Events.Unregister<TutorialClick>(OnButtonClick);
-//				Context.ToggleAdvanceButton();
-//			}
-//		}
+
+
+		/////////////////////////////////////////////
+		/// Fields
+		/////////////////////////////////////////////
+
+
+		//the specialized state machine for the tutorial
+		private FSM<TutorialTurnManager> tutMachine;
+		public FSM<TutorialTurnManager> TutMachine { 
+			get { return tutMachine; } 
+			protected set { tutMachine = value; }
+		}
+
+
+		//the special UI for the tutorial
+		private Text tutText;
+		private const string TUTORIAL_TEXT_OBJ = "Tutorial text";
+
+
+		/////////////////////////////////////////////
+		/// Functions
+		/////////////////////////////////////////////
+
+
+		//initialize variables
+		public override void Setup(){
+			ResetTurnUI();
+			tutMachine = new FSM<TutorialTurnManager>(this);
+			TutMachine = tutMachine;
+			tutText = GameObject.Find(TUTORIAL_TEXT_OBJ).GetComponent<Text>();
+			tutMachine.TransitionTo<StartOfTutorial>();
+		}
+
+
+		//go through one loop of the current state
+		public override void Tick(){
+			tutMachine.Tick();
+		}
+
+
+		public void SetTutorialText(string info){
+			tutText.text = info;
+		}
+
+
+		public string GetTutorialText(){
+			return tutText.text;
+		}
+
+
+		/////////////////////////////////////////////
+		/// States
+		/////////////////////////////////////////////
+
+
+		//update the turn counter
+		public class StartOfTutorial : FSM<TutorialTurnManager>.State {
+
+
+			private const string WELCOME_MSG = "OK, we're all set up.";
+			private const string HOW_MSG = "How do we play?";
+			private const string THEME_MSG = "I'm the evil Necromancer. I try to get my horde to the bottom row of tiles.";
+			private const string NEVER_MSG = "Never!";
+			private const string HORDE_MSG = "My skeletal horde is endless. You have to hold out until daybreak, which dispels my necromancy.";
+			private const string NONE_MSG = "None shall pass!";
+			private const string WAVES_MSG = "My horde attacks in waves. Each wave lasts a certain number of turns.";
+			private const string UNDERSTAND_MSG = "I understand.";
+			private const string ONE_THREE_MSG = "We start with the first wave. It lasts three turns.";
+			private const string END_OF_WAVE_MSG = "You win by surviving through the last turn of the third wave. That's when daybreak happens.";
+			private const string VALIANT_MSG = "Great!";
+			private const string ADVANCE_MSG = "Each turn begins with my horde advancing.";
+			private const string DASTARDLY_MSG = "Stop that!";
+
+
+			private void OnButtonClick(global::Event e){
+				switch (Context.GetTutorialText()){
+					case WELCOME_MSG:
+						Services.UI.SimultaneousStatements(WELCOME_MSG, HOW_MSG);
+						Context.SetTutorialText(THEME_MSG);
+						Services.UI.SetButtonText(NEVER_MSG);
+						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.On);
+						break;
+					case THEME_MSG:
+						Services.UI.SimultaneousStatements(THEME_MSG, NEVER_MSG);
+						Context.SetTutorialText(HORDE_MSG);
+						Services.UI.SetButtonText(NONE_MSG);
+						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.Off);
+						break;
+					case HORDE_MSG:
+						Services.UI.OpponentStatement(HORDE_MSG);
+						Services.UI.PlayerPhaseStatement(NONE_MSG);
+						Context.SetTutorialText(WAVES_MSG);
+						Services.UI.SetButtonText(UNDERSTAND_MSG);
+						break;
+					case WAVES_MSG:
+						Services.UI.OpponentStatement(WAVES_MSG);
+						Services.UI.PlayerPhaseStatement(UNDERSTAND_MSG);
+						Context.SetTutorialText(ONE_THREE_MSG);
+						break;
+					case ONE_THREE_MSG:
+						Services.UI.OpponentStatement(ONE_THREE_MSG);
+						Services.UI.PlayerPhaseStatement(UNDERSTAND_MSG);
+						Context.SetTutorialText(END_OF_WAVE_MSG);
+						Services.UI.SetButtonText(VALIANT_MSG);
+						break;
+					case END_OF_WAVE_MSG:
+						Services.UI.OpponentStatement(END_OF_WAVE_MSG);
+						Services.UI.PlayerPhaseStatement(VALIANT_MSG);
+						Context.SetTutorialText(ADVANCE_MSG);
+						Services.UI.SetButtonText(DASTARDLY_MSG);
+						break;
+					case ADVANCE_MSG:
+						Services.UI.OpponentStatement(ADVANCE_MSG);
+						Services.UI.PlayerPhaseStatement(DASTARDLY_MSG);
+						TransitionTo<AttackersAdvance>();
+						break;
+				}
+			} 
+
+
+			public override void OnEnter (){
+				Context.NewTurn();
+				Context.SetTutorialText(WELCOME_MSG);
+				Services.UI.SetButtonText(HOW_MSG);
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
+
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+
+			}
+		}
 //
 //
 //		/// <summary>
 //		/// State for the attackers moving south at the start of each turn.
 //		/// </summary>
-//		protected class AttackersAdvance : FSM<TutorialTurnManager>.State {
+		public class AttackersAdvance : FSM<TutorialTurnManager>.State {
 //			float timer;
 //
 //			//tell the attacker manager to move the attackers.
@@ -256,7 +240,7 @@
 //						}
 //					}
 //				}
-//			}
+			}
 //
 //
 //			private void ResetMoveTutorial(global::Event e){
@@ -311,7 +295,7 @@
 //		/// State for the defenders' combat. This is public so that the Ranger can determine whether it's the Defenders Fight phase, and display--or not display--
 //		/// the Showboating UI accordingly.
 //		/// </summary>
-//		public class PlayerFight : FSM<TutorialTurnManager>.State {
+		public class PlayerFight : FSM<TutorialTurnManager>.State {
 //
 //
 //			private const string FACING_MSG = "Normally your defenders can only fight someone directly ahead of them.";
@@ -430,13 +414,13 @@
 //				Context.ToggleNextPhaseButton();
 //				Services.Events.Unregister<TutorialClick>(OnButtonClick);
 //			}
-//		}
+		}
 //
 //
 //		/// <summary>
 //		/// State for demonstrating powering up.
 //		/// </summary>
-//		public class PowerUp : FSM<TutorialTurnManager>.State {
+		public class PowerUp : FSM<TutorialTurnManager>.State {
 //
 //
 //			private const string UI_TAG = "UI";
@@ -541,10 +525,10 @@
 //					Context.SetButtonText(WHEN_MSG);
 //				}
 //			}
-//		}
+		}
 //
 //
-//		protected class BesiegeWalls : FSM<TutorialTurnManager>.State {
+		public class BesiegeWalls : FSM<TutorialTurnManager>.State {
 //
 //
 //			private const string BESIEGE_MSG = "The last thing that happens each turn is my horde besieges the wall.";
@@ -628,6 +612,6 @@
 //					Services.Defenders.CompleteFightPhase();
 //				}
 //			}
-//		}
+		}
 	}
 }
