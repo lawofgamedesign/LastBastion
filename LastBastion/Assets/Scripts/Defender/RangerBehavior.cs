@@ -109,7 +109,7 @@ public class RangerBehavior : DefenderSandbox {
 	public override void BeSelectedForFight(){
 		base.BeSelectedForFight();
 
-		if (currentShowboat != ShowboatTrack.None) Services.UI.MakeStatement(ReviseAttackText());
+		if (currentShowboat != ShowboatTrack.None) Services.UI.OpponentStatement(ReviseAttackText());
 	}
 
 
@@ -148,7 +148,7 @@ public class RangerBehavior : DefenderSandbox {
 			//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
 			currentAttacks--;
 			extraAttacks++;
-			Services.UI.MakeStatement(ReviseAttackText());
+			Services.UI.OpponentStatement(ReviseAttackText());
 
 			FinishWithCard();
 		} else {
@@ -156,7 +156,7 @@ public class RangerBehavior : DefenderSandbox {
 			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 			currentAttacks--;
-			Services.UI.MakeStatement(ReviseAttackText());
+			Services.UI.OpponentStatement(ReviseAttackText());
 		}
 
 		//the Ranger can keep fighting until they run out of attacks
@@ -332,7 +332,7 @@ public class RangerBehavior : DefenderSandbox {
 					//just started showboating; need to make sure the UI is correct, and displayed if it's the appropriate phase
 					if (currentShowboat == ShowboatTrack.Showboat){
 						PrepareToFight();
-					if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)) Services.UI.MakeStatement(ReviseAttackText());
+					if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)) Services.UI.OpponentStatement(ReviseAttackText());
 					}
 				}
 
@@ -349,7 +349,7 @@ public class RangerBehavior : DefenderSandbox {
 
 						//register for input and provide appropriate feedback
 						Services.Events.Register<InputEvent>(PutDownBlock);
-						Services.UI.MakeStatement(ROCK_MSG);
+						Services.UI.OpponentStatement(ROCK_MSG);
 						Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On, true);
 						break;
 					case TrapTrack.Landslide:
@@ -391,7 +391,7 @@ public class RangerBehavior : DefenderSandbox {
 			if (CheckBlockable(space.GridLocation.x, space.GridLocation.z, destroyingBlock)){
 				space.Block = true;
 				Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, BLOCK_MARKER_OBJ));
-				Services.UI.MakeStatement(BLOCKED_MSG);
+				Services.UI.OpponentStatement(BLOCKED_MSG);
 
 				if (currentTrap == TrapTrack.Rockfall) rockfallLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
 

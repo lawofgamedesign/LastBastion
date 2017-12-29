@@ -80,6 +80,11 @@ public class ChatUI {
 	protected const int BALLOON_PADDING = 5;
 
 
+	//the source of the attacker's speech balloons
+	protected Vector3 attackerBalloonStart = new Vector3(0.0f, 0.0f, 0.0f);
+	protected const string BALLOON_START_OBJ = "Attacker balloon source";
+
+
 	/////////////////////////////////////////////
 	/// Fields
 	/////////////////////////////////////////////
@@ -113,6 +118,10 @@ public class ChatUI {
 		discardOrganizer = GameObject.Find(DISCARD_ORGANIZER).transform;
 		combatDeck.Clear(); //sanity check
 		combatDeck = CreateCombatDeck();
+
+
+		//speech balloon setup
+		attackerBalloonStart = GameObject.Find(BALLOON_START_OBJ).transform.position;
 	}
 
 
@@ -136,12 +145,21 @@ public class ChatUI {
 
 
 	/// <summary>
+	/// Call this when the opponent is conceptually saying something.
+	/// </summary>
+	/// <param name="statement">The statement the opponent makes.</param>
+	public void OpponentStatement(string statement){
+		Services.Tasks.AddTask(new MoveBalloonTask(attackerBalloonStart, statement, MoveBalloonTask.GrowOrShrink.Grow));
+	}
+
+
+	/// <summary>
 	/// Say something when the attackers gain momentum.
 	/// </summary>
 	public void MomentumWarning(){
 		string warning = "You lost, so I gain momentum. My attackers move " + (Services.Momentum.Momentum + 1).ToString() + " next turn.";
 
-		MakeStatement(warning);
+		OpponentStatement(warning);
 	}
 
 
@@ -199,7 +217,7 @@ public class ChatUI {
 			explanation += I_WIN_MSG;
 		}
 
-		MakeStatement(explanation);
+		OpponentStatement(explanation);
 	}
 
 
@@ -208,7 +226,7 @@ public class ChatUI {
 
 		string turnMessage = "This is turn " + currentTurn.ToString() + " of " + totalTurns.ToString() + " this wave.";
 
-		MakeStatement(turnMessage);
+		OpponentStatement(turnMessage);
 	}
 
 
@@ -230,12 +248,12 @@ public class ChatUI {
 			phaseOverButton.SetActive(true);
 			undoButton.SetActive(true);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerFight)){
-			MakeStatement(MOVE_DONE_MSG);
 			phaseText.text = FIGHT_DONE_MSG;
+			Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, MOVE_DONE_MSG, MoveBalloonTask.GrowOrShrink.Shrink));
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
-			MakeStatement(FIGHT_DONE_MSG);
 			phaseOverButton.SetActive(false);
 			undoButton.SetActive(false);
+			Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, FIGHT_DONE_MSG, MoveBalloonTask.GrowOrShrink.Shrink));
 		}
 	}
 

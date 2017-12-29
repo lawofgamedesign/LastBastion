@@ -134,7 +134,7 @@ public class TurnManager {
 	/// Handles informing the player that they've won.
 	/// </summary>
 	protected void PlayerWinFeedback(){
-		Services.UI.MakeStatement(WIN_MSG);
+		Services.UI.OpponentStatement(WIN_MSG);
 	}
 
 
@@ -142,7 +142,7 @@ public class TurnManager {
 	/// Handles informing the player that they've lost.
 	/// </summary>
 	protected void PlayerLoseFeedback(){
-		Services.UI.MakeStatement(LOSE_MSG);
+		Services.UI.OpponentStatement(LOSE_MSG);
 	}
 
 
@@ -250,7 +250,7 @@ public class TurnManager {
 					Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
 				}
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG){
-				Services.UI.MakeStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
+				Services.UI.OpponentStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			}
 		}
 
@@ -264,7 +264,7 @@ public class TurnManager {
 			else if (Context.imSure) TransitionTo<PlayerFight>();
 			else {
 				Context.imSure = true;
-				Services.UI.MakeStatement(ARE_YOU_SURE_MSG);
+				Services.UI.OpponentStatement(ARE_YOU_SURE_MSG);
 			}
 		}
 
@@ -308,7 +308,7 @@ public class TurnManager {
 					   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
 				Services.Defenders.GetSelectedDefender().TryFight(inputEvent.selected.GetComponent<AttackerSandbox>());
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) {
-				Services.UI.MakeStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
+				Services.UI.OpponentStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			} else if (inputEvent.selected.tag == BOARD_TAG){
 				SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
 

@@ -92,7 +92,7 @@ public class GuardianBehavior : DefenderSandbox {
 		base.Move();
 
 		if (currentHold != HoldTrack.None &&
-			currentHold != HoldTrack.The_Last_Bastion) Services.UI.MakeStatement(CHOOSE_TO_BLOCK);
+			currentHold != HoldTrack.The_Last_Bastion) Services.UI.OpponentStatement(CHOOSE_TO_BLOCK);
 
 
 		/*
@@ -128,10 +128,10 @@ public class GuardianBehavior : DefenderSandbox {
 		alternateTurn++;
 		if (alternateTurn%2 == 0){
 			BlockAllColumns();
-			Services.UI.MakeStatement(ALL_BLOCKED);
+			Services.UI.OpponentStatement(ALL_BLOCKED);
 		} else {
 			UnblockAllColumns();
-			Services.UI.MakeStatement(NONE_BLOCKED);
+			Services.UI.OpponentStatement(NONE_BLOCKED);
 		}
 	}
 
@@ -180,7 +180,7 @@ public class GuardianBehavior : DefenderSandbox {
 				if (currentHold != HoldTrack.Hold_the_Line) MakeColumnLure(blockedColumn, true); //attackers move into blocked columns at higher Hold the Line levels
 
 				Services.Events.Unregister<InputEvent>(ChooseColumn);
-				Services.UI.MakeStatement(COLUMN_CHOSEN);
+				Services.UI.OpponentStatement(COLUMN_CHOSEN);
 
 				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask(LINE_MARKER_OBJ);
 				pickUpTask.Then(new BlockFeedbackTask(blockedColumn, LINE_MARKER_OBJ));
@@ -189,7 +189,7 @@ public class GuardianBehavior : DefenderSandbox {
 				Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.Off);
 				return;
 			} else {
-				Services.UI.MakeStatement(INVALID_COLUMN);
+				Services.UI.OpponentStatement(INVALID_COLUMN);
 			}
 		}
 	}
