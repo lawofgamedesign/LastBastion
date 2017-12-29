@@ -96,6 +96,7 @@ public class ChatUI {
 		chatContent = GameObject.Find(CHAT_OBJ).transform.Find(VIEWPORT_OBJ).Find(CONTENT_OBJ);
 		phaseOverButton = GameObject.Find(PHASE_BUTTON_OBJ);
 		phaseText = phaseOverButton.transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		phaseOverButton.SetActive(false);
 		undoButton = GameObject.Find(UNDO_BUTTON_OBJ);
 		undoButton.SetActive(false);
 		Services.Events.Register<PhaseStartEvent>(PhaseStartHandling);
