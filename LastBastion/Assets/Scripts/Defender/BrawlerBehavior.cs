@@ -242,13 +242,13 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		//if the Brawler gets this far, a fight will actually occur; get a card for the Attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-		extraText.text = DisplayCombatMath(attacker, attackerValue);
+		int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
 
-		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){ //successful attack
-			int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
+		damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
 
-			damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
+		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
 
+		if ((ChosenCard.Value + AttackMod) > (attackerValue + attacker.AttackMod)){ //successful attack
 			if (damage >= attacker.Health){
 				DefeatAttacker();
 				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
@@ -488,7 +488,7 @@ public class BrawlerBehavior : DefenderSandbox {
 							}
 							Services.Events.Register<InputEvent>(DropTankard);
 							tankardsToDrop = 1;
-							Services.UI.SetExtraText(DROP_DIRECTIONS);
+							Services.UI.MakeStatement(DROP_DIRECTIONS);
 							drinkDamage = START_DRINK_DAMAGE;
 							Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.On);
 							break;
@@ -547,7 +547,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		if (tankardsToDrop <= 0){
 			Services.Events.Unregister<InputEvent>(DropTankard);
-			Services.UI.SetExtraText(DRINK_MSG);
+			Services.UI.MakeStatement(DRINK_MSG);
 			Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.Off);
 		}
 	}
@@ -573,7 +573,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		//try to kick the tankard
 		if (Services.Board.CheckIfTankard(GridLoc.x, GridLoc.z)){
-			Services.UI.SetExtraText(KICK_DIRECTIONS);
+			Services.UI.MakeStatement(KICK_DIRECTIONS);
 			Services.Events.Register<InputEvent>(ChooseTankardKick);
 			Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On);
 			//gain inspiration for drinking, if at that point in the track
@@ -627,7 +627,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		Services.Board.GetSpace(GridLoc.x, GridLoc.z).Tankard = false;
 		localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
 		Services.Tasks.AddTask(waitTask);
-		Services.UI.SetExtraText(KICK_MSG);
+		Services.UI.MakeStatement(KICK_MSG);
 		Services.Events.Unregister<InputEvent>(ChooseTankardKick);
 		Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.Off);
 	}

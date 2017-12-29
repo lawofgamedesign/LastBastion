@@ -82,10 +82,10 @@ public static class Services {
 	}
 
 
-	private static UIManager uI;
-	public static UIManager UI {
+	private static ChatUI uI;
+	public static ChatUI UI {
 		get {
-			Debug.Assert(uI != null, "No UI manager. Did you forget to create one?");
+			Debug.Assert(uI != null, "No UI system. Are services being created in the wrong order?");
 			return uI;
 		}
 		set { uI = value; }

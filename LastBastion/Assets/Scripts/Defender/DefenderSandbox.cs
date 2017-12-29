@@ -72,7 +72,6 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	//extra UI for displaying combat math
-	protected Text extraText;
 	protected const string EXTRA_INFO_OBJ = "Extra info canvas";
 	protected const string DEFENDER_VALUE = "Defender: ";
 	protected const string ATTACKER_VALUE = "Horde: ";
@@ -130,7 +129,6 @@ public class DefenderSandbox : MonoBehaviour {
 		uICanvas = GameObject.Find(CARD_UI_CANVAS).transform;
 		defenderCards = uICanvas.GetComponent<DefenderUIBehavior>();
 		noFightButton = transform.Find(PRIVATE_UI_CANVAS).Find(NO_FIGHT_BUTTON).GetComponent<Button>();
-		extraText = GameObject.Find(EXTRA_INFO_OBJ).transform.Find(TEXT_OBJ).GetComponent<Text>();
 		DefeatedSoFar = START_DEFEATED;
 		xpParticle = transform.Find(XP_PARTICLE_OBJ).GetComponent<ParticleSystem>();
 		powerupReadyParticle = transform.Find(POWER_UP_PARTICLE_OBJ).gameObject;
@@ -454,7 +452,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-		extraText.text = DisplayCombatMath(attacker, attackerValue);
+		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, ChosenCard.Value - (attackerValue + attacker.AttackMod + attacker.Armor));
 
 		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){
 			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));

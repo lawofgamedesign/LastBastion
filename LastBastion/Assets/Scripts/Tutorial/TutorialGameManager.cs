@@ -9,6 +9,16 @@
 		/////////////////////////////////////////////
 
 
+		private static UIManager oldUI;
+		public static UIManager OldUI{
+			get {
+				Debug.Assert(oldUI != null, "No UIManager. Did you forget to create one?");
+				return oldUI;
+			}
+			set { oldUI = value; }
+		}
+
+
 		//the canvas defenders use for their UI
 		private const string DEFENDER_UI = "Defender card canvas";
 
@@ -22,8 +32,8 @@
 			Services.Tasks = new TaskManager();
 			Services.AttackDeck = new AttackerDeck();
 			Services.AttackDeck.Setup();
-			Services.UI = new UIManager();
-			Services.UI.Setup();
+			OldUI = new UIManager();
+			OldUI.Setup();
 			Services.Board = new BoardBehavior();
 			Services.Board.Setup();
 			Services.Events = new EventManager();

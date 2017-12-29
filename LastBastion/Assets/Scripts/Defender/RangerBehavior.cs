@@ -89,15 +89,6 @@ public class RangerBehavior : DefenderSandbox {
 	}
 
 
-	/// <summary>
-	/// If the Ranger has anything on the extra UI notepad, blank it when the Ranger moves.
-	/// </summary>
-	public override void Move(){
-		extraText.text = BlankAttackText();
-		base.Move();
-	}
-
-
 	#region combat
 
 
@@ -118,7 +109,7 @@ public class RangerBehavior : DefenderSandbox {
 	public override void BeSelectedForFight(){
 		base.BeSelectedForFight();
 
-		if (currentShowboat != ShowboatTrack.None) extraText.text = ReviseAttackText();
+		if (currentShowboat != ShowboatTrack.None) Services.UI.MakeStatement(ReviseAttackText());
 	}
 
 
@@ -136,17 +127,16 @@ public class RangerBehavior : DefenderSandbox {
 
 		//if the Ranger gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-		extraText.text = DisplayCombatMath(attacker, attackerValue);
+		int damage = (ChosenCard.Value + AttackMod) -
+			(attackerValue + DetermineAttackerModifier(attacker) +
+				DetermineAttackerArmor(attacker));
+
+		damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
+		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
 
 
 		//the attacker's attack modifier might be reduced if the Ranger is behind them
 		if (ChosenCard.Value + AttackMod > attackerValue + DetermineAttackerModifier(attacker)){
-			int damage = (ChosenCard.Value + AttackMod) -
-						 (attackerValue + DetermineAttackerModifier(attacker) +
-						  DetermineAttackerArmor(attacker));
-
-			damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
-
 			if (damage >= attacker.Health){
 				DefeatedSoFar++;
 				powerupReadyParticle.SetActive(CheckUpgradeStatus());
@@ -158,7 +148,7 @@ public class RangerBehavior : DefenderSandbox {
 			//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
 			currentAttacks--;
 			extraAttacks++;
-			extraText.text = ReviseAttackText();
+			Services.UI.MakeStatement(ReviseAttackText());
 
 			FinishWithCard();
 		} else {
@@ -166,7 +156,7 @@ public class RangerBehavior : DefenderSandbox {
 			Services.Events.Fire(new MissedFightEvent());
 			FinishWithCard();
 			currentAttacks--;
-			extraText.text = ReviseAttackText();
+			Services.UI.MakeStatement(ReviseAttackText());
 		}
 
 		//the Ranger can keep fighting until they run out of attacks
@@ -303,17 +293,6 @@ public class RangerBehavior : DefenderSandbox {
 	}
 
 
-	/// <summary>
-	/// In addition to the normal effects associated with being done fighting, the Ranger needs to blank the sheet
-	/// that provides feedback on the number of attacks remaining.
-	/// </summary>
-	public override void DoneFighting(){
-		extraText.text = BlankAttackText();
-
-		base.DoneFighting();
-	}
-
-
 	#endregion combat
 
 
@@ -353,7 +332,7 @@ public class RangerBehavior : DefenderSandbox {
 					//just started showboating; need to make sure the UI is correct, and displayed if it's the appropriate phase
 					if (currentShowboat == ShowboatTrack.Showboat){
 						PrepareToFight();
-						if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)) extraText.text = ReviseAttackText();
+					if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)) Services.UI.MakeStatement(ReviseAttackText());
 					}
 				}
 
@@ -370,7 +349,7 @@ public class RangerBehavior : DefenderSandbox {
 
 						//register for input and provide appropriate feedback
 						Services.Events.Register<InputEvent>(PutDownBlock);
-						Services.UI.SetExtraText(ROCK_MSG);
+						Services.UI.MakeStatement(ROCK_MSG);
 						Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On, true);
 						break;
 					case TrapTrack.Landslide:
@@ -412,7 +391,7 @@ public class RangerBehavior : DefenderSandbox {
 			if (CheckBlockable(space.GridLocation.x, space.GridLocation.z, destroyingBlock)){
 				space.Block = true;
 				Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, BLOCK_MARKER_OBJ));
-				Services.UI.SetExtraText(BLOCKED_MSG);
+				Services.UI.MakeStatement(BLOCKED_MSG);
 
 				if (currentTrap == TrapTrack.Rockfall) rockfallLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
 

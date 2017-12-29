@@ -33,15 +33,6 @@ public class TurnManager {
 	protected const string MINION_TAG = "Minion";
 
 
-	//feedback for the player to help track which phase they're in
-	protected Text phaseText;
-	protected const string PHASE_OBJ = "Phase";
-	protected const string ATTACKER_MOVE = "Horde moves";
-	protected const string PLAYER_MOVE = "Defenders move";
-	protected const string PLAYER_FIGHT = "Defenders fight";
-	protected const string BESIEGE = "Horde besieges";
-
-
 	//button for ending the current phase and moving to the next
 	protected GameObject nextPhaseButton;
 	protected Text phaseButtonText;
@@ -87,13 +78,9 @@ public class TurnManager {
 		TurnMachine = turnMachine;
 		ResetTurnUI();
 		turnMachine.TransitionTo<StartOfTurn>();
-		phaseText = GameObject.Find(PHASE_OBJ).GetComponent<Text>();
-		nextPhaseButton = GameObject.Find(NEXT_BUTTON_OBJ);
-		phaseButtonText = nextPhaseButton.transform.Find(TEXT_OBJ).GetComponent<Text>();
 		tutorialCanvas = GameObject.Find(TUTORIAL_CANVAS_OBJ);
 		tutorialText = tutorialCanvas.transform.Find(TUTORIAL_TEXT_OBJ).GetComponent<Text>();
 		tutorialCanvas.SetActive(false);
-		ToggleNextPhaseButton();
 	}
 
 
@@ -131,14 +118,6 @@ public class TurnManager {
 
 
 	/// <summary>
-	/// Switch the next phase button on or off.
-	/// </summary>
-	protected void ToggleNextPhaseButton(){
-		nextPhaseButton.SetActive(!nextPhaseButton.activeInHierarchy);
-	}
-
-
-	/// <summary>
 	/// Check if an attacker has reached the final row of the board, meaning the player has lost.
 	/// </summary>
 	/// <returns><c>true</c> if the player has lost, <c>false</c> otherwise.</returns>
@@ -155,7 +134,7 @@ public class TurnManager {
 	/// Handles informing the player that they've won.
 	/// </summary>
 	protected void PlayerWinFeedback(){
-		Services.UI.SetExtraText(WIN_MSG);
+		Services.UI.MakeStatement(WIN_MSG);
 	}
 
 
@@ -163,7 +142,7 @@ public class TurnManager {
 	/// Handles informing the player that they've lost.
 	/// </summary>
 	protected void PlayerLoseFeedback(){
-		Services.UI.SetExtraText(LOSE_MSG);
+		Services.UI.MakeStatement(LOSE_MSG);
 	}
 
 
@@ -231,8 +210,7 @@ public class TurnManager {
 			Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
 			Services.Attackers.PrepareAttackerMove();
 			Services.Attackers.MoveAttackers();
-			Context.phaseText.text = ATTACKER_MOVE;
-			Context.TurnRulebookPage();
+			Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 		}
 
 
@@ -272,7 +250,7 @@ public class TurnManager {
 					Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
 				}
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG){
-				Services.UI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
+				Services.UI.MakeStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			}
 		}
 
@@ -286,20 +264,17 @@ public class TurnManager {
 			else if (Context.imSure) TransitionTo<PlayerFight>();
 			else {
 				Context.imSure = true;
-				Services.UI.SetExtraText(ARE_YOU_SURE_MSG);
+				Services.UI.MakeStatement(ARE_YOU_SURE_MSG);
 			}
 		}
 
 
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderMovePhase();
-			Context.phaseText.text = PLAYER_MOVE;
-			Context.TurnRulebookPage();
 			Services.Events.Register<InputEvent>(HandleMoveInputs);
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
-			Context.phaseButtonText.text = STOP_MOVING_MSG;
-			Context.ToggleNextPhaseButton();
-			Services.UI.ToggleUndoButton();
+			Services.Events.Fire(new PhaseStartEvent(Context.TurnMachine.CurrentState));
+			Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 			Services.Undo.PrepareToUndoMoves();
 			Context.imSure = false;
 			//display help text for the first move phase
@@ -312,8 +287,6 @@ public class TurnManager {
 			Services.Defenders.CompleteMovePhase();
 			Services.Events.Unregister<InputEvent>(HandleMoveInputs);
 			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
-			Context.ToggleNextPhaseButton();
-			Services.UI.ToggleUndoButton();
 		}
 	}
 
@@ -335,7 +308,7 @@ public class TurnManager {
 					   Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED){
 				Services.Defenders.GetSelectedDefender().TryFight(inputEvent.selected.GetComponent<AttackerSandbox>());
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) {
-				Services.UI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
+				Services.UI.MakeStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			} else if (inputEvent.selected.tag == BOARD_TAG){
 				SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
 
@@ -371,12 +344,10 @@ public class TurnManager {
 
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderFightPhase();
-			Context.phaseText.text = PLAYER_FIGHT;
-			Context.TurnRulebookPage();
+			Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 			Services.Events.Register<InputEvent>(HandleFightInputs);
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
-			Context.phaseButtonText.text = STOP_FIGHTING_MSG;
-			Context.ToggleNextPhaseButton();
+			Services.Events.Fire(new PhaseStartEvent(Context.TurnMachine.CurrentState));
 			//display help text for the first fight phase
 			if (Services.Attackers.GetCurrentWave() == 0 &&
 				Context.CurrentTurn == 1) Context.StartFightReminder();
@@ -387,14 +358,13 @@ public class TurnManager {
 			Services.Events.Unregister<InputEvent>(HandleFightInputs);
 			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
 			Services.Defenders.CompleteFightPhase();
-			Context.ToggleNextPhaseButton();
 			if (Services.Attackers.GetCurrentWave() == 0 &&
 				Context.CurrentTurn == 1) Context.EndReminder();
 		}
 	}
 
 
-	protected class BesiegeWalls : FSM<TurnManager>.State {
+	public class BesiegeWalls : FSM<TurnManager>.State {
 		float timer;
 		List<AttackerSandbox> besiegers;
 
@@ -404,10 +374,10 @@ public class TurnManager {
 
 		//are any enemies besieging the wall? Get a list of them
 		public override void OnEnter (){
+			Services.Events.Fire(new PhaseStartEvent(Context.TurnMachine.CurrentState));
+			Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 			timer = 0.0f;
 			besiegers = Services.Board.GetBesiegingAttackers();
-			Context.phaseText.text = BESIEGE;
-			Context.TurnRulebookPage();
 		}
 
 

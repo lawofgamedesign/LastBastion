@@ -92,7 +92,7 @@ public class GuardianBehavior : DefenderSandbox {
 		base.Move();
 
 		if (currentHold != HoldTrack.None &&
-			currentHold != HoldTrack.The_Last_Bastion) extraText.text = CHOOSE_TO_BLOCK;
+			currentHold != HoldTrack.The_Last_Bastion) Services.UI.MakeStatement(CHOOSE_TO_BLOCK);
 
 
 		/*
@@ -128,10 +128,10 @@ public class GuardianBehavior : DefenderSandbox {
 		alternateTurn++;
 		if (alternateTurn%2 == 0){
 			BlockAllColumns();
-			extraText.text = ALL_BLOCKED;
+			Services.UI.MakeStatement(ALL_BLOCKED);
 		} else {
 			UnblockAllColumns();
-			extraText.text = NONE_BLOCKED;
+			Services.UI.MakeStatement(NONE_BLOCKED);
 		}
 	}
 
@@ -180,7 +180,7 @@ public class GuardianBehavior : DefenderSandbox {
 				if (currentHold != HoldTrack.Hold_the_Line) MakeColumnLure(blockedColumn, true); //attackers move into blocked columns at higher Hold the Line levels
 
 				Services.Events.Unregister<InputEvent>(ChooseColumn);
-				extraText.text = COLUMN_CHOSEN;
+				Services.UI.MakeStatement(COLUMN_CHOSEN);
 
 				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask(LINE_MARKER_OBJ);
 				pickUpTask.Then(new BlockFeedbackTask(blockedColumn, LINE_MARKER_OBJ));
@@ -189,7 +189,7 @@ public class GuardianBehavior : DefenderSandbox {
 				Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.Off);
 				return;
 			} else {
-				extraText.text = INVALID_COLUMN;
+				Services.UI.MakeStatement(INVALID_COLUMN);
 			}
 		}
 	}
@@ -220,13 +220,13 @@ public class GuardianBehavior : DefenderSandbox {
 
 		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-		extraText.text = DisplayCombatMath(attacker, attackerValue);
+		int damage = (ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor);
+
+		damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
+
+		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
 
 		if (ChosenCard.Value + DetermineAttackMod(attacker) > attackerValue + attacker.AttackMod){
-			int damage = (ChosenCard.Value + DetermineAttackMod(attacker)) - (attackerValue + attacker.AttackMod + attacker.Armor);
-
-			damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
-
 			if (damage >= attacker.Health){
 				DefeatedSoFar = DetermineDefeatedSoFar(attacker);
 				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);

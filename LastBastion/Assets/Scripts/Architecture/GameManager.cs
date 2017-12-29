@@ -21,11 +21,11 @@ public class GameManager : MonoBehaviour {
 		Services.Tasks = new TaskManager();
 		Services.AttackDeck = new AttackerDeck();
 		Services.AttackDeck.Setup();
-		Services.UI = new UIManager();
+		Services.Events = new EventManager();
+		Services.UI = new ChatUI();
 		Services.UI.Setup();
 		Services.Board = new BoardBehavior();
 		Services.Board.Setup();
-		Services.Events = new EventManager();
 		Services.Attackers = new AttackerManager();
 		Services.Attackers.Setup();
 		Services.Rulebook = new TurnManager();

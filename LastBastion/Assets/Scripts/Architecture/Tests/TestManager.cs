@@ -7,8 +7,8 @@
 		private void Awake(){
 			Services.AttackDeck = new AttackerDeck();
 			Services.AttackDeck.Setup();
-			Services.UI = new UIManager();
-			Services.UI.TestSetup();
+//			Services.UI = new UIManager();
+//			Services.UI.TestSetup();
 			Services.Tasks = new TaskManager();
 		}
 
