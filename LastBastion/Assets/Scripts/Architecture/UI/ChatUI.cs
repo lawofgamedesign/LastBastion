@@ -152,7 +152,7 @@ public class ChatUI {
 	/// <param name="playerStmt">Player statement.</param>
 	public void SimultaneousStatements(string opponentStmt, string playerStmt){
 		MakeStatementTask opponentTask = new MakeStatementTask(opponentStmt, MoveBalloonTask.GrowOrShrink.Grow);
-		MakeStatementTask playerTask = new MakeStatementTask(playerStmt, MoveBalloonTask.GrowOrShrink.Grow);
+		MakeStatementTask playerTask = new MakeStatementTask(playerStmt, MoveBalloonTask.GrowOrShrink.Shrink);
 
 		WaitTask waitTask = new WaitTask();
 		opponentTask.Then(waitTask);
@@ -176,7 +176,7 @@ public class ChatUI {
 	/// </summary>
 	/// <param name="statement">The statement the player makes.</param>
 	public void PlayerPhaseStatement(string statement){
-		Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, statement, MoveBalloonTask.GrowOrShrink.Grow));
+		Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, statement, MoveBalloonTask.GrowOrShrink.Shrink));
 	}
 
 

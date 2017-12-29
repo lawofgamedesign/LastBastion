@@ -22,6 +22,7 @@
 		//the special UI for the tutorial
 		private Text tutText;
 		private const string TUTORIAL_TEXT_OBJ = "Tutorial text";
+		public enum OnOrOff { On, Off };
 
 
 		/////////////////////////////////////////////
@@ -34,6 +35,7 @@
 			ResetTurnUI();
 			tutMachine = new FSM<TutorialTurnManager>(this);
 			TutMachine = tutMachine;
+			tutorialCanvas = GameObject.Find(TUTORIAL_CANVAS_OBJ);
 			tutText = GameObject.Find(TUTORIAL_TEXT_OBJ).GetComponent<Text>();
 			tutMachine.TransitionTo<StartOfTutorial>();
 		}
@@ -53,6 +55,16 @@
 		public string GetTutorialText(){
 			return tutText.text;
 		}
+
+
+		public void ToggleTutorialCanvas(OnOrOff onOrOff){
+			if (onOrOff == OnOrOff.On){
+				tutorialCanvas.SetActive(true);
+			} else {
+				tutorialCanvas.SetActive(false);
+			}
+		}
+			
 
 
 		/////////////////////////////////////////////
@@ -94,31 +106,26 @@
 						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.Off);
 						break;
 					case HORDE_MSG:
-						Services.UI.OpponentStatement(HORDE_MSG);
-						Services.UI.PlayerPhaseStatement(NONE_MSG);
+						Services.UI.SimultaneousStatements(HORDE_MSG, NONE_MSG);
 						Context.SetTutorialText(WAVES_MSG);
 						Services.UI.SetButtonText(UNDERSTAND_MSG);
 						break;
 					case WAVES_MSG:
-						Services.UI.OpponentStatement(WAVES_MSG);
-						Services.UI.PlayerPhaseStatement(UNDERSTAND_MSG);
+						Services.UI.SimultaneousStatements(WAVES_MSG, UNDERSTAND_MSG);
 						Context.SetTutorialText(ONE_THREE_MSG);
 						break;
 					case ONE_THREE_MSG:
-						Services.UI.OpponentStatement(ONE_THREE_MSG);
-						Services.UI.PlayerPhaseStatement(UNDERSTAND_MSG);
+						Services.UI.SimultaneousStatements(ONE_THREE_MSG, UNDERSTAND_MSG);
 						Context.SetTutorialText(END_OF_WAVE_MSG);
 						Services.UI.SetButtonText(VALIANT_MSG);
 						break;
 					case END_OF_WAVE_MSG:
-						Services.UI.OpponentStatement(END_OF_WAVE_MSG);
-						Services.UI.PlayerPhaseStatement(VALIANT_MSG);
+						Services.UI.SimultaneousStatements(END_OF_WAVE_MSG, VALIANT_MSG);
 						Context.SetTutorialText(ADVANCE_MSG);
 						Services.UI.SetButtonText(DASTARDLY_MSG);
 						break;
 					case ADVANCE_MSG:
-						Services.UI.OpponentStatement(ADVANCE_MSG);
-						Services.UI.PlayerPhaseStatement(DASTARDLY_MSG);
+						Services.UI.SimultaneousStatements(ADVANCE_MSG, DASTARDLY_MSG);
 						TransitionTo<AttackersAdvance>();
 						break;
 				}
@@ -137,7 +144,7 @@
 
 			public override void OnExit (){
 				Services.Events.Unregister<TutorialClick>(OnButtonClick);
-
+				Context.ToggleTutorialCanvas(OnOrOff.Off);
 			}
 		}
 //
@@ -146,36 +153,35 @@
 //		/// State for the attackers moving south at the start of each turn.
 //		/// </summary>
 		public class AttackersAdvance : FSM<TutorialTurnManager>.State {
-//			float timer;
-//
+			float timer;
+
 //			//tell the attacker manager to move the attackers.
 //			//this is routed through the attacker manager to avoid spreading control over the attackers over multiple classes.
-//			public override void OnEnter(){
-//				timer = 0.0f;
-//				Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
-//				Services.Attackers.PrepareAttackerMove();
-//				Services.Attackers.MoveAttackers();
-//				Context.phaseText.text = ATTACKER_MOVE;
-//				Context.TurnRulebookPage();
-//			}
-//
-//
+			public override void OnEnter(){
+				timer = 0.0f;
+				Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
+				Services.Attackers.PrepareAttackerMove();
+				Services.Attackers.MoveAttackers();
+				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
+			}
+
+
 //			//wait while the attackers move
-//			public override void Tick(){
-//				timer += Time.deltaTime;
-//				if (timer >= Context.attackerAdvanceDuration){
-//
-//					//go to the Defenders Move phase
-//					TransitionTo<PlayerMove>();
-//				}
-//			}
-//		}
+			public override void Tick(){
+				timer += Time.deltaTime;
+				if (timer >= Context.attackerAdvanceDuration){
+
+					//go to the Defenders Move phase
+					TransitionTo<PlayerMove>();
+				}
+			}
+		}
 //
 //
 //		/// <summary>
 //		/// State for the defenders' movement. This is public so that the momentum system can determine whether momentum has been used up.
 //		/// </summary>
-//		public class PlayerMove : FSM<TutorialTurnManager>.State {
+		public class PlayerMove : FSM<TutorialTurnManager>.State {
 //
 //
 //			private const string YOUR_TURN_MSG = "After my horde advances, it's your turn to move your defenders.";

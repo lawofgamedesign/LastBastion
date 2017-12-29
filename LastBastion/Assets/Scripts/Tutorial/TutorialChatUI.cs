@@ -49,6 +49,8 @@
 
 			if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.StartOfTutorial)){
 				phaseOverButton.SetActive(true);
+			} else if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.AttackersAdvance)){
+				phaseOverButton.SetActive(false);
 			}
 		}
 	}
