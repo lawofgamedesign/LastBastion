@@ -8,6 +8,9 @@
 */Advertising/
 */Additional Assets/
 */Assets/TextMesh*
+*/Assets/Resources/Audio/Music/*
+*/Assets/Models/*
+*/Assets/Fonts/*
 
 # Visual Studio 2015 cache directory
 /.vs/
