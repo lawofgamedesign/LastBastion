@@ -171,9 +171,14 @@ public class RangerBehavior : DefenderSandbox {
 	/// <returns><c>true</c> if the defender has defeated enough attackers and has room to upgrade, <c>false</c> otherwise.</returns>
 	protected override bool CheckUpgradeStatus(){
 		if (DefeatedSoFar >= defeatsToNextUpgrade &&
-			currentShowboat != ShowboatTrack.Set_the_Standard) return true;
+			currentShowboat != ShowboatTrack.Set_the_Standard){
 
-		return false;
+			string name = gameObject.name.Remove(gameObject.name.Length - CLONE_LENGTH); //remove the end of the gameobject's name, which is always "(Clone)"
+			Services.UI.ObjectStatement(transform.position, name + POWER_UP_MSG);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 

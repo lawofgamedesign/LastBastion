@@ -85,6 +85,19 @@ public class ChatUI {
 	protected const string BALLOON_START_OBJ = "Attacker balloon source";
 
 
+	//generic balloon size, for the opponent's statements
+	protected const float CHAT_WINDOW_WIDTH = 150.0f;
+	protected const float TUTORIAL_WINDOW_HEIGHT = 41.0f;
+
+
+	//tutorial text
+	protected GameObject tutorialCanvas;
+	protected TextMeshProUGUI tutText;
+	protected const string TUTORIAL_CANVAS_OBJ = "Tutorial canvas";
+	protected const string TUTORIAL_TEXT_OBJ = "Tutorial text";
+	public enum OnOrOff { On, Off };
+
+
 	/////////////////////////////////////////////
 	/// Fields
 	/////////////////////////////////////////////
@@ -123,6 +136,12 @@ public class ChatUI {
 
 		//speech balloon setup
 		attackerBalloonStart = GameObject.Find(BALLOON_START_OBJ).transform.position;
+
+
+		//tutorial canvas setup
+		tutorialCanvas = GameObject.Find(TUTORIAL_CANVAS_OBJ);
+		tutText = tutorialCanvas.transform.Find(TUTORIAL_TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		tutorialCanvas.SetActive(false);
 	}
 
 
@@ -167,7 +186,11 @@ public class ChatUI {
 	/// </summary>
 	/// <param name="statement">The statement the opponent makes.</param>
 	public void OpponentStatement(string statement){
-		Services.Tasks.AddTask(new MoveBalloonTask(attackerBalloonStart, statement, MoveBalloonTask.GrowOrShrink.Grow));
+		Services.Tasks.AddTask(new MoveBalloonTask(attackerBalloonStart,
+												   CHAT_WINDOW_WIDTH,
+												   TUTORIAL_WINDOW_HEIGHT,
+												   statement,
+												   MoveBalloonTask.GrowOrShrink.Grow));
 	}
 
 
@@ -176,7 +199,44 @@ public class ChatUI {
 	/// </summary>
 	/// <param name="statement">The statement the player makes.</param>
 	public void PlayerPhaseStatement(string statement){
-		Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, statement, MoveBalloonTask.GrowOrShrink.Shrink));
+		Vector2 buttonSize = phaseOverButton.GetComponent<RectTransform>().sizeDelta;
+
+		Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position,
+												   buttonSize.x,
+												   buttonSize.y,
+												   statement,
+												   MoveBalloonTask.GrowOrShrink.Shrink));
+	}
+
+
+	/// <summary>
+	/// Call this when the player "says" something using the button normally used for undoing.
+	/// </summary>
+	/// <param name="statement">The statement the player makes.</param>
+	public void PlayerUndoStatement(string statement){
+		Vector2 buttonSize = phaseOverButton.GetComponent<RectTransform>().sizeDelta;
+
+		Services.Tasks.AddTask(new MoveBalloonTask(undoButton.transform.position,
+												   buttonSize.x,
+												   buttonSize.y,
+												   statement,
+												   MoveBalloonTask.GrowOrShrink.Shrink));
+	}
+
+
+	/// <summary>
+	/// Call this when the statement is coming from an object, as a feedback tool.
+	/// </summary>
+	/// <param name="loc">The location of the object.</param>
+	/// <param name="statement">The statement coming from the object.</param>
+	public void ObjectStatement(Vector3 loc, string statement){
+		Vector3 screenPoint = Camera.main.WorldToScreenPoint(loc);
+
+		Services.Tasks.AddTask(new MoveBalloonTask(screenPoint,
+												   CHAT_WINDOW_WIDTH,
+												   TUTORIAL_WINDOW_HEIGHT,
+												   statement,
+												   MoveBalloonTask.GrowOrShrink.Grow));
 	}
 
 
@@ -210,11 +270,39 @@ public class ChatUI {
 
 
 	/// <summary>
+	/// Switch the tutorial text on or off.
+	/// </summary>
+	/// <param name="onOrOff">Whether the canvas should be on (displayed) or off (hidden).</param>
+	public void ToggleTutorialText(OnOrOff onOrOff){
+		if (onOrOff == OnOrOff.On){
+			tutorialCanvas.SetActive(true);
+		} else {
+			tutorialCanvas.SetActive(false);
+		}
+	}
+
+
+	/// <summary>
+	/// Set the tutorial text's text.
+	/// </summary>
+	/// <param name="message">The text to display.</param>
+	public void SetTutorialText(string message){
+		tutText.text = message;
+	}
+
+
+	public string GetTutorialText(){
+		return tutText.text;
+	}
+
+
+	/// <summary>
 	/// Defenders call this when they fight to explain the result of the combat.
 	/// </summary>
 	/// <param name="playerValue">The value of the player's card.</param>
 	/// <param name="defender">The defender's script.</param>
-	/// <param name="attacker">The attacker's script.</param>
+	/// <param name="attackerMod">The attacker's attacker modifier.</param>
+	/// <param name="attackerArmor">The attacker's armor.</param>
 	/// <param name="attackerValue">The value of the attacker's card.</param>
 	/// <param name="damage">The damage inflicted. If none, any value is fine; this will be discarded.</param>
 	public void ExplainCombat(int playerValue, DefenderSandbox defender, AttackerSandbox attacker, int attackerValue, int damage){
@@ -239,7 +327,13 @@ public class ChatUI {
 
 			if (attacker.Armor > 0) explanation += ARMOR_MSG + attacker.Armor + REDUCE_MSG + NEWLINE;
 
-			explanation += TAKE_DAMAGE_MSG + damage.ToString() + DAMAGE_MSG + attacker.Health + HEALTH_MSG;
+			//calculate what the attacker's health is now; don't rely on the attacker having updated information, since
+			//all of this is happening in the same frame
+			int newHealth = attacker.Health - ((playerValue + defender.AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
+
+			newHealth = newHealth < 0 ? 0 : newHealth; //don't let newHealth be less than zero
+
+			explanation += TAKE_DAMAGE_MSG + damage.ToString() + DAMAGE_MSG + newHealth + HEALTH_MSG;
 		} else {
 			explanation += I_WIN_MSG;
 		}
@@ -276,11 +370,11 @@ public class ChatUI {
 			undoButton.SetActive(true);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerFight)){
 			SetButtonText(FIGHT_DONE_MSG);
-			Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, MOVE_DONE_MSG, MoveBalloonTask.GrowOrShrink.Shrink));
+			PlayerPhaseStatement(MOVE_DONE_MSG);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
 			phaseOverButton.SetActive(false);
 			undoButton.SetActive(false);
-			Services.Tasks.AddTask(new MoveBalloonTask(phaseText.transform.position, FIGHT_DONE_MSG, MoveBalloonTask.GrowOrShrink.Shrink));
+			PlayerPhaseStatement(FIGHT_DONE_MSG);
 		}
 	}
 

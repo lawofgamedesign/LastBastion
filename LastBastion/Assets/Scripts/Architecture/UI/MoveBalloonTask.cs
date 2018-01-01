@@ -40,24 +40,44 @@ public class MoveBalloonTask : Task {
 	private readonly GrowOrShrink change;
 
 
+	//starting X and Y size
+	private readonly float xSize;
+	private readonly float ySize;
+	private const float CHAT_WINDOW_WIDTH = 150.0f;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
 
 
 	//constructor
-	public MoveBalloonTask(Vector3 position, string message, GrowOrShrink change){
+	public MoveBalloonTask(Vector3 position, float xSize, float ySize, string message, GrowOrShrink change){
 		RectTransform balloon = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(BALLOON_OBJ),
 																	  GameObject.Find(CHAT_UI_ORGANIZER).transform).GetComponent<RectTransform>();
 		balloon.transform.position = position;
 
 		this.balloon = balloon;
 
+		this.xSize = xSize;
+		this.ySize = ySize;
+
 		this.message = message;
 
 		balloon.transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>().text = this.message;
 
 		this.change = change;
+
+		//if this is a message that's growing to the size of the chat window, don't let it be bigger than
+		//the chat window
+		if (change == GrowOrShrink.Grow) this.xSize = CHAT_WINDOW_WIDTH;
+
+		//change the sizeDeltas of the speech balloon and its children, the background image and the text
+		balloon.sizeDelta = new Vector2(xSize, ySize);
+
+		foreach (Transform child in balloon.transform){
+			child.GetComponent<RectTransform>().sizeDelta = new Vector2(xSize, ySize);
+		}
 	}
 
 

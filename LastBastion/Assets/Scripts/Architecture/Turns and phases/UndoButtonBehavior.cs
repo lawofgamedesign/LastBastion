@@ -20,7 +20,7 @@ public class UndoButtonBehavior : MonoBehaviour {
 	public void UndoPhase(){
 		if (Services.Undo == null) return; //if there's somehow no undo system, don't do anything
 
-		Services.Tasks.AddTask(new MoveBalloonTask(transform.position, UNDO_MSG, MoveBalloonTask.GrowOrShrink.Shrink));
+		Services.UI.PlayerUndoStatement(UNDO_MSG);
 
 		Services.Undo.UndoMovePhase();
 	}

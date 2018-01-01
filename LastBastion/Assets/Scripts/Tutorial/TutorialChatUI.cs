@@ -22,10 +22,6 @@
 			turnText = GameObject.Find(TURN_CANVAS).transform.Find(TEXT_OBJ).GetComponent<Text>();
 
 
-			//phase reminder setup
-			phaseReminder = GameObject.Find(PHASE_OBJ).GetComponent<TextMeshProUGUI>();
-
-
 			//character sheet setup
 			charSheet = GameObject.Find(CHAR_SHEET_OBJ).GetComponent<CharacterSheetBehavior>();
 
@@ -39,6 +35,12 @@
 
 			//speech balloon setup
 			attackerBalloonStart = GameObject.Find(BALLOON_START_OBJ).transform.position;
+
+
+			//tutorial canvas setup
+			tutorialCanvas = GameObject.Find(TUTORIAL_CANVAS_OBJ);
+			tutText = tutorialCanvas.transform.Find(TUTORIAL_TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+			tutorialCanvas.SetActive(false);
 		}
 
 
@@ -51,6 +53,8 @@
 				phaseOverButton.SetActive(true);
 			} else if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.AttackersAdvance)){
 				phaseOverButton.SetActive(false);
+			} else if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.PlayerMove)){
+				phaseOverButton.SetActive(true);
 			}
 		}
 	}

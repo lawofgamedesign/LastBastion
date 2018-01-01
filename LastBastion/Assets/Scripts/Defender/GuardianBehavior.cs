@@ -256,9 +256,14 @@ public class GuardianBehavior : DefenderSandbox {
 	protected override bool CheckUpgradeStatus(){
 		if (DefeatedSoFar >= defeatsToNextUpgrade &&
 			currentHold != HoldTrack.The_Last_Bastion &&
-			currentSingleCombat!= SingleCombatTrack.Champion) return true;
+			currentSingleCombat!= SingleCombatTrack.Champion){
 
-		return false;
+			string name = gameObject.name.Remove(gameObject.name.Length - CLONE_LENGTH); //remove the end of the gameobject's name, which is always "(Clone)"
+			Services.UI.ObjectStatement(transform.position, name + POWER_UP_MSG);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 

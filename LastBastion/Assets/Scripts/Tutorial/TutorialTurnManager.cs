@@ -19,12 +19,6 @@
 		}
 
 
-		//the special UI for the tutorial
-		private Text tutText;
-		private const string TUTORIAL_TEXT_OBJ = "Tutorial text";
-		public enum OnOrOff { On, Off };
-
-
 		/////////////////////////////////////////////
 		/// Functions
 		/////////////////////////////////////////////
@@ -35,8 +29,6 @@
 			ResetTurnUI();
 			tutMachine = new FSM<TutorialTurnManager>(this);
 			TutMachine = tutMachine;
-			tutorialCanvas = GameObject.Find(TUTORIAL_CANVAS_OBJ);
-			tutText = GameObject.Find(TUTORIAL_TEXT_OBJ).GetComponent<Text>();
 			tutMachine.TransitionTo<StartOfTutorial>();
 		}
 
@@ -44,25 +36,6 @@
 		//go through one loop of the current state
 		public override void Tick(){
 			tutMachine.Tick();
-		}
-
-
-		public void SetTutorialText(string info){
-			tutText.text = info;
-		}
-
-
-		public string GetTutorialText(){
-			return tutText.text;
-		}
-
-
-		public void ToggleTutorialCanvas(OnOrOff onOrOff){
-			if (onOrOff == OnOrOff.On){
-				tutorialCanvas.SetActive(true);
-			} else {
-				tutorialCanvas.SetActive(false);
-			}
 		}
 			
 
@@ -92,36 +65,36 @@
 
 
 			private void OnButtonClick(global::Event e){
-				switch (Context.GetTutorialText()){
+				switch (Services.UI.GetTutorialText()){
 					case WELCOME_MSG:
 						Services.UI.SimultaneousStatements(WELCOME_MSG, HOW_MSG);
-						Context.SetTutorialText(THEME_MSG);
+						Services.UI.SetTutorialText(THEME_MSG);
 						Services.UI.SetButtonText(NEVER_MSG);
 						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.On);
 						break;
 					case THEME_MSG:
 						Services.UI.SimultaneousStatements(THEME_MSG, NEVER_MSG);
-						Context.SetTutorialText(HORDE_MSG);
+						Services.UI.SetTutorialText(HORDE_MSG);
 						Services.UI.SetButtonText(NONE_MSG);
 						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.Off);
 						break;
 					case HORDE_MSG:
 						Services.UI.SimultaneousStatements(HORDE_MSG, NONE_MSG);
-						Context.SetTutorialText(WAVES_MSG);
+						Services.UI.SetTutorialText(WAVES_MSG);
 						Services.UI.SetButtonText(UNDERSTAND_MSG);
 						break;
 					case WAVES_MSG:
 						Services.UI.SimultaneousStatements(WAVES_MSG, UNDERSTAND_MSG);
-						Context.SetTutorialText(ONE_THREE_MSG);
+						Services.UI.SetTutorialText(ONE_THREE_MSG);
 						break;
 					case ONE_THREE_MSG:
 						Services.UI.SimultaneousStatements(ONE_THREE_MSG, UNDERSTAND_MSG);
-						Context.SetTutorialText(END_OF_WAVE_MSG);
+						Services.UI.SetTutorialText(END_OF_WAVE_MSG);
 						Services.UI.SetButtonText(VALIANT_MSG);
 						break;
 					case END_OF_WAVE_MSG:
 						Services.UI.SimultaneousStatements(END_OF_WAVE_MSG, VALIANT_MSG);
-						Context.SetTutorialText(ADVANCE_MSG);
+						Services.UI.SetTutorialText(ADVANCE_MSG);
 						Services.UI.SetButtonText(DASTARDLY_MSG);
 						break;
 					case ADVANCE_MSG:
@@ -134,7 +107,8 @@
 
 			public override void OnEnter (){
 				Context.NewTurn();
-				Context.SetTutorialText(WELCOME_MSG);
+				Services.UI.SetTutorialText(WELCOME_MSG);
+				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
 				Services.UI.SetButtonText(HOW_MSG);
 				Services.Events.Register<TutorialClick>(OnButtonClick);
 				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
@@ -144,7 +118,7 @@
 
 			public override void OnExit (){
 				Services.Events.Unregister<TutorialClick>(OnButtonClick);
-				Context.ToggleTutorialCanvas(OnOrOff.Off);
+				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.Off);
 			}
 		}
 //
@@ -179,18 +153,18 @@
 //
 //
 //		/// <summary>
-//		/// State for the defenders' movement. This is public so that the momentum system can determine whether momentum has been used up.
+//		/// State for the defenders' movement.
 //		/// </summary>
 		public class PlayerMove : FSM<TutorialTurnManager>.State {
 //
 //
-//			private const string YOUR_TURN_MSG = "After my horde advances, it's your turn to move your defenders.";
-//			private const string OK_MSG = "Got it.";
-//			private const string SELECT_MSG = "Plan your move by clicking the spaces you want to move to. First, click your defender.";
-//			private const string PLAN_MSG = "Now choose your move by clicking each highlighted space.";
-//			private const string DONE_MSG = "Right, now lock in your move with the \"Go here\" button.";
-//			private const string THERE_MSG = "I'm there.";
-//			private const string GO_ON_MSG = "When you've moved your defender, hit \"Done moving\" in the upper-right to fight.";
+			private const string YOUR_TURN_MSG = "After my horde advances, it's your turn to move your defenders.";
+			private const string OK_MSG = "Got it.";
+			private const string SELECT_MSG = "Plan your move by clicking the spaces you want to move to. First, click your defender.";
+			private const string PLAN_MSG = "Now choose your move by clicking each highlighted space.";
+			private const string DONE_MSG = "Right, now lock in your move with the \"Go here\" button.";
+			private const string THERE_MSG = "I'm there.";
+			private const string GO_ON_MSG = "When you're done moving, say so to let me know where we are in the game.";
 //			private TwoDLoc[] requiredMoves = new TwoDLoc[2] { new TwoDLoc(3, 2), new TwoDLoc(3, 3) };
 //			private int moveIndex = 0;
 //			private Transform moveHighlight;
@@ -199,20 +173,19 @@
 //			private DefenderSandbox defender; //assumes there is only one defender in the tutorial
 //
 //
-//			private void OnButtonClick(global::Event e){
-//				switch (Context.GetTutorialText()){
-//					case YOUR_TURN_MSG:
-//						Context.SetTutorialText(SELECT_MSG);
-//						Context.ToggleAdvanceButton();
-//						break;
+			private void OnButtonClick(global::Event e){
+				switch (Services.UI.GetTutorialText()){
+					case YOUR_TURN_MSG:
+						Services.UI.SetTutorialText(SELECT_MSG);
+						break;
 //					case DONE_MSG:
 //						if (defender.ReportGridLoc().x == requiredMoves[moveIndex].x && defender.ReportGridLoc().z == requiredMoves[moveIndex].z){
 //							Context.SetTutorialText(GO_ON_MSG);
 //							Context.ToggleAdvanceButton();
 //						}
 //						break;
-//				}
-//			}
+				}
+			}
 //
 //
 //			private void HandleMoveInputs(global::Event e){
@@ -246,7 +219,6 @@
 //						}
 //					}
 //				}
-			}
 //
 //
 //			private void ResetMoveTutorial(global::Event e){
@@ -267,8 +239,12 @@
 //			}
 //
 //
-//			public override void OnEnter(){
-//				Services.Defenders.PrepareDefenderMovePhase();
+			public override void OnEnter(){
+				Services.Defenders.PrepareDefenderMovePhase();
+				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
+				Services.UI.SetTutorialText(YOUR_TURN_MSG);
+				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
+				Services.UI.SetButtonText(OK_MSG);
 //				Context.phaseText.text = PLAYER_MOVE;
 //				Context.TurnRulebookPage();
 //				Services.Events.Register<InputEvent>(HandleMoveInputs);
@@ -283,7 +259,7 @@
 //				Context.ToggleAdvanceButton();
 //				moveHighlight = GameObject.Find(HIGHLIGHT_OBJ).transform;
 //				defender = GameObject.FindGameObjectWithTag(DEFENDER_TAG).GetComponent<DefenderSandbox>();
-//			}
+			}
 //
 //
 //			public override void OnExit(){
@@ -294,7 +270,7 @@
 //				Context.ToggleNextPhaseButton();
 //				Services.Events.Unregister<TutorialClick>(OnButtonClick);
 //			}
-//		}
+		}
 //
 //
 //		/// <summary>
