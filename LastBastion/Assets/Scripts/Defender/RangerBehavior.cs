@@ -13,7 +13,7 @@ public class RangerBehavior : DefenderSandbox {
 	//ranger's stats
 	private int rangerSpeed = 4;
 	private int rangerAttack = 0;
-	private int rangerArmor = 1;
+	private int rangerArmor = 0;
 
 
 	//character sheet

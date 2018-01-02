@@ -13,7 +13,7 @@ public class BrawlerBehavior : DefenderSandbox {
 	//brawler's stats
 	private int brawlerSpeed = 4;
 	private int brawlerAttackMod = 0;
-	private int brawlerArmor = 1;
+	private int brawlerArmor = 0;
 
 
 	//upgrade tracks

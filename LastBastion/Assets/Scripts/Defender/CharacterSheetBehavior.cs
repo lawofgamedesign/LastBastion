@@ -29,8 +29,8 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private Text nextLabel;
 	private const string NEXT_LABEL_OBJ = "Next label";
 	private const string NEXT_IN = "Next upgrade in ";
-	private const string DEFEATS = " defeats";
-	private const string DEFEAT = " defeat";
+	private const string DEFEATS = " Inspiration";
+	private const string DEFEAT = " Inspiration";
 	private const string CHOOSE = "Choose an upgrade";
 	private const string WRONG_PHASE = "Upgrade at start of turn";
 	private const int UPGRADE_READY = 0;

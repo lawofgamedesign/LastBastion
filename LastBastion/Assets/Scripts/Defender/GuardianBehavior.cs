@@ -12,7 +12,7 @@ public class GuardianBehavior : DefenderSandbox {
 	//Guardian stats
 	private int guardianSpeed = 4;
 	private int guardianAttack = 0;
-	private int guardianArmor = 2;
+	private int guardianArmor = 0;
 
 
 	//upgrade tracks
