@@ -153,7 +153,102 @@ public class TurnManager {
 		}
 
 		public override void Tick (){
-			TransitionTo<AttackersAdvance>();
+			TransitionTo<PlayerUpgrade>();
+		}
+	}
+
+
+	/// <summary>
+	/// Upgrading occurs here.
+	/// </summary>
+	public class PlayerUpgrade : FSM<TurnManager>.State {
+
+
+		List<DefenderSandbox> upgraders = new List<DefenderSandbox>();
+
+
+		private List<DefenderSandbox> GetUpgradeableDefenders(){
+			List<DefenderSandbox> upgradeables = new List<DefenderSandbox>();
+
+			foreach (DefenderSandbox defender in Services.Defenders.GetAllDefenders()){
+				if (defender.ReadyToUpgrade()) upgradeables.Add(defender);
+			}
+
+			Debug.Assert(upgradeables.Count <= Services.Defenders.GetAllDefenders().Count &&
+						 upgradeables.Count >= 0, "Impossible number of defenders ready to upgrade: " + upgradeables.Count);
+
+			return upgradeables;
+		}
+
+
+		/// <summary>
+		/// Remove an upgrading defender from the list of defenders who need to upgrade. If that was the last defender who needed to upgrade,
+		/// move on.
+		/// </summary>
+		/// <param name="defender">The defender who upgraded.</param>
+		public void CheckForAllFinished(DefenderSandbox defender){
+			Debug.Assert(upgraders.Contains(defender), "Trying to remove a defender who doesn't need to upgrade.");
+
+			upgraders.Remove(defender);
+
+			if (upgraders.Count <= 0) {
+				//unregister here rather than in OnExit because there may not have been a registration if no defender needed to upgrade
+				Services.Events.Unregister<PowerChoiceEvent>(HandlePowerChoice);
+				Services.Defenders.NoSelectedDefender();
+
+				TransitionTo<AttackersAdvance>();
+			}
+		}
+
+
+		/// <summary>
+		/// When the player chooses a power, see if the player is done upgrading and it's time to move on to the next phase.
+		/// </summary>
+		/// <param name="e">A PowerChoiceEvent sent out by the character sheet.</param>
+		private void HandlePowerChoice(Event e){
+			Debug.Assert(e.GetType() == typeof(PowerChoiceEvent), "Non-PowerChoiceEvent in HandlePowerChoice");
+
+			PowerChoiceEvent powerEvent = e as PowerChoiceEvent;
+
+			CheckForAllFinished(powerEvent.defender);
+		}
+
+
+		/// <summary>
+		/// See if any defenders need to upgrade. If not, skip this phase.
+		/// 
+		/// If so, set up tasks that will have the player choose an upgrade for each defender who needs to upgrade. Listen
+		/// for those choices, so that the system will move on when the player has made them all.
+		/// </summary>
+		public override void OnEnter (){
+			upgraders = GetUpgradeableDefenders();
+
+			if (upgraders.Count == 0) TransitionTo<AttackersAdvance>();
+			else {
+				Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
+				Services.Events.Register<PowerChoiceEvent>(HandlePowerChoice);
+
+				foreach (DefenderSandbox defender in upgraders){
+
+					//if this is the first defender who needs to upgrade, add an appropriate task
+					if (!Services.Tasks.CheckForTaskOfType<UpgradeTask>()) {
+						Services.Tasks.AddTask(new UpgradeTask(defender));
+					}
+
+
+					//this is the second or third defender who needs to upgrade. If it's the third, GetLastTaskOfType() will still return null;
+					//delay the third defender's UpgradeTask until the second's can be found
+					else if (Services.Tasks.GetLastTaskOfType<UpgradeTask>() == null){
+						Services.Tasks.AddTask(new DelayedUpgradeTask(defender));
+					}
+
+
+					//this is the second defender who needs to upgrade; add an appropriate task
+					else {
+						Services.Tasks.GetLastTaskOfType<UpgradeTask>().Then(new UpgradeTask(defender));
+					}
+				}
+			}
 		}
 	}
 

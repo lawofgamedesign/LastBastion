@@ -68,6 +68,7 @@ public class ChatUI {
 	protected const string PHASE_OBJ = "Phase";
 	protected const string CURRENT_MSG = "We're in the ";
 	protected const string PHASE_MSG = " phase.";
+	protected const string UPGRADE = "Defenders upgrade";
 	protected const string ATTACKER_MOVE = "Horde moves";
 	protected const string PLAYER_MOVE = "Defenders move";
 	protected const string PLAYER_FIGHT = "Defenders fight";
@@ -253,7 +254,9 @@ public class ChatUI {
 	public void RemindPhase(FSM<TurnManager>.State phase){
 		string temp = CURRENT_MSG;
 
-		if (phase.GetType() == typeof(TurnManager.AttackersAdvance)){
+		if (phase.GetType() == typeof(TurnManager.PlayerUpgrade)){
+			temp += UPGRADE;
+		} else if (phase.GetType() == typeof(TurnManager.AttackersAdvance)){
 			temp += ATTACKER_MOVE;
 		} else if (phase.GetType() == typeof(TurnManager.PlayerMove)){
 			temp += PLAYER_MOVE;
@@ -319,11 +322,15 @@ public class ChatUI {
 		string PERIOD = ".";
 		string NEWLINE = "\n";
 
-		string explanation = YOU_MSG + playerValue.ToString() + BONUS_MSG + defender.AttackMod.ToString() + PERIOD + NEWLINE +
-							 ATK_MSG + attackerValue.ToString() + PERIOD + NEWLINE;
 
-		if (playerValue > attackerValue){
-			explanation += YOU_WIN_MSG + (playerValue - attackerValue).ToString() + PERIOD + NEWLINE;
+		int defenderTotal = playerValue + defender.AttackMod;
+		int attackerTotal = attackerValue + attacker.AttackMod;
+
+		string explanation = YOU_MSG + playerValue.ToString() + BONUS_MSG + defender.AttackMod.ToString() + PERIOD + NEWLINE +
+			ATK_MSG + attackerValue.ToString() + BONUS_MSG + attacker.AttackMod.ToString() + PERIOD + NEWLINE;
+
+		if (defenderTotal > attackerTotal){
+			explanation += YOU_WIN_MSG + (defenderTotal - attackerTotal).ToString() + PERIOD + NEWLINE;
 
 			if (attacker.Armor > 0) explanation += ARMOR_MSG + attacker.Armor + REDUCE_MSG + NEWLINE;
 

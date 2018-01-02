@@ -32,7 +32,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private const string DEFEATS = " defeats";
 	private const string DEFEAT = " defeat";
 	private const string CHOOSE = "Choose an upgrade";
-	private const string NOT_SELECTED = "Can't upgrade out-of-turn";
+	private const string WRONG_PHASE = "Upgrade at start of turn";
 	private const int UPGRADE_READY = 0;
 
 
@@ -215,11 +215,13 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	/// </summary>
 	/// <param name="tree">The upgrade tree the player clicked on. Left is 0, right is 1.</param>
 	public void PowerUpButton(int tree){
-		if (Services.Defenders.IsAnyoneSelected()) Services.Defenders.GetSelectedDefender().PowerUp(tree);
 
-		//the most common reason for no one to be selected when the player presses a powerup button is that the selected
-		//defender is already finished for the phase. The following else-statement provides feedback for that situation
+		//if it's the upgrade phase, allow the player to upgrade
+		if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerUpgrade)) {
+			Services.Events.Fire(new PowerChoiceEvent(Services.Defenders.GetSelectedDefender(), tree));
+		}
 
-		else nextLabel.text = NOT_SELECTED;
+		//if it's not the upgrade phase, provide feedback
+		else nextLabel.text = WRONG_PHASE;
 	}
 }

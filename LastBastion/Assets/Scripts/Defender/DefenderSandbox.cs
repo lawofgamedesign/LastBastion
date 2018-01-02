@@ -493,6 +493,18 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
+	/// A publicly-available way to check to see if this defender is ready to upgrade.
+	/// 
+	/// Unlike CheckUpgradeStatus, this doesn't say anything; it's entirely for game-logic purposes.
+	/// </summary>
+	/// <returns><c>true</c> if this defender is ready to upgrade, <c>false</c> otherwise.</returns>
+	public bool ReadyToUpgrade(){
+		if (DefeatedSoFar >= defeatsToNextUpgrade) return true;
+		else return false;
+	}
+
+
+	/// <summary>
 	/// Show the math behind combats on the extra information UI.
 	/// </summary>
 	/// <returns>A string explaining the math behind each combat.</returns>

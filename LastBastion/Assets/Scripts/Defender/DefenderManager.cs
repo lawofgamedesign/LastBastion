@@ -129,6 +129,18 @@ public class DefenderManager {
 
 
 	/// <summary>
+	/// Selects a defender for upgrading.
+	/// 
+	/// This doesn't do anything with the defender; it just allows the manager to know who's upgrading, so that PowerChoiceEvents
+	/// know which defender is doing the upgrading.
+	/// </summary>
+	/// <param name="selected">The defender who will upgrade.</param>
+	public void SelectDefenderForUpgrade(DefenderSandbox selected){
+		selectedDefender = selected;
+	}
+
+
+	/// <summary>
 	/// Selects a defender for movement or attacking. Players cannot select a new defender while one is in the middle of a move.
 	/// </summary>
 	/// <param name="selected">The selected defender.</param>
