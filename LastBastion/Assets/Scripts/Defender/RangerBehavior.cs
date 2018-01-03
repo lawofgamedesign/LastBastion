@@ -173,8 +173,7 @@ public class RangerBehavior : DefenderSandbox {
 		if (DefeatedSoFar >= defeatsToNextUpgrade &&
 			currentShowboat != ShowboatTrack.Set_the_Standard){
 
-			string name = gameObject.name.Remove(gameObject.name.Length - CLONE_LENGTH); //remove the end of the gameobject's name, which is always "(Clone)"
-			Services.UI.ObjectStatement(transform.position, name + POWER_UP_MSG);
+			Services.UI.ObjectStatement(transform.position, gameObject.name + POWER_UP_MSG);
 			return true;
 		} else {
 			return false;

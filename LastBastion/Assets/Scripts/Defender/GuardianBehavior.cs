@@ -224,7 +224,13 @@ public class GuardianBehavior : DefenderSandbox {
 
 		damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
 
-		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
+		Services.Tasks.AddTask(new CombatExplanationTask(attacker,
+														 this,
+														 attackerValue,
+														 ChosenCard.Value,
+														 attacker.AttackMod,
+														 DetermineAttackMod(attacker),
+														 damage));
 
 		if (ChosenCard.Value + DetermineAttackMod(attacker) > attackerValue + attacker.AttackMod){
 			if (damage >= attacker.Health){
@@ -234,7 +240,7 @@ public class GuardianBehavior : DefenderSandbox {
 				powerupReadyParticle.SetActive(CheckUpgradeStatus());
 			}
 
-			attacker.TakeDamage(damage);
+			//inflicting damage is handled by the combat explanation task, if appropriate
 				
 			FinishWithCard();
 			DoneFighting();
@@ -258,8 +264,7 @@ public class GuardianBehavior : DefenderSandbox {
 			currentHold != HoldTrack.The_Last_Bastion &&
 			currentSingleCombat!= SingleCombatTrack.Champion){
 
-			string name = gameObject.name.Remove(gameObject.name.Length - CLONE_LENGTH); //remove the end of the gameobject's name, which is always "(Clone)"
-			Services.UI.ObjectStatement(transform.position, name + POWER_UP_MSG);
+			Services.UI.ObjectStatement(transform.position, gameObject.name + POWER_UP_MSG);
 			return true;
 		} else {
 			return false;

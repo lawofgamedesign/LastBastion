@@ -102,7 +102,6 @@ public class DefenderSandbox : MonoBehaviour {
 	protected const string XP_PARTICLE_OBJ = "XP gained particle";
 	protected const string POWER_UP_PARTICLE_OBJ = "Powerup ready particle";
 	protected const string POWER_UP_MSG = " is ready to power up. Click the character sheet in the lower-right to choose a new ability.";
-	protected const int CLONE_LENGTH = 7; //length of "(Clone)" at the end of the defender's gameobject's name
 
 
 	/////////////////////////////////////////////
@@ -482,9 +481,7 @@ public class DefenderSandbox : MonoBehaviour {
 	/// <returns><c>true</c> if the particle should be switched on, <c>false</c> otherwise.</returns>
 	protected virtual bool CheckUpgradeStatus(){
 		if (DefeatedSoFar >= defeatsToNextUpgrade){
-			string name = gameObject.name.Remove(gameObject.name.Length - CLONE_LENGTH); //remove the end of the gameobject's name, which is always "(Clone)"
-
-			Services.UI.ObjectStatement(transform.position, name + POWER_UP_MSG);
+			Services.UI.ObjectStatement(transform.position, gameObject.name + POWER_UP_MSG);
 			return true;
 		} else {
 			return false;

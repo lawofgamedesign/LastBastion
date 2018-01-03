@@ -45,6 +45,11 @@ public class AttackerManager {
 	protected int enemyNum = 0;
 
 
+	//formatting for enemy names
+	public const string DIVIDER = "_";
+	private const int CLONE_LENGTH = 7; //number of characters in "(Clone)";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -190,7 +195,7 @@ public class AttackerManager {
 
 		newWarlord.GetComponent<AttackerSandbox>().Setup();
 		newWarlord.GetComponent<AttackerSandbox>().NewLoc(x, z);
-		newWarlord.name = type + enemyNum;
+		newWarlord.name = type + DIVIDER + enemyNum;
 		enemyNum++;
 		Services.Tasks.AddTask(new MoveTask(newWarlord.transform, x, z, MoveSpeed)); //create the task that moves the warlord onto the board
 
@@ -225,7 +230,8 @@ public class AttackerManager {
 
 			newRetinueMember.GetComponent<AttackerSandbox>().Setup();
 			newRetinueMember.GetComponent<AttackerSandbox>().NewLoc(x - 1, z);
-			newRetinueMember.name = newRetinueMember.name + enemyNum;
+			newRetinueMember.name = newRetinueMember.name.Remove(newRetinueMember.name.Length - CLONE_LENGTH);
+			newRetinueMember.name += DIVIDER + enemyNum;
 			enemyNum++;
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x - 1, z, MoveSpeed)); //create the task that moves them onto the board
 
@@ -248,7 +254,8 @@ public class AttackerManager {
 
 			newRetinueMember.GetComponent<AttackerSandbox>().Setup();
 			newRetinueMember.GetComponent<AttackerSandbox>().NewLoc(x, z - 1);
-			newRetinueMember.name = newRetinueMember.name + enemyNum;
+			newRetinueMember.name = newRetinueMember.name.Remove(newRetinueMember.name.Length - CLONE_LENGTH);
+			newRetinueMember.name += DIVIDER + enemyNum;
 			enemyNum++;
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x, z - 1, MoveSpeed)); //create the task that moves them onto the board
 
@@ -272,7 +279,8 @@ public class AttackerManager {
 
 			newRetinueMember.GetComponent<AttackerSandbox>().Setup();
 			newRetinueMember.GetComponent<AttackerSandbox>().NewLoc(x + 1, z);
-			newRetinueMember.name = newRetinueMember.name + enemyNum;
+			newRetinueMember.name = newRetinueMember.name.Remove(newRetinueMember.name.Length - CLONE_LENGTH);
+			newRetinueMember.name += DIVIDER + enemyNum;
 			enemyNum++;
 			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x + 1, z, MoveSpeed)); //create the task that moves them onto the board
 

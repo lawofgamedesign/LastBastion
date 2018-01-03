@@ -35,6 +35,10 @@ public class DefenderManager {
 	protected List<DefenderSandbox> doneDefenders = new List<DefenderSandbox>();
 
 
+	//name formatting
+	protected const int CLONE_LENGTH = 7; //length of "(Clone)"
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -114,6 +118,7 @@ public class DefenderManager {
 
 		newDefender.GetComponent<DefenderSandbox>().Setup();
 		newDefender.GetComponent<DefenderSandbox>().NewLoc(spawnPoint.x, spawnPoint.z);
+		newDefender.name = newDefender.name.Remove(newDefender.name.Length - CLONE_LENGTH);
 
 		return newDefender.GetComponent<DefenderSandbox>();
 	}
