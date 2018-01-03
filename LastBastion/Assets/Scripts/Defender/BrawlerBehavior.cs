@@ -246,7 +246,13 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
 
-		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
+		Services.Tasks.AddTask(new CombatExplanationTask(attacker,
+														 this,
+														 attackerValue,
+														 ChosenCard.Value,
+														 attacker.AttackMod,
+														 AttackMod,
+														 damage));
 
 		if ((ChosenCard.Value + AttackMod) > (attackerValue + attacker.AttackMod)){ //successful attack
 			if (damage >= attacker.Health){
@@ -258,7 +264,7 @@ public class BrawlerBehavior : DefenderSandbox {
 				defeatedLastTarget = true; //only important for The Last One Standing
 			}
 
-			attacker.TakeDamage(damage);
+			//inflicting damage is handled by the combat explanation task, if appropriate
 
 			FinishWithCard();
 		} else { //the Brawler's value was too low

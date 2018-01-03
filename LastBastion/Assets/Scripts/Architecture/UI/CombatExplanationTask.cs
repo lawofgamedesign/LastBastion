@@ -63,6 +63,7 @@ public class CombatExplanationTask : Task {
 	private const string TOTAL = " total";
 	private const string OVERALL_TOTAL = "Total";
 	private const string WINNER = "Winner";
+	private const string BLANK = "";
 
 
 	//time between each element displaying
@@ -144,6 +145,19 @@ public class CombatExplanationTask : Task {
 	/// </summary>
 	protected override void OnSuccess (){
 		display.SetActive(false);
+
+		//clear all text for next time
+		attackerNameText.text = BLANK;
+		defenderNameText.text = BLANK;
+		attackerCardText.text = BLANK;
+		defenderCardText.text = BLANK;
+		attackerModText.text = BLANK;
+		defenderModText.text = BLANK;
+		attackerTotalText.text = BLANK;
+		defenderTotalText.text = BLANK;
+		totalText.text = BLANK;
+		winnerText.text = BLANK;
+
 		Services.UI.ExplainCombat(defenderValue, defenderScript, attackerScript, attackerValue, damage);
 	}
 

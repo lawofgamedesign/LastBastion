@@ -132,6 +132,15 @@ public class RangerBehavior : DefenderSandbox {
 				DetermineAttackerArmor(attacker));
 
 		damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
+
+		Services.Tasks.AddTask(new CombatExplanationTask(attacker,
+														 this,
+														 attackerValue,
+														 ChosenCard.Value,
+														 DetermineAttackerModifier(attacker),
+														 AttackMod,
+														 damage));
+
 		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
 
 
@@ -143,7 +152,7 @@ public class RangerBehavior : DefenderSandbox {
 				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 			}
 
-			attacker.TakeDamage(damage);
+			//damaging the attacker is handled by the CombatExplanationTask, if appropriate
 
 			//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
 			currentAttacks--;

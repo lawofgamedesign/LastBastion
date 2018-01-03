@@ -223,8 +223,9 @@ public class TurnManager {
 		public override void OnEnter (){
 			upgraders = GetUpgradeableDefenders();
 
-			if (upgraders.Count == 0) TransitionTo<AttackersAdvance>();
-			else {
+			if (upgraders.Count == 0){
+				//do nothing; on the first frame, transition to AttackersAdvance
+			} else {
 				Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 				Services.Events.Register<PowerChoiceEvent>(HandlePowerChoice);
 
@@ -249,6 +250,10 @@ public class TurnManager {
 					}
 				}
 			}
+		}
+
+		public override void Tick(){
+			if (upgraders.Count == 0) TransitionTo<AttackersAdvance>();
 		}
 	}
 
