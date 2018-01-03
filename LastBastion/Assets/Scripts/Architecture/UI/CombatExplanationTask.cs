@@ -129,6 +129,7 @@ public class CombatExplanationTask : Task {
 		ColorUtility.TryParseHtmlString(DEFENDER_COLOR_HEX, out defenderColor);
 		explainMachine = new FSM<CombatExplanationTask>(this);
 		explainMachine.TransitionTo<Intro>();
+		Services.Events.Register<InputEvent>(BeDone);
 	}
 
 
@@ -159,6 +160,17 @@ public class CombatExplanationTask : Task {
 		winnerText.text = BLANK;
 
 		Services.UI.ExplainCombat(defenderValue, defenderScript, attackerScript, attackerValue, damage);
+
+		Services.Events.Unregister<InputEvent>(BeDone);
+
+		if (damage > 0) attackerScript.TakeDamage(damage);
+	}
+
+
+	private void BeDone(Event e){
+		Debug.Assert(e.GetType() == typeof(InputEvent));
+
+		SetStatus(TaskStatus.Success);
 	}
 
 
@@ -258,7 +270,6 @@ public class CombatExplanationTask : Task {
 	private class ShowOverallTotal : FSM<CombatExplanationTask>.State {
 
 
-		private float timer = 0.0f;
 		private int total = 0;
 
 
@@ -290,16 +301,7 @@ public class CombatExplanationTask : Task {
 
 
 		public override void Tick (){
-			timer += Time.deltaTime;
-
-			if (timer >= CombatExplanationTask.DISPLAY_DELAY) {
-				Context.SetStatus(TaskStatus.Success);
-
-				//if the defender won, inflict damage on the attacker
-				if (total < 0){
-					Context.attackerScript.TakeDamage(Context.damage);
-				}
-			}
+			//wait for the player to click to move on
 		}
 	}
 }
