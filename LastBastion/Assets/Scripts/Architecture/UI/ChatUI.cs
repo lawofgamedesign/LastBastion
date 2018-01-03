@@ -378,9 +378,9 @@ public class ChatUI {
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerFight)){
 			SetButtonText(FIGHT_DONE_MSG);
 			PlayerPhaseStatement(MOVE_DONE_MSG);
+			undoButton.SetActive(false);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
 			phaseOverButton.SetActive(false);
-			undoButton.SetActive(false);
 			PlayerPhaseStatement(FIGHT_DONE_MSG);
 		}
 	}

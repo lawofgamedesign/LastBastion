@@ -262,6 +262,7 @@ public class BrawlerBehavior : DefenderSandbox {
 					currentRampage == RampageTrack.Berserk ||
 					currentRampage == RampageTrack.The_Last_One_Standing){
 
+					if (lastDefeatedLoc != null) Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
 					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
 					Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
 				}
