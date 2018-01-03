@@ -260,7 +260,11 @@ public class BrawlerBehavior : DefenderSandbox {
 				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 				if (currentRampage == RampageTrack.Wade_In ||
 					currentRampage == RampageTrack.Berserk ||
-					currentRampage == RampageTrack.The_Last_One_Standing) lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+					currentRampage == RampageTrack.The_Last_One_Standing){
+
+					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+					Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
+				}
 				defeatedLastTarget = true; //only important for The Last One Standing
 			}
 
@@ -405,6 +409,8 @@ public class BrawlerBehavior : DefenderSandbox {
 		Services.Board.TakeThingFromSpace(GridLoc.x, GridLoc.z);
 		Services.Board.PutThingInSpace(gameObject, boardEvent.coords.x, boardEvent.coords.z, SpaceBehavior.ContentType.Defender);
 		NewLoc(boardEvent.coords.x, boardEvent.coords.z);
+		Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
+		lastDefeatedLoc = null;
 
 		//record this jump
 		jumpsSoFar++;
@@ -444,6 +450,11 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		if (currentRampage == RampageTrack.Wade_In || currentRampage == RampageTrack.Berserk || currentRampage == RampageTrack.The_Last_One_Standing){
 			Services.Events.Unregister<BoardClickedEvent>(boardFunc);
+
+			//switch off any highlighting for where the Brawler can jump to
+			if (lastDefeatedLoc != null){
+				Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
+			}
 		}
 
 		base.DoneFighting();
