@@ -35,6 +35,8 @@
 			Services.Defenders.Setup();
 			Services.Sound = new AudioManager();
 			Services.Sound.Setup();
+			Services.Cursor = new CursorManager();
+			Services.Cursor.Setup();
 			camScript = new CameraRotator();
 			camScript.Setup();
 		}

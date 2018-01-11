@@ -232,26 +232,30 @@ public class GuardianBehavior : DefenderSandbox {
 														 DetermineAttackMod(attacker),
 														 damage));
 
-		if (ChosenCard.Value + DetermineAttackMod(attacker) > attackerValue + attacker.AttackMod){
-			if (damage >= attacker.Health){
-				DefeatedSoFar = DetermineDefeatedSoFar(attacker);
-				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-				if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
-				powerupReadyParticle.SetActive(CheckUpgradeStatus());
-			}
-
-			//inflicting damage is handled by the combat explanation task, if appropriate
-				
-			FinishWithCard();
-			DoneFighting();
-		} else {
-			attacker.FailToDamage();
-			Services.Events.Fire(new MissedFightEvent());
-			FinishWithCard();
-			DoneFighting();
-		}
-
 		Services.UI.ReviseCardsAvail(GetAvailableValues());
+	}
+
+
+	public override void WinFight(AttackerSandbox attacker){
+		DefeatedSoFar = DetermineDefeatedSoFar(attacker);
+		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+		if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
+		powerupReadyParticle.SetActive(CheckUpgradeStatus());
+
+		FinishWithCard();
+		DoneFighting();
+	}
+
+
+	public override void TieFight(AttackerSandbox attacker){
+		Services.Events.Fire(new MissedFightEvent());
+		FinishWithCard();
+		DoneFighting();
+	}
+
+
+	public override void LoseFight(AttackerSandbox attacker){
+		TieFight(attacker);
 	}
 
 

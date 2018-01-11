@@ -120,4 +120,14 @@ public static class Services {
 		}
 		set { sound = value; }
 	}
+
+
+	private static CursorManager cursor;
+	public static CursorManager Cursor {
+		get {
+			Debug.Assert(cursor != null, "No cursor manager. Are services being created out of order?");
+			return cursor;
+		}
+		set { cursor = value; }
+	}
 }

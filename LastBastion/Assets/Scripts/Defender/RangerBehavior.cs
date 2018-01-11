@@ -43,7 +43,7 @@ public class RangerBehavior : DefenderSandbox {
 
 
 	//the Lay Traps upgrade track
-	private enum TrapTrack { None, Rockfall, Landslide, On_the_Lookout, The_Last_Chance };
+	public enum TrapTrack { None, Rockfall, Landslide, On_the_Lookout, The_Last_Chance };
 	private List<string> trapDescriptions = new List<string>() {
 		"<b>Lay your traps</b>",
 		"<b>Rockfall</b>\n\n<size=11>When you choose this, select an empty space adjacent to you. The Horde must go around that space.\n\nGain 1 experience whenever your rockfall blocks the Horde.</size>",
@@ -53,7 +53,7 @@ public class RangerBehavior : DefenderSandbox {
 	private TrapTrack currentTrap;
 	private const string BOARD_TAG = "Board";
 	private const string BLOCK_MARKER_OBJ = "Space blocked marker";
-	private TwoDLoc rockfallLoc;
+	public TwoDLoc RockfallLoc { get; set; }
 	private int landslideDamage = 999; //enough to defeat any attacker
 
 
@@ -144,33 +144,36 @@ public class RangerBehavior : DefenderSandbox {
 		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
 
 
-		//the attacker's attack modifier might be reduced if the Ranger is behind them
-		if (ChosenCard.Value + AttackMod > attackerValue + DetermineAttackerModifier(attacker)){
-			if (damage >= attacker.Health){
-				DefeatedSoFar++;
-				powerupReadyParticle.SetActive(CheckUpgradeStatus());
-				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-			}
-
-			//damaging the attacker is handled by the CombatExplanationTask, if appropriate
-
-			//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
-			currentAttacks--;
-			extraAttacks++;
-			Services.UI.OpponentStatement(ReviseAttackText());
-
-			FinishWithCard();
-		} else {
-			attacker.FailToDamage();
-			Services.Events.Fire(new MissedFightEvent());
-			FinishWithCard();
-			currentAttacks--;
-			Services.UI.OpponentStatement(ReviseAttackText());
-		}
-
 		//the Ranger can keep fighting until they run out of attacks
 		if (currentAttacks <= 0) DoneFighting();
 		Services.UI.ReviseCardsAvail(GetAvailableValues());
+	}
+
+
+	public override void WinFight(AttackerSandbox attacker){
+		DefeatedSoFar++;
+		powerupReadyParticle.SetActive(CheckUpgradeStatus());
+		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+
+		//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
+		currentAttacks--;
+		extraAttacks++;
+		Services.UI.OpponentStatement(ReviseAttackText());
+
+		FinishWithCard();
+	}
+
+
+	public override void TieFight(AttackerSandbox attacker){
+		Services.Events.Fire(new MissedFightEvent());
+		FinishWithCard();
+		currentAttacks--;
+		Services.UI.OpponentStatement(ReviseAttackText());
+	}
+
+
+	public override void LoseFight(AttackerSandbox attacker){
+		TieFight(attacker);
 	}
 
 
@@ -366,10 +369,10 @@ public class RangerBehavior : DefenderSandbox {
 						Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.On, true);
 						break;
 					case TrapTrack.Landslide:
-						DamageAtLoc(rockfallLoc.x, rockfallLoc.z + 1);
-						DamageAtLoc(rockfallLoc.x, rockfallLoc.z - 1);
-						DamageAtLoc(rockfallLoc.x - 1, rockfallLoc.z);
-						DamageAtLoc(rockfallLoc.x + 1, rockfallLoc.z);
+						DamageAtLoc(RockfallLoc.x, RockfallLoc.z + 1);
+						DamageAtLoc(RockfallLoc.x, RockfallLoc.z - 1);
+						DamageAtLoc(RockfallLoc.x - 1, RockfallLoc.z);
+						DamageAtLoc(RockfallLoc.x + 1, RockfallLoc.z);
 						break;
 				}
 
@@ -382,6 +385,11 @@ public class RangerBehavior : DefenderSandbox {
 		powerupReadyParticle.SetActive(false);
 
 		return true;
+	}
+
+
+	public TrapTrack GetCurrentTrapTrack(){
+		return currentTrap;
 	}
 
 
@@ -406,7 +414,7 @@ public class RangerBehavior : DefenderSandbox {
 				Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, BLOCK_MARKER_OBJ));
 				Services.UI.OpponentStatement(BLOCKED_MSG);
 
-				if (currentTrap == TrapTrack.Rockfall) rockfallLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
+				if (currentTrap == TrapTrack.Rockfall) RockfallLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
 
 				Services.Events.Unregister<InputEvent>(PutDownBlock);
 				Services.Board.HighlightAllAroundSpace(GridLoc.x, GridLoc.z, BoardBehavior.OnOrOff.Off, true);

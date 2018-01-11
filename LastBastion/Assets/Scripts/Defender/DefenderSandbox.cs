@@ -453,22 +453,57 @@ public class DefenderSandbox : MonoBehaviour {
 
 		//if the Defender gets this far, a fight will actually occur; get a combat card for the attacker
 		int attackerValue = Services.AttackDeck.GetAttackerCard().Value;
-		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, ChosenCard.Value - (attackerValue + attacker.AttackMod + attacker.Armor));
+		int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
 
-		if (ChosenCard.Value + AttackMod > attackerValue + attacker.AttackMod){
-			attacker.TakeDamage((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
-			FinishWithCard();
-			DefeatAttacker();
-			Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-			DoneFighting();
-		} else {
-			attacker.FailToDamage();
-			Services.Events.Fire(new MissedFightEvent());
-			FinishWithCard();
-			DoneFighting();
-		}
+		damage = damage < 0 ? 0 : damage; //don't allow damage to be negative, "healing" the attacker
+
+		Services.Tasks.AddTask(new CombatExplanationTask(attacker,
+														 this,
+														 attackerValue,
+														 ChosenCard.Value,
+														 attacker.AttackMod,
+														 AttackMod,
+														 damage));
+
+		//CombatExplanationTask handles all combat effects when the player dismisses the combat explanation
 
 		Services.UI.ReviseCardsAvail(GetAvailableValues());
+	}
+
+
+	/// <summary>
+	/// Carries out everything that happens when a defender wins a fight (card + modifer > attacker's card + modifier).
+	/// </summary>
+	/// <param name="attacker">The attacker who lost the fight; generic defenders don't need this, but the Brawler does.</param>
+	public virtual void WinFight(AttackerSandbox attacker){
+		FinishWithCard();
+		DefeatAttacker();
+		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+		DoneFighting();
+	}
+
+
+	/// <summary>
+	/// Carries out everything that happens when a defender ties a fight (card + modifer == attacker's card + modifier).
+	/// </summary>
+	/// <param name="attacker">The attacker in the fight; generic defenders don't need this, but the Brawler does.</param>
+	public virtual void TieFight(AttackerSandbox attacker){
+		attacker.FailToDamage();
+		Services.Events.Fire(new MissedFightEvent());
+		FinishWithCard();
+		DoneFighting();
+	}
+
+
+	/// <summary>
+	/// Carries out everything that happens when a defender loses a fight (card + modifer < attacker's card + modifier).
+	/// </summary>
+	/// <param name="attacker">The attacker in the fight; generic defenders don't need this, but the Brawler does.</param>
+	public virtual void LoseFight(AttackerSandbox attacker){
+		attacker.FailToDamage();
+		Services.Events.Fire(new MissedFightEvent());
+		FinishWithCard();
+		DoneFighting();
 	}
 
 

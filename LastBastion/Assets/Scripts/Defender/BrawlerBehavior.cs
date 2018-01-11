@@ -256,32 +256,54 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		if ((ChosenCard.Value + AttackMod) > (attackerValue + attacker.AttackMod)){ //successful attack
 			if (damage >= attacker.Health){
-				DefeatAttacker();
-				Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
-				if (currentRampage == RampageTrack.Wade_In ||
-					currentRampage == RampageTrack.Berserk ||
-					currentRampage == RampageTrack.The_Last_One_Standing){
-
-					if (lastDefeatedLoc != null) Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
-					lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
-					Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
-				}
-				defeatedLastTarget = true; //only important for The Last One Standing
+				
 			}
 
 			//inflicting damage is handled by the combat explanation task, if appropriate
 
-			FinishWithCard();
+
 		} else { //the Brawler's value was too low
-			if (dir == Directions.East ||
-				dir == Directions.West) defeatedLastTarget = false; //only important for The Last One Standing
-			attacker.FailToDamage();
-			Services.Events.Fire(new MissedFightEvent());
-			FinishWithCard();
+			
 		}
 
 		if (currentRampage != RampageTrack.None) SetAvailableFeedback();
 		Services.UI.ReviseCardsAvail(GetAvailableValues());
+	}
+
+
+	public override void WinFight(AttackerSandbox attacker){
+		DefeatAttacker();
+		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+		if (currentRampage == RampageTrack.Wade_In ||
+			currentRampage == RampageTrack.Berserk ||
+			currentRampage == RampageTrack.The_Last_One_Standing){
+
+			if (lastDefeatedLoc != null) Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
+			lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
+			Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
+		}
+		defeatedLastTarget = true; //only important for The Last One Standing
+
+		FinishWithCard();
+	}
+
+
+	public override void TieFight(AttackerSandbox attacker){
+		Directions dir = GetAttackerDir(attacker);
+
+		if (dir == Directions.East ||
+			dir == Directions.West) defeatedLastTarget = false; //only important for The Last One Standing
+		Services.Events.Fire(new MissedFightEvent());
+		FinishWithCard();
+	}
+
+
+	/// <summary>
+	/// The Brawler does the same thing whether they lose or tie a fight.
+	/// </summary>
+	/// <param name="attacker">The attacker in the fight.</param>
+	public override void LoseFight(AttackerSandbox attacker){
+		TieFight(attacker);
 	}
 
 

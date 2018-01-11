@@ -163,7 +163,18 @@ public class CombatExplanationTask : Task {
 
 		Services.Events.Unregister<InputEvent>(BeDone);
 
-		if (damage > 0) attackerScript.TakeDamage(damage);
+		int total = (attackerValue + attackerMod) - (defenderValue + defenderMod);
+
+		if (total < 0){
+			defenderScript.WinFight(attackerScript);
+			attackerScript.TakeDamage(damage);
+		} else if (total == 0){
+			defenderScript.TieFight(attackerScript);
+			attackerScript.FailToDamage();
+		} else {
+			defenderScript.LoseFight(attackerScript);
+			attackerScript.FailToDamage();
+		}
 	}
 
 
