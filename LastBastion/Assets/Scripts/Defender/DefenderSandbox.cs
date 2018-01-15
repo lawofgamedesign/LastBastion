@@ -308,6 +308,9 @@ public class DefenderSandbox : MonoBehaviour {
 		Services.Defenders.DeclareSelfDone(this);
 
 		remainingSpeed = 0;
+
+		//send out an event announcing that this defender has moved; important for the tutorial
+
 	}
 
 

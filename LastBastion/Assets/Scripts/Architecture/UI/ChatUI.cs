@@ -300,6 +300,19 @@ public class ChatUI {
 
 
 	/// <summary>
+	/// Switch the left button, usually for ending a phase, on or off.
+	/// </summary>
+	/// <param name="onOrOff">Whether the button should be on (gameobject active) or off (inactive).</param>
+	public virtual void TogglePhaseButton(OnOrOff onOrOff){
+		if (onOrOff == OnOrOff.On){
+			phaseOverButton.SetActive(true);
+		} else {
+			phaseOverButton.SetActive(false);
+		}
+	}
+
+
+	/// <summary>
 	/// Defenders call this when they fight to explain the result of the combat.
 	/// </summary>
 	/// <param name="playerValue">The value of the player's card.</param>
@@ -373,14 +386,14 @@ public class ChatUI {
 
 		if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerMove)){
 			SetButtonText(MOVE_DONE_MSG);
-			phaseOverButton.SetActive(true);
+			TogglePhaseButton(OnOrOff.On);
 			undoButton.SetActive(true);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerFight)){
 			SetButtonText(FIGHT_DONE_MSG);
 			PlayerPhaseStatement(MOVE_DONE_MSG);
 			undoButton.SetActive(false);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
-			phaseOverButton.SetActive(false);
+			TogglePhaseButton(OnOrOff.Off);
 			PlayerPhaseStatement(FIGHT_DONE_MSG);
 		}
 	}

@@ -50,7 +50,9 @@ public class MoveDefenderTask : Task {
 			} else { 
 				defender.MovePosition(defender.position + (nextWaypointLoc - defender.position).normalized * speed * Time.deltaTime); 
 			} 
-		} else { 
+		} else {
+			Services.Events.Fire(new MoveEvent(defender.transform, new TwoDLoc(waypoints[waypoints.Count - 1].x,
+																			   waypoints[waypoints.Count - 1].z)));
 			SetStatus(TaskStatus.Success); 
 		} 
 	} 

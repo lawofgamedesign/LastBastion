@@ -17,7 +17,7 @@
 
 		//scenes to load
 		private const string GAME_SCENE = "Game";
-		private const string TUTORIAL_SCENE = "Tutorial";
+		private const string TUTORIAL_SCENE = "Tutorial2";
 
 
 		/////////////////////////////////////////////
