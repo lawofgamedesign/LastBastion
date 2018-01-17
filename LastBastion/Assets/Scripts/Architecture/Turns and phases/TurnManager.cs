@@ -515,6 +515,7 @@ public class TurnManager {
 				Services.AttackDeck.Reshuffle();
 				Context.ResetTurnUI();
 				Services.UI.RecreateCombatDeck();
+				Services.Environment.ChangeEnvironment(Services.Environment.GetNextPlace());
 				TransitionTo<StartOfTurn>();
 			}
 			else TransitionTo<PlayerWin>();

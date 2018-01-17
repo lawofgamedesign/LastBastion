@@ -3,11 +3,26 @@
 public class InputManager {
 
 
+	//how close to the edge of the screen the input device needs to be to rotate the camera,
+	//as a percentage
+	private const float SCREEN_MARGIN = 10.0f;
+
+
 	public virtual void Tick(){
 		if (Input.GetMouseButtonDown(0)){
 			GameObject selected = GetClickedThing();
 
 			if (selected != null) Services.Events.Fire(new InputEvent(selected));
+		}
+
+		if (Input.mousePosition.y/Screen.height >= (100.0f - SCREEN_MARGIN)/100.0f){
+			Services.PlayerEyes.CameraUp();
+		} else if (Input.mousePosition.x/Screen.width <= SCREEN_MARGIN/100.0f) {
+			Services.PlayerEyes.CameraLeft();
+		} else if (Input.mousePosition.x/Screen.width >= (100.0f - SCREEN_MARGIN)/100.0f) {
+			Services.PlayerEyes.CameraRight();
+		} else {
+			Services.PlayerEyes.CameraToTable();
 		}
 	}
 

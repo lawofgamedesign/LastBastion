@@ -130,4 +130,24 @@ public static class Services {
 		}
 		set { cursor = value; }
 	}
+
+
+	private static CameraBehavior playerEyes;
+	public static CameraBehavior PlayerEyes {
+		get {
+			Debug.Assert(playerEyes != null, "No controller for the player's view. Are services being created out of order?");
+			return playerEyes;
+		}
+		set { playerEyes = value; }
+	}
+
+
+	private static EnvironmentManager environment;
+	public static EnvironmentManager Environment {
+		get {
+			Debug.Assert(environment != null, "No environment manager. Are services being created out of order?");
+			return environment;
+		}
+		set { environment = value; }
+	}
 }

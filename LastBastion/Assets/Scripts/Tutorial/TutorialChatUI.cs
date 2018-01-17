@@ -50,11 +50,11 @@
 			TutorialPhaseStartEvent startEvent = e as TutorialPhaseStartEvent;
 
 			if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.StartOfTutorial)){
-				phaseOverButton.SetActive(true);
+				TogglePhaseButton(OnOrOff.On);
 			} else if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.AttackersAdvance)){
-				phaseOverButton.SetActive(false);
+				TogglePhaseButton(OnOrOff.Off);
 			} else if (startEvent.Phase.GetType() == typeof(TutorialTurnManager.PlayerMove)){
-				phaseOverButton.SetActive(true);
+				TogglePhaseButton(OnOrOff.On);
 			}
 		}
 	}
