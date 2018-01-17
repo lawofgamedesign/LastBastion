@@ -41,8 +41,6 @@ public class GameManager : MonoBehaviour {
 		Services.Momentum.Setup();
 		Services.Sound = new AudioManager();
 		Services.Sound.Setup();
-		Services.Cursor = new CursorManager();
-		Services.Cursor.Setup();
 		Services.PlayerEyes = new CameraBehavior();
 		Services.PlayerEyes.Setup();
 		Services.Environment = new EnvironmentManager();

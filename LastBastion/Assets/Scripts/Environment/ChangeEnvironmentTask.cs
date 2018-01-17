@@ -35,6 +35,9 @@ public class ChangeEnvironmentTask : Task {
 	}
 
 
+	/// <summary>
+	/// Activate the new environment and deactivate the old one.
+	/// </summary>
 	public override void Tick (){
 		environment.Find(newPlace.ToString()).gameObject.SetActive(true);
 		environment.Find(oldPlace.ToString()).gameObject.SetActive(false);

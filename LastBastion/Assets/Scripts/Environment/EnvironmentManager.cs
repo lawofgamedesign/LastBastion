@@ -21,6 +21,7 @@ public class EnvironmentManager {
 	/////////////////////////////////////////////
 
 
+	//initialize variables
 	public void Setup(){
 		currentPlace = Place.Kitchen;
 	}
@@ -40,6 +41,10 @@ public class EnvironmentManager {
 	}
 
 
+	/// <summary>
+	/// Get the next location in which the game will take place.
+	/// </summary>
+	/// <returns>The next location.</returns>
 	public Place GetNextPlace(){
 		Place temp = Place.Kitchen; //default initialization
 
