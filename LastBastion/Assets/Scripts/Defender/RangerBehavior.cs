@@ -96,6 +96,16 @@ public class RangerBehavior : DefenderSandbox {
 	/// When a Ranger who has moved up the Showboat track gets ready to fight, they gain extra attacks.
 	/// </summary>
 	public override void PrepareToFight(){
+		base.PrepareToFight();
+
+		ResetCurrentAttacks();
+	}
+
+
+	/// <summary>
+	/// Determine how many attacks the Ranger has right now. Reset the extra attacks.
+	/// </summary>
+	private void ResetCurrentAttacks(){
 		if (currentShowboat != ShowboatTrack.None){
 			currentAttacks = BASE_ATTACKS + extraAttacks;
 			extraAttacks = 0; //reset the Ranger's extra attacks; these must be built up again.
@@ -347,8 +357,10 @@ public class RangerBehavior : DefenderSandbox {
 
 					//just started showboating; need to make sure the UI is correct, and displayed if it's the appropriate phase
 					if (currentShowboat == ShowboatTrack.Showboat){
-						PrepareToFight();
-					if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)) Services.UI.OpponentStatement(ReviseAttackText());
+						ResetCurrentAttacks();
+						if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)){
+							Services.UI.OpponentStatement(ReviseAttackText());
+						}
 					}
 				}
 

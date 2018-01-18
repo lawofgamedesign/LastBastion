@@ -42,6 +42,8 @@
 			Services.Momentum.Setup();
 			Services.Sound = new AudioManager();
 			Services.Sound.Setup();
+			Services.PlayerEyes = new CameraBehavior();
+			Services.PlayerEyes.Setup();
 		}
 
 

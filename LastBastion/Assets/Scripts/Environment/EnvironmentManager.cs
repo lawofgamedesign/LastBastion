@@ -16,6 +16,10 @@ public class EnvironmentManager {
 	private Place currentPlace;
 
 
+	//tavern environment settings
+	private const string TAVERN_LIGHT_HEX = "#7E7E7EFF";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -31,7 +35,7 @@ public class EnvironmentManager {
 	public void ChangeEnvironment(Place newPlace){
 		ChangeFogTask fogGrows = new ChangeFogTask(ChangeFogTask.DenseOrLight.Dense);
 
-		ChangeEnvironmentTask changePlace = new ChangeEnvironmentTask(newPlace, currentPlace);
+		ChangeEnvironmentTask changePlace = new ChangeEnvironmentTask(newPlace, currentPlace, GetNextColor(newPlace));
 		currentPlace = newPlace;
 
 		fogGrows.Then(changePlace);
@@ -55,6 +59,21 @@ public class EnvironmentManager {
 		}
 
 		Debug.Assert(temp != Place.Kitchen, "Failed to get next place.");
+
+		return temp;
+	}
+
+
+	private Color GetNextColor(Place newPlace){
+		Color temp = Color.white; //default initializtion
+
+		switch (newPlace){
+			case Place.Tavern:
+			ColorUtility.TryParseHtmlString(TAVERN_LIGHT_HEX, out temp);
+			break;
+		}
+
+		Debug.Assert(temp != Color.white, "Could not get next color");
 
 		return temp;
 	}

@@ -4020,7 +4020,7 @@ Prefab:
     - target: {fileID: 224884508427595340, guid: 7616684d2de7942109355bd05440e2cc,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000023396395
+      value: -0.000007329691
       objectReference: {fileID: 0}
     - target: {fileID: 224058770850819376, guid: 7616684d2de7942109355bd05440e2cc,
         type: 2}
@@ -4079,7 +4079,7 @@ Prefab:
     - target: {fileID: 224058770850819376, guid: 7616684d2de7942109355bd05440e2cc,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 0.00000017881393
+      value: 0.000000059604645
       objectReference: {fileID: 0}
     - target: {fileID: 224058770850819376, guid: 7616684d2de7942109355bd05440e2cc,
         type: 2}

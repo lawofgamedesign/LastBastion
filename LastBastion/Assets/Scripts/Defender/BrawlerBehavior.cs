@@ -144,6 +144,8 @@ public class BrawlerBehavior : DefenderSandbox {
 	/// If the Brawler is a significant distance down the Rampage track, they also get ready to move into the spaces of enemies they defeat.
 	/// </summary>
 	public override void PrepareToFight(){
+		base.PrepareToFight();
+
 		attacksSoFar.Clear();
 		lastDefeatedLoc = null;
 

@@ -182,9 +182,8 @@ public class DefenderSandbox : MonoBehaviour {
 
 		Selected = true;
 		selectedParticle.SetActive(true);
-		moveButton.gameObject.SetActive(true);
-		undoButton.gameObject.SetActive(true);
 		TakeOverCharSheet();
+		Services.Events.Fire(new NotSelectableEvent(this));
 	}
 
 
@@ -198,9 +197,16 @@ public class DefenderSandbox : MonoBehaviour {
 		ChosenCard = null; //relevant for the fight phase
 		moveButton.gameObject.SetActive(false);
 		undoButton.gameObject.SetActive(false);
-		//noFightButton.gameObject.SetActive(false);
 		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
 		Services.Defenders.NoSelectedDefender();
+
+		//if this defender can still move, display the selection icon moving again
+		if (Services.Rulebook.TurnMachine != null){ //are we in the tutorial? If so, bail out
+			if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerMove) &&
+				remainingSpeed != 0){
+				Services.Tasks.AddTask(new SelectIconMoveTask(this));
+			}
+		}
 	}
 
 
@@ -214,6 +220,7 @@ public class DefenderSandbox : MonoBehaviour {
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
 		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+		Services.Tasks.AddTask(new SelectIconMoveTask(this));
 	}
 
 
@@ -246,6 +253,9 @@ public class DefenderSandbox : MonoBehaviour {
 			remainingSpeed--;
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
 			moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+
+			moveButton.gameObject.SetActive(true);
+			undoButton.gameObject.SetActive(true);
 
 			return true;
 		}
@@ -286,7 +296,12 @@ public class DefenderSandbox : MonoBehaviour {
 	public void UndoMove(){
 		ClearLine();
 		PrepareToMove();
+		moveButton.gameObject.SetActive(false);
+		undoButton.gameObject.SetActive(false);
 		Services.Events.Fire(new UndoMoveEvent());
+
+		//PrepareToMove will attempt to start the selectable icon moving; this is necessary to re-hide it
+		Services.Events.Fire(new NotSelectableEvent(this));
 	}
 
 
@@ -306,6 +321,7 @@ public class DefenderSandbox : MonoBehaviour {
 		BeUnselected();
 		Services.UI.ShutOffCharSheet();
 		Services.Defenders.DeclareSelfDone(this);
+		Services.Events.Fire(new NotSelectableEvent(this));
 
 		remainingSpeed = 0;
 
@@ -345,6 +361,9 @@ public class DefenderSandbox : MonoBehaviour {
 		GridLoc = new TwoDLoc(Services.Undo.GetDefenderLoc(this).x, Services.Undo.GetDefenderLoc(this).z);
 		Services.Board.PutThingInSpace(gameObject, GridLoc.x, GridLoc.z, SpaceBehavior.ContentType.Defender);
 
+		moveButton.gameObject.SetActive(false);
+		undoButton.gameObject.SetActive(false);
+
 		transform.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z);
 	}
 
@@ -369,7 +388,11 @@ public class DefenderSandbox : MonoBehaviour {
 	/// If this defender needs to do anything at the start of the Defender Fight phase, that happens here.
 	/// </summary>
 	public virtual void PrepareToFight(){
-		//generic defenders don't need to do anything
+
+		//reset the canvas' position. Otherwise, the last defender to move will put it where it's supposed to be before they move,
+		//and they'll push it to the wrong location.
+		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+		Services.Tasks.AddTask(new SelectIconMoveTask(this));
 	}
 
 
@@ -400,6 +423,8 @@ public class DefenderSandbox : MonoBehaviour {
 		TurnOverAvailableCards();
 
 		TakeOverCharSheet();
+
+		Services.Events.Fire(new NotSelectableEvent(this));
 	}
 
 

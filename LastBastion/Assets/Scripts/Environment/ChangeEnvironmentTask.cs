@@ -21,26 +21,32 @@ public class ChangeEnvironmentTask : Task {
 	private readonly EnvironmentManager.Place oldPlace;
 
 
+	//other settings to change
+	private readonly Color ambientColor; //the color of the ambient light
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
 
 
 	//constructor
-	public ChangeEnvironmentTask(EnvironmentManager.Place newPlace, EnvironmentManager.Place oldPlace){
+	public ChangeEnvironmentTask(EnvironmentManager.Place newPlace, EnvironmentManager.Place oldPlace, Color ambientColor){
 		environment = GameObject.Find(ENVIRONMENT_ORGANIZER).transform;
 
 		this.newPlace = newPlace;
 		this.oldPlace = oldPlace;
+		this.ambientColor = ambientColor;
 	}
 
 
 	/// <summary>
-	/// Activate the new environment and deactivate the old one.
+	/// Activate the new environment and deactivate the old one. Change other settings as necessary
 	/// </summary>
 	public override void Tick (){
 		environment.Find(newPlace.ToString()).gameObject.SetActive(true);
 		environment.Find(oldPlace.ToString()).gameObject.SetActive(false);
+		RenderSettings.ambientLight = ambientColor;
 		SetStatus(Task.TaskStatus.Success);
 	}
 }
