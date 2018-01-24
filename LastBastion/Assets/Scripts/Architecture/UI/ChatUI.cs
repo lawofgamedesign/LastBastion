@@ -56,10 +56,17 @@ public class ChatUI {
 
 
 	//turn UI
-	protected Text turnText;
+	protected TextMeshProUGUI turnText;
 	protected const string TURN_CANVAS = "Turn canvas";
+	protected const string TURN_TEXT_OBJ = "Turn text";
 	protected const string TURN = "Turn ";
 	protected const string BACKSLASH = "/";
+
+
+	//wave UI
+	protected TextMeshProUGUI waveText;
+	protected const string WAVE_TEXT_OBJ = "Wave text";
+	protected const string WAVE = "Wave ";
 
 
 	//phase reminder
@@ -117,7 +124,11 @@ public class ChatUI {
 
 
 		//turn UI setup
-		turnText = GameObject.Find(TURN_CANVAS).transform.Find(TEXT_OBJ).GetComponent<Text>();
+		turnText = GameObject.Find(TURN_CANVAS).transform.Find(TURN_TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+
+
+		//wave UI setup
+		waveText = GameObject.Find(TURN_CANVAS).transform.Find(WAVE_TEXT_OBJ).GetComponent<TextMeshProUGUI>();
 
 
 		//phase reminder setup
@@ -368,6 +379,15 @@ public class ChatUI {
 		string turnMessage = "This is turn " + currentTurn.ToString() + " of " + totalTurns.ToString() + " this wave.";
 
 		OpponentStatement(turnMessage);
+	}
+
+
+	public void SetWaveText(int currentWave, int totalWaves){
+		waveText.text = WAVE + currentWave.ToString() + BACKSLASH + totalWaves.ToString();
+
+		string waveMessage = "We're starting a new wave. This is wave " + currentWave.ToString() + " of " + totalWaves.ToString();
+
+		OpponentStatement(waveMessage);
 	}
 
 

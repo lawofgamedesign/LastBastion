@@ -160,6 +160,15 @@ public class AttackerManager {
 
 
 	/// <summary>
+	/// Get the total number of waves.
+	/// </summary>
+	/// <returns>The total number of waves.</returns>
+	public int GetTotalWaves(){
+		return waves.Count;
+	}
+
+
+	/// <summary>
 	/// Make a warlord.
 	/// </summary>
 	/// <returns>The warlord's AttackerSandbox (or inheriting script).</returns>

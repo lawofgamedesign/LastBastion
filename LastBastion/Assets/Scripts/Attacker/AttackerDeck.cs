@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,8 +17,8 @@ public class AttackerDeck {
 
 
 	//the UI for the deck
-	private Text cardsInDeck;
-	private Text playedCards;
+	private TextMeshProUGUI cardsInDeck;
+	private TextMeshProUGUI playedCards;
 	private List<Card> playedCardList = new List<Card>();
 	private const string DECK_CANVAS = "Attacker deck canvas";
 	private const string DECK_OBJ = "Deck";
@@ -43,9 +44,9 @@ public class AttackerDeck {
 						      new Card(4),
 						      new Card(4) };
 		attackerDeck = new CardDeck<Card>(values);
-		cardsInDeck = GameObject.Find(DECK_CANVAS).transform.Find(DECK_OBJ).GetComponent<Text>();
+		cardsInDeck = GameObject.Find(DECK_CANVAS).transform.Find(DECK_OBJ).GetComponent<TextMeshProUGUI>();
 		cardsInDeck.text = UpdateCardsInDeckUI(attackerDeck.RemainingCards());
-		playedCards = GameObject.Find(DECK_CANVAS).transform.Find(PLAYED_CARDS_OBJ).GetComponent<Text>();
+		playedCards = GameObject.Find(DECK_CANVAS).transform.Find(PLAYED_CARDS_OBJ).GetComponent<TextMeshProUGUI>();
 		playedCards.text = PLAYED_LABEL + NEWLINE;
 	}
 

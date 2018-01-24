@@ -73,6 +73,7 @@ public class TurnManager {
 		turnMachine = new FSM<TurnManager>(this);
 		TurnMachine = turnMachine;
 		ResetTurnUI();
+		Services.UI.SetWaveText(Services.Attackers.GetCurrentWave() + 1, Services.Attackers.GetTotalWaves()); //+1 because waves are zero-indexed
 		turnMachine.TransitionTo<StartOfTurn>();
 	}
 
@@ -518,6 +519,7 @@ public class TurnManager {
 				Services.AttackDeck.Reshuffle();
 				Context.ResetTurnUI();
 				Services.UI.RecreateCombatDeck();
+				Services.UI.SetWaveText(Services.Attackers.GetCurrentWave() + 2, Services.Attackers.GetTotalWaves()); //+2 for the wave after this one, zero-indexed
 				Services.Environment.ChangeEnvironment(Services.Environment.GetNextPlace());
 				TransitionTo<StartOfTurn>();
 			}
