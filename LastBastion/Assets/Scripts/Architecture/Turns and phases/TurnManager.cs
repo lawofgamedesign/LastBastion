@@ -280,6 +280,9 @@ public class TurnManager {
 			timer += Time.deltaTime;
 			if (timer >= Context.attackerAdvanceDuration){
 
+				//if the defenders are being pushed, don't transition to the next phase until that happens.
+				if (Services.Tasks.CheckForTaskOfType<MoveDefenderTask>()) return;
+
 				//go to the Defenders Move phase, unless the player has now lost.
 				if (!Context.CheckForLoss()) TransitionTo<PlayerMove>();
 				else TransitionTo<PlayerLose>();

@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * 
+ * This script manages the board for a 2D game played on a grid. It is responsible for creating the grid,
+ * tracking the state of each space in the grid, and reporting that state upon request.
+ * 
+ */
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardBehavior {
@@ -52,6 +58,8 @@ public class BoardBehavior {
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
+
+	#region setup
 
 
 	//set up the board
@@ -115,6 +123,22 @@ public class BoardBehavior {
 
 
 	/// <summary>
+	/// Checks each spawn point. If no Attacker is present in it or the spaces around it, put it
+	/// in a list for the AttackerManager to use to spawn warlords and their retinues.
+	/// </summary>
+	/// <returns>A list of the world-space coordinates for the open spawn points.</returns>
+	public List<Vector3> FindOpenSpawnPoints(){
+		return null;
+	}
+
+
+	#endregion setup
+
+
+	#region location
+
+
+	/// <summary>
 	/// Assigns a tile a location in world space, based on its position in the grid.
 	/// </summary>
 	/// <returns>The world space location as a Vector3.</returns>
@@ -135,14 +159,10 @@ public class BoardBehavior {
 	}
 
 
-	/// <summary>
-	/// Checks each spawn point. If no Attacker is present in it or the spaces around it, put it
-	/// in a list for the AttackerManager to use to spawn warlords and their retinues.
-	/// </summary>
-	/// <returns>A list of the world-space coordinates for the open spawn points.</returns>
-	public List<Vector3> FindOpenSpawnPoints(){
-		return null;
-	}
+	#endregion location
+
+
+	#region validity checks
 
 
 	/// <summary>
@@ -178,6 +198,12 @@ public class BoardBehavior {
 		if (z < 0 || z > BOARD_HEIGHT - 1) return false;
 		else return true;
 	}
+
+
+	#endregion validity checks
+
+
+	#region space contents
 
 
 	/// <summary>
@@ -282,6 +308,31 @@ public class BoardBehavior {
 
 
 	/// <summary>
+	/// Determine whether there's a defender to the south of a given space.
+	/// </summary>
+	/// <returns>The number of defenders to the south.</returns>
+	/// <param name="x">The x coordinate in the grid of the space to check from.</param>
+	/// <param name="z">The z coordinate in the grid of the space to check from.</param>
+	public int CheckDefenderToSouth(int x, int z){
+		Debug.Assert(CheckValidSpace(x, z), "Checking for a defender to the south from an invalid space.");
+
+		int temp = 0;
+
+		for (int i = z - 1; i >= 0; i--){
+			if (GeneralSpaceQuery(x, i) == SpaceBehavior.ContentType.Defender) temp++;
+		}
+
+		return temp;
+	}
+
+
+	#endregion space contents
+
+
+	#region wall
+
+
+	/// <summary>
 	/// Get the durability of the wall in a given column.
 	/// </summary>
 	/// <returns>The wall's durability.</returns>
@@ -329,9 +380,19 @@ public class BoardBehavior {
 	}
 
 
+	#endregion wall
+
+
+	/// <summary>
+	/// Currently intentionally blank. This is expected to be necessary for features down the road.
+	/// </summary>
+	/// <param name="attacker">The attacker being taken out of the game.</param>
 	public void EliminateAttacker(AttackerSandbox attacker){
 
 	}
+
+
+	#region spaces
 
 
 	/// <summary>
@@ -468,6 +529,12 @@ public class BoardBehavior {
 	}
 
 
+	#endregion spaces
+
+
+	#region highlighting
+
+
 	/// <summary>
 	/// Change the state of a space's highlight, on or off.
 	/// </summary>
@@ -592,6 +659,16 @@ public class BoardBehavior {
 	}
 
 
+	#endregion highlighting
+
+
+	#region tankard
+
+
+	/// <summary>
+	/// Gets all tankards on the map.
+	/// </summary>
+	/// <returns>A list of the tankards.</returns>
 	public List<TankardBehavior> GetAllTankards(){
 		GameObject[] objs = GameObject.FindGameObjectsWithTag(TANKARD_TAG);
 
@@ -609,6 +686,11 @@ public class BoardBehavior {
 	}
 
 
+	/// <summary>
+	/// Get a tankard in a known space.
+	/// </summary>
+	/// <returns>The tankard in the space.</returns>
+	/// <param name="loc">The grid location of the tankard.</param>
 	public Transform GetTankardInSpace(TwoDLoc loc){
 		foreach (TankardBehavior tankard in GetAllTankards()){
 			if (tankard.GridLoc.x == loc.x &&
@@ -619,21 +701,5 @@ public class BoardBehavior {
 	}
 
 
-	/// <summary>
-	/// Determine whether there's a defender to the south of a given space.
-	/// </summary>
-	/// <returns>The number of defenders to the south.</returns>
-	/// <param name="x">The x coordinate in the grid of the space to check from.</param>
-	/// <param name="z">The z coordinate in the grid of the space to check from.</param>
-	public int CheckDefenderToSouth(int x, int z){
-		Debug.Assert(CheckValidSpace(x, z), "Checking for a defender to the south from an invalid space.");
-
-		int temp = 0;
-
-		for (int i = z - 1; i >= 0; i--){
-			if (GeneralSpaceQuery(x, i) == SpaceBehavior.ContentType.Defender) temp++;
-		}
-
-		return temp;
-	}
+	#endregion tankard
 }

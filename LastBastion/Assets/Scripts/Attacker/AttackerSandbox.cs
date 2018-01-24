@@ -137,6 +137,9 @@ public class AttackerSandbox : MonoBehaviour {
 	}
 
 
+	#region movement
+
+
 	/// <summary>
 	/// Anything this attacker needs to do at the start of the movement phase happens here.
 	/// </summary>
@@ -342,6 +345,9 @@ public class AttackerSandbox : MonoBehaviour {
 	}
 
 
+	#endregion movement
+
+
 	/// <summary>
 	/// A publicly-accessible way to find out what column this attacker is in.
 	/// 
@@ -351,6 +357,9 @@ public class AttackerSandbox : MonoBehaviour {
 	public int GetColumn(){
 		return XPos;
 	}
+
+
+	#region combat
 
 
 	/// <summary>
@@ -393,9 +402,15 @@ public class AttackerSandbox : MonoBehaviour {
 	}
 
 
+	/// <summary>
+	/// Call this when the defender does no damage to the attacker, to provide appropriate feedback.
+	/// </summary>
 	public void FailToDamage(){
 		noDamageParticle.Play();
 	}
+
+
+	#endregion combat
 
 
 	/// <summary>

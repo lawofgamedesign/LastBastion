@@ -219,7 +219,7 @@ public class DefenderSandbox : MonoBehaviour {
 		remainingSpeed = Speed;
 		ClearLine();
 		DrawLine(0, GridLoc.x, GridLoc.z);
-		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+		moveCanvas.position = CenterPrivateUI();
 		Services.Tasks.AddTask(new SelectIconMoveTask(this));
 	}
 
@@ -391,7 +391,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		//reset the canvas' position. Otherwise, the last defender to move will put it where it's supposed to be before they move,
 		//and they'll push it to the wrong location.
-		moveCanvas.position = Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+		moveCanvas.position = CenterPrivateUI();
 		Services.Tasks.AddTask(new SelectIconMoveTask(this));
 	}
 
@@ -565,24 +565,6 @@ public class DefenderSandbox : MonoBehaviour {
 
 
 	/// <summary>
-	/// Show the math behind combats on the extra information UI.
-	/// </summary>
-	/// <returns>A string explaining the math behind each combat.</returns>
-	/// <param name="attacker">The attacker this defender is fighting.</param>
-	/// <param name="attackerValue">The value of the attacker's card.</param>
-	protected virtual string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
-		int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
-
-		damage = damage < 0 ? 0 : damage;
-
-		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
-			   ATTACKER_VALUE + attackerValue + PLUS + attacker.AttackMod + NEWLINE +
-			   HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod)).ToString() + NEWLINE + 
-			   DAMAGE + damage.ToString();
-	}
-
-
-	/// <summary>
 	/// Is an attacker directly north of this defender?
 	/// </summary>
 	/// <returns><c>true</c> if the attacker is one space north, <c>false</c> otherwise.</returns>
@@ -676,6 +658,9 @@ public class DefenderSandbox : MonoBehaviour {
 	#endregion combat
 
 
+	#region UI
+
+
 	/// <summary>
 	/// Each defender calls their own TakeOverCharSheet, which gives them the chance to substitute in their own text for the upgrade paths.
 	/// </summary>
@@ -698,6 +683,36 @@ public class DefenderSandbox : MonoBehaviour {
 
 		return values;
 	}
+
+
+	/// <summary>
+	/// Bring the UI for the defender's movement back to the defender.
+	/// </summary>
+	/// <returns>The private UI canvas' location at the defender's feet.</returns>
+	protected Vector3 CenterPrivateUI(){
+		return Services.Board.GetWorldLocation(GridLoc.x, GridLoc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+	}
+
+
+	/// <summary>
+	/// Show the math behind combats on the extra information UI.
+	/// </summary>
+	/// <returns>A string explaining the math behind each combat.</returns>
+	/// <param name="attacker">The attacker this defender is fighting.</param>
+	/// <param name="attackerValue">The value of the attacker's card.</param>
+	protected virtual string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
+		int damage = (ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor);
+
+		damage = damage < 0 ? 0 : damage;
+
+		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
+			ATTACKER_VALUE + attackerValue + PLUS + attacker.AttackMod + NEWLINE +
+			HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + attacker.AttackMod)).ToString() + NEWLINE + 
+			DAMAGE + damage.ToString();
+	}
+
+
+	#endregion UI
 
 
 	/// <summary>

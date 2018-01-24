@@ -5,7 +5,7 @@ public class InputManager {
 
 	//how close to the edge of the screen the input device needs to be to rotate the camera,
 	//as a percentage
-	private const float SCREEN_MARGIN = 10.0f;
+	private const float SCREEN_MARGIN = 5.0f;
 
 
 	public virtual void Tick(){

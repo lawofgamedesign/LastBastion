@@ -151,8 +151,6 @@ public class RangerBehavior : DefenderSandbox {
 														 AttackMod,
 														 damage));
 
-		Services.UI.ExplainCombat(ChosenCard.Value, this, attacker, attackerValue, damage);
-
 
 		//the Ranger can keep fighting until they run out of attacks
 		if (currentAttacks <= 0) DoneFighting();
@@ -200,26 +198,6 @@ public class RangerBehavior : DefenderSandbox {
 		} else {
 			return false;
 		}
-	}
-
-
-	/// <summary>
-	/// The Ranger's combat math changes when showboating.
-	/// </summary>
-	/// <returns>A string explaining the math behind each combat.</returns>
-	/// <param name="attacker">The attacker this defender is fighting.</param>
-	/// <param name="attackerValue">The value of the attacker's card.</param>
-	protected override string DisplayCombatMath(AttackerSandbox attacker, int attackerValue){
-		int damage = (ChosenCard.Value + AttackMod) -
-					 (attackerValue + DetermineAttackerModifier(attacker) +
-					  DetermineAttackerArmor(attacker));
-
-		damage = damage < 0 ? 0 : damage; //don't let damage be negative, "healing" the attacker
-
-		return DEFENDER_VALUE + ChosenCard.Value + PLUS + AttackMod + NEWLINE +
-			   ATTACKER_VALUE + attackerValue + PLUS + DetermineAttackerModifier(attacker) + NEWLINE +
-			   HITS + ((ChosenCard.Value + AttackMod) - (attackerValue + DetermineAttackerModifier(attacker))).ToString() + NEWLINE +
-			   DAMAGE + damage.ToString();;
 	}
 
 

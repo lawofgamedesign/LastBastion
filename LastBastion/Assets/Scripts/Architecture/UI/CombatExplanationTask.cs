@@ -159,7 +159,7 @@ public class CombatExplanationTask : Task {
 		totalText.text = BLANK;
 		winnerText.text = BLANK;
 
-		Services.UI.ExplainCombat(defenderValue, defenderScript, attackerScript, attackerValue, damage);
+		Services.UI.ExplainCombat(defenderValue, defenderScript, attackerScript, attackerValue, attackerMod, damage);
 
 		Services.Events.Unregister<InputEvent>(BeDone);
 

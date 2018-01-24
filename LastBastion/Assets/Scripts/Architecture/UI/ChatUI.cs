@@ -321,7 +321,7 @@ public class ChatUI {
 	/// <param name="attackerArmor">The attacker's armor.</param>
 	/// <param name="attackerValue">The value of the attacker's card.</param>
 	/// <param name="damage">The damage inflicted. If none, any value is fine; this will be discarded.</param>
-	public void ExplainCombat(int playerValue, DefenderSandbox defender, AttackerSandbox attacker, int attackerValue, int damage){
+	public void ExplainCombat(int playerValue, DefenderSandbox defender, AttackerSandbox attacker, int attackerValue, int attackerMod, int damage){
 		string YOU_MSG = "You played a ";
 		string BONUS_MSG = ", plus a bonus of ";
 		string ATK_MSG = "I played a ";
@@ -337,10 +337,10 @@ public class ChatUI {
 
 
 		int defenderTotal = playerValue + defender.AttackMod;
-		int attackerTotal = attackerValue + attacker.AttackMod;
+		int attackerTotal = attackerValue + attackerMod;
 
 		string explanation = YOU_MSG + playerValue.ToString() + BONUS_MSG + defender.AttackMod.ToString() + PERIOD + NEWLINE +
-			ATK_MSG + attackerValue.ToString() + BONUS_MSG + attacker.AttackMod.ToString() + PERIOD + NEWLINE;
+			ATK_MSG + attackerValue.ToString() + BONUS_MSG + attackerMod.ToString() + PERIOD + NEWLINE;
 
 		if (defenderTotal > attackerTotal){
 			explanation += YOU_WIN_MSG + (defenderTotal - attackerTotal).ToString() + PERIOD + NEWLINE;
@@ -349,7 +349,7 @@ public class ChatUI {
 
 			//calculate what the attacker's health is now; don't rely on the attacker having updated information, since
 			//all of this is happening in the same frame
-			int newHealth = attacker.Health - ((playerValue + defender.AttackMod) - (attackerValue + attacker.AttackMod + attacker.Armor));
+			int newHealth = attacker.Health - ((playerValue + defender.AttackMod) - (attackerValue + attackerMod + attacker.Armor));
 
 			newHealth = newHealth < 0 ? 0 : newHealth; //don't let newHealth be less than zero
 
