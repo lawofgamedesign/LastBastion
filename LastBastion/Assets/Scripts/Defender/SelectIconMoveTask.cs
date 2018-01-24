@@ -40,6 +40,7 @@ public class SelectIconMoveTask : Task {
 		selectableIcon = this.defender.transform.Find(PRIVATE_UI_CANVAS).Find(SELECTABLE_ICON_OBJ);
 
 		Services.Events.Register<NotSelectableEvent>(ListenForDefenderDone);
+		Services.Events.Register<PhaseStartEvent>(ListenForCombatEnd);
 	}
 
 
@@ -69,6 +70,7 @@ public class SelectIconMoveTask : Task {
 	/// </summary>
 	protected override void Cleanup (){
 		Services.Events.Unregister<NotSelectableEvent>(ListenForDefenderDone);
+		Services.Events.Unregister<PhaseStartEvent>(ListenForCombatEnd);
 		selectableIcon.gameObject.SetActive(false);
 	}
 
@@ -85,5 +87,20 @@ public class SelectIconMoveTask : Task {
 		NotSelectableEvent notEvent = e as NotSelectableEvent;
 
 		if (notEvent.defender == defender) SetStatus(TaskStatus.Success);
+	}
+
+
+	/// <summary>
+	/// Stop the icon's movement when the fight phase ends (implicitly occurs if the Besiege Walls phase has begun).
+	/// </summary>
+	/// <param name="e">A PhaseStartEvent.</param>
+	private void ListenForCombatEnd(global::Event e){
+		Debug.Assert(e.GetType() == typeof(PhaseStartEvent), "Non-PhaseStartEvent in ListenForCombatEnd");
+
+		PhaseStartEvent phaseEvent = e as PhaseStartEvent;
+
+		if (phaseEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
+			SetStatus(TaskStatus.Success);
+		}
 	}
 }
