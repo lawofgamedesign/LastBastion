@@ -100,4 +100,35 @@ public class TaskManager {
 
 		return null;
 	}
+
+
+	/// <summary>
+	/// Get the currently-running task of a given type.
+	/// 
+	/// IMPORTANT: this only works reliably with tasks where there's only going to be one of them running at a given time.
+	/// If there's more than one, it will return one of them unpredictably.
+	/// </summary>
+	/// <returns>The current task of the given type.</returns>
+	/// <typeparam name="T">The type of task to find.</typeparam>
+	public Task GetCurrentTaskOfType<T>(){
+		foreach (Task task in tasks){
+			if (task.GetType() == typeof(T)){
+				if (task.IsWorking) return task;
+			}
+		}
+
+		return null;
+	}
+
+
+	/// <summary>
+	/// Insert a task between two other tasks.
+	/// </summary>
+	/// <param name="insertPoint">The task that comes before the new task.</param>
+	/// <param name="newTask">The inserted task.</param>
+	public void InsertTask(Task insertPoint, Task newTask){
+		if (insertPoint.NextTask != null) newTask.Then(insertPoint.NextTask);
+
+		insertPoint.Then(newTask);
+	}
 }
