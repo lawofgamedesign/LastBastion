@@ -48,7 +48,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	//drink track
-	private enum DrinkTrack { None, Party_Foul, Liquid_Courage, Open_The_Tap, Buy_A_Round };
+	public enum DrinkTrack { None, Party_Foul, Liquid_Courage, Open_The_Tap, Buy_A_Round };
 	private List<string> drinkDescriptions = new List<string>() {
 		"<b>Start drinking</b>",
 		"<b>Party Foul</b>\n\nPut a tankard on the field. When you stop on it, take a drink and then kick it.\n\nAny Horde member it hits takes 1 damage.",
@@ -59,12 +59,6 @@ public class BrawlerBehavior : DefenderSandbox {
 	};
 	private DrinkTrack currentDrink;
 	private const string BOARD_TAG = "Board";
-	private const string TANKARD_1_OBJ = "Tankard 1";
-	private const string TANKARD_2_OBJ = "Tankard 2";
-	private const string TANKARD_3_OBJ = "Tankard 3";
-	private const string TANKARD_TAG = "Tankard";
-	private const string DROP_DIRECTIONS = "Choose an empty space for your tankard.";
-	private const string DRINK_MSG = "The party's starting!";
 	private const string KICK_DIRECTIONS = "Pick an adjacent space to kick the tankard to.";
 	private const string KICK_MSG = "Gave it the boot!";
 	private int drinkDamage = 0;
@@ -532,11 +526,9 @@ public class BrawlerBehavior : DefenderSandbox {
 							foreach (TankardBehavior tankard in Services.Board.GetAllTankards()){
 								tankard.GridLoc = new TwoDLoc(-999, -999); //nonsense value to indicate off the board
 							}
-							Services.Events.Register<InputEvent>(DropTankard);
 							tankardsToDrop = 1;
-							Services.UI.OpponentStatement(DROP_DIRECTIONS);
 							drinkDamage = START_DRINK_DAMAGE;
-							Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.On);
+							Services.Tasks.InsertTask(Services.Tasks.GetCurrentTaskOfType<UpgradeTask>(), new TankardDropTask(this, tankardsToDrop));
 							break;
 						case DrinkTrack.Liquid_Courage:
 							drinkInspiration = START_DRINK_INSP;
@@ -546,10 +538,9 @@ public class BrawlerBehavior : DefenderSandbox {
 							drinkInspiration = BETTER_DRINK_INSP;
 							break;
 						case DrinkTrack.Buy_A_Round:
-							Services.Events.Register<InputEvent>(DropTankard);
 							Services.Events.Register<EndPhaseEvent>(GiveInspiration);
 							tankardsToDrop = 2;
-							Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.On);
+							Services.Tasks.InsertTask(Services.Tasks.GetCurrentTaskOfType<UpgradeTask>(), new TankardDropTask(this, tankardsToDrop));
 							break;
 					}
 				}
@@ -566,48 +557,12 @@ public class BrawlerBehavior : DefenderSandbox {
 	}
 
 
+	public DrinkTrack ReportCurrentDrink(){
+		return currentDrink;
+	}
+
+
 	#region tankard
-
-
-	/// <summary>
-	/// Drop a tankard in a chosen empty space. Also set the space's state accordingly, and provide feedback.
-	/// </summary>
-	/// <param name="e">An InputEvent with the relevant space.</param>
-	private void DropTankard(Event e){
-		Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in DropTankard.");
-
-		InputEvent inputEvent = e as InputEvent;
-
-		if (inputEvent.selected.tag == BOARD_TAG &&
-			Services.UI.GetCharSheetStatus() == CharacterSheetBehavior.SheetStatus.Hidden){
-			SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
-
-			if (Services.Board.GeneralSpaceQuery(space.GridLocation.x, space.GridLocation.z) != SpaceBehavior.ContentType.None) return;
-
-			Services.Tasks.AddTask(new BlockSpaceFeedbackTask(space.GridLocation.x, space.GridLocation.z, GetTankard()));
-			space.Tankard = true;
-			GameObject.Find(GetTankard()).GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(space.GridLocation.x, space.GridLocation.z);
-				
-			tankardsToDrop--;
-		}
-
-		if (tankardsToDrop <= 0){
-			Services.Events.Unregister<InputEvent>(DropTankard);
-			Services.UI.OpponentStatement(DRINK_MSG);
-			Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.Off);
-		}
-	}
-
-
-	/// <summary>
-	/// Provide the appropriate tankard for DropTankard to drop.
-	/// </summary>
-	/// <returns>The tankard's name, as a string.</returns>
-	private string GetTankard(){
-		if (currentDrink == DrinkTrack.Party_Foul) return TANKARD_1_OBJ;
-		else if (tankardsToDrop == 2) return TANKARD_2_OBJ;
-		else return TANKARD_3_OBJ;
-	}
 
 
 	/// <summary>

@@ -196,8 +196,6 @@ public class TurnManager {
 				//unregister here rather than in OnExit because there may not have been a registration if no defender needed to upgrade
 				Services.Events.Unregister<PowerChoiceEvent>(HandlePowerChoice);
 				Services.Defenders.NoSelectedDefender();
-
-				TransitionTo<AttackersAdvance>();
 			}
 		}
 
@@ -253,8 +251,14 @@ public class TurnManager {
 			}
 		}
 
+
+		public override void OnExit (){
+			base.OnExit ();
+		}
+
 		public override void Tick(){
-			if (upgraders.Count == 0) TransitionTo<AttackersAdvance>();
+			//only go on if no one needs to upgrade and there are no tasks running (i.e., wait for tankards to be dropped, etc.)
+			if (upgraders.Count == 0 && !Services.Tasks.CheckForAnyTasks()) TransitionTo<AttackersAdvance>();
 		}
 	}
 

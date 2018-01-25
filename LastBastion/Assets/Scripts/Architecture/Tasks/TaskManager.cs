@@ -131,4 +131,14 @@ public class TaskManager {
 
 		insertPoint.Then(newTask);
 	}
+
+
+	/// <summary>
+	/// Are any tasks running at all?
+	/// </summary>
+	/// <returns><c>true</c> if any tasks are running, <c>false</c> otherwise.</returns>
+	public bool CheckForAnyTasks(){
+		if (tasks.Count > 0 ) return true;
+		else return false;
+	}
 }
