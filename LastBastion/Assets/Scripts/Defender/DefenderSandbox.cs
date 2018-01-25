@@ -101,7 +101,7 @@ public class DefenderSandbox : MonoBehaviour {
 	protected GameObject powerupReadyParticle;
 	protected const string XP_PARTICLE_OBJ = "XP gained particle";
 	protected const string POWER_UP_PARTICLE_OBJ = "Powerup ready particle";
-	protected const string POWER_UP_MSG = " is ready to power up. Click the character sheet in the lower-right to choose a new ability.";
+	protected const string POWER_UP_MSG = " is ready to power up. You'll be able to choose a new ability at the start of the next turn.";
 
 
 	/////////////////////////////////////////////
