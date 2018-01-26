@@ -223,6 +223,7 @@ public class AttackerSandbox : MonoBehaviour {
 			//if nothing's in the way, move
 			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - 1) == SpaceBehavior.ContentType.None){
 				GoToSouth(1);
+				MoveTankard();
 				attemptedMove--;
 			}
 			//if an attacker is in the way, stop
@@ -248,6 +249,7 @@ public class AttackerSandbox : MonoBehaviour {
 				else {
 					PushDefender(Services.Board.GetThingInSpace(XPos, ZPos - 1));
 					GoToSouth(1);
+					MoveTankard();
 					attemptedMove--;
 				}
 			}
@@ -435,6 +437,26 @@ public class AttackerSandbox : MonoBehaviour {
 		Services.Board.PutThingInSpace(gameObject, XPos, ZPos - speed, SpaceBehavior.ContentType.Attacker);
 		moveTasks.Add(new MoveTask(transform, XPos, ZPos - speed, Services.Attackers.MoveSpeed));
 		NewLoc(XPos, ZPos - speed);
+	}
+
+
+	private void MoveTankard(){
+		if (ZPos == 0) return; //don't try to push tankards off the screen
+
+		if (Services.Board.CheckIfTankard(XPos, ZPos)){
+			if (!Services.Board.CheckIfTankard(XPos, ZPos - 1)){
+				Services.Board.GetSpace(XPos, ZPos).Tankard = false;
+				Services.Board.GetSpace(XPos, ZPos - 1).Tankard = true;
+
+				Transform localTankard = Services.Board.GetTankardInSpace(new TwoDLoc(XPos, ZPos));
+				Debug.Assert(localTankard != null, "Didn't find local tankard.");
+		
+				Services.Tasks.AddTask(new MoveObjectTask(localTankard,
+														  new TwoDLoc(XPos, ZPos),
+														  new TwoDLoc(XPos, ZPos - 1)));
+				localTankard.GetComponent<TankardBehavior>().GridLoc = new TwoDLoc(XPos, ZPos - 1);
+			}
+		}
 	}
 
 

@@ -362,7 +362,7 @@ public class ChatUI {
 		string NEWLINE = "\n";
 
 
-		int defenderTotal = playerValue + defender.AttackMod;
+		int defenderTotal = playerValue + defenderMod;
 		int attackerTotal = attackerValue + attackerMod;
 
 		string explanation = YOU_MSG + playerValue.ToString() + BONUS_MSG + defenderMod.ToString() + PERIOD + NEWLINE +
