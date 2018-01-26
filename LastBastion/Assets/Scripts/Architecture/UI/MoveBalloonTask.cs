@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MoveBalloonTask : Task {
 
@@ -27,6 +28,13 @@ public class MoveBalloonTask : Task {
 	private const string BALLOON_TARGET = "Speech balloon target";
 
 
+	//the image for the balloon
+	private const string IMAGE_OBJ = "Balloon image";
+	private const string PLAYER_BALLOON_IMG = "Sprites/Player Speech Balloon";
+	private const string OPPONENT_BALLOON_IMG = "Sprites/Opponent Speech Balloon";
+	private const string OBJECT_BALLOON_IMG = "Sprites/Object Speech Balloon";
+
+
 	//speed
 	private float speed = 500.0f;
 
@@ -46,15 +54,25 @@ public class MoveBalloonTask : Task {
 	private const float CHAT_WINDOW_WIDTH = 150.0f;
 
 
+	//who or what is speaking
+	private readonly ChatUI.BalloonTypes balloonType;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
 
 
 	//constructor
-	public MoveBalloonTask(Vector3 position, float xSize, float ySize, string message, GrowOrShrink change){
+	public MoveBalloonTask(Vector3 position, float xSize, float ySize, string message, GrowOrShrink change, ChatUI.BalloonTypes balloonType){
 		RectTransform balloon = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(BALLOON_OBJ),
 																	  GameObject.Find(CHAT_UI_ORGANIZER).transform).GetComponent<RectTransform>();
+
+
+		this.balloonType = balloonType;
+	
+		balloon.Find(IMAGE_OBJ).GetComponent<Image>().sprite = AssignBalloonImage(this.balloonType);
+
 		balloon.transform.position = position;
 
 		this.balloon = balloon;
@@ -77,6 +95,30 @@ public class MoveBalloonTask : Task {
 
 		foreach (Transform child in balloon.transform){
 			child.GetComponent<RectTransform>().sizeDelta = new Vector2(xSize, ySize);
+		}
+	}
+
+
+	/// <summary>
+	/// Choose the appropriate speech balloon, based on who (or what) is speaking.
+	/// </summary>
+	/// <returns>The balloon image.</returns>
+	/// <param name="type">The type of speech balloon.</param>
+	private Sprite AssignBalloonImage(ChatUI.BalloonTypes type){
+		switch (type){
+			case ChatUI.BalloonTypes.Player:
+				return Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
+				break;
+			case ChatUI.BalloonTypes.Opponent:
+				return Resources.Load<Sprite>(OPPONENT_BALLOON_IMG);
+				break;
+			case ChatUI.BalloonTypes.Object:
+				return Resources.Load<Sprite>(OBJECT_BALLOON_IMG);
+				break;
+			default:
+				Debug.Log("Invalid balloon type: " + type.ToString());
+				return Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
+				break;
 		}
 	}
 
@@ -148,7 +190,7 @@ public class MoveBalloonTask : Task {
 	/// Get rid of the speech balloon when it reaches the chat window
 	/// </summary>
 	protected override void OnSuccess (){
-		Services.UI.MakeStatement(message);
+		Services.UI.MakeStatement(message, balloonType);
 		MonoBehaviour.Destroy(balloon.gameObject);
 	}
 }

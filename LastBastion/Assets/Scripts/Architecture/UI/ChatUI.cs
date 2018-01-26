@@ -84,8 +84,12 @@ public class ChatUI {
 
 	//balloon sizing
 	protected const int SIZE_PER_ROW = 15; //used to determine how many rows a message needs to be divided into
-	protected const int TEXT_ROW_SIZE = 17; //the amount of space each line should have, measured--roughly--in font size.
+	protected const int TEXT_ROW_SIZE = 20; //the amount of space each line should have, measured--roughly--in font size.
 	protected const int BALLOON_PADDING = 5;
+
+
+	//balloon types
+	public enum BalloonTypes { Player, Opponent, Object };
 
 
 	//the source of the attacker's speech balloons
@@ -96,6 +100,13 @@ public class ChatUI {
 	//generic balloon size, for the opponent's statements
 	protected const float CHAT_WINDOW_WIDTH = 150.0f;
 	protected const float TUTORIAL_WINDOW_HEIGHT = 41.0f;
+
+
+	//chat balloon sprites
+	private const string IMAGE_OBJ = "Balloon image";
+	private const string PLAYER_BALLOON_IMG = "Sprites/Player Speech Balloon";
+	private const string OPPONENT_BALLOON_IMG = "Sprites/Opponent Speech Balloon";
+	private const string OBJECT_BALLOON_IMG = "Sprites/Object Speech Balloon";
 
 
 	//tutorial text
@@ -163,8 +174,8 @@ public class ChatUI {
 	/// <summary>
 	/// For generic statements of unpredictable formatting--how many attacks the Ranger has left, etc.
 	/// </summary>
-	public void MakeStatement(string statement){
-		TextMeshProUGUI balloon = AddBalloon(statement);
+	public void MakeStatement(string statement, BalloonTypes type){
+		TextMeshProUGUI balloon = AddBalloon(statement, type);
 		balloon.text = statement;
 
 		WaitTask waitTask = new WaitTask();
@@ -202,7 +213,8 @@ public class ChatUI {
 												   CHAT_WINDOW_WIDTH,
 												   TUTORIAL_WINDOW_HEIGHT,
 												   statement,
-												   MoveBalloonTask.GrowOrShrink.Grow));
+												   MoveBalloonTask.GrowOrShrink.Grow,
+												   BalloonTypes.Opponent));
 	}
 
 
@@ -217,7 +229,8 @@ public class ChatUI {
 												   buttonSize.x,
 												   buttonSize.y,
 												   statement,
-												   MoveBalloonTask.GrowOrShrink.Shrink));
+												   MoveBalloonTask.GrowOrShrink.Shrink,
+												   BalloonTypes.Player));
 	}
 
 
@@ -232,7 +245,8 @@ public class ChatUI {
 												   buttonSize.x,
 												   buttonSize.y,
 												   statement,
-												   MoveBalloonTask.GrowOrShrink.Shrink));
+												   MoveBalloonTask.GrowOrShrink.Shrink,
+												   BalloonTypes.Player));
 	}
 
 
@@ -248,7 +262,8 @@ public class ChatUI {
 												   CHAT_WINDOW_WIDTH,
 												   TUTORIAL_WINDOW_HEIGHT,
 												   statement,
-												   MoveBalloonTask.GrowOrShrink.Grow));
+												   MoveBalloonTask.GrowOrShrink.Grow,
+												   BalloonTypes.Object));
 	}
 
 
@@ -332,7 +347,7 @@ public class ChatUI {
 	/// <param name="attackerArmor">The attacker's armor.</param>
 	/// <param name="attackerValue">The value of the attacker's card.</param>
 	/// <param name="damage">The damage inflicted. If none, any value is fine; this will be discarded.</param>
-	public void ExplainCombat(int playerValue, DefenderSandbox defender, AttackerSandbox attacker, int attackerValue, int attackerMod, int damage){
+	public void ExplainCombat(int playerValue, DefenderSandbox defender, int defenderMod, AttackerSandbox attacker, int attackerValue, int attackerMod, int damage){
 		string YOU_MSG = "You played a ";
 		string BONUS_MSG = ", plus a bonus of ";
 		string ATK_MSG = "I played a ";
@@ -350,7 +365,7 @@ public class ChatUI {
 		int defenderTotal = playerValue + defender.AttackMod;
 		int attackerTotal = attackerValue + attackerMod;
 
-		string explanation = YOU_MSG + playerValue.ToString() + BONUS_MSG + defender.AttackMod.ToString() + PERIOD + NEWLINE +
+		string explanation = YOU_MSG + playerValue.ToString() + BONUS_MSG + defenderMod.ToString() + PERIOD + NEWLINE +
 			ATK_MSG + attackerValue.ToString() + BONUS_MSG + attackerMod.ToString() + PERIOD + NEWLINE;
 
 		if (defenderTotal > attackerTotal){
@@ -360,7 +375,7 @@ public class ChatUI {
 
 			//calculate what the attacker's health is now; don't rely on the attacker having updated information, since
 			//all of this is happening in the same frame
-			int newHealth = attacker.Health - ((playerValue + defender.AttackMod) - (attackerValue + attackerMod + attacker.Armor));
+			int newHealth = attacker.Health - ((playerValue + defenderMod) - (attackerValue + attackerMod + attacker.Armor));
 
 			newHealth = newHealth < 0 ? 0 : newHealth; //don't let newHealth be less than zero
 
@@ -423,8 +438,10 @@ public class ChatUI {
 	/// Create a speech balloon, sized appropriately for its text.
 	/// </summary>
 	/// <returns>The balloon's TextMeshPro component, so that its text can be set.</returns>
-	protected TextMeshProUGUI AddBalloon(string message){
+	protected TextMeshProUGUI AddBalloon(string message, BalloonTypes type){
 		TextMeshProUGUI balloon = MonoBehaviour.Instantiate<GameObject>(speechBalloon, chatContent).transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+
+		balloon.transform.parent.Find(IMAGE_OBJ).GetComponent<Image>().sprite = AssignBalloonImage(type);
 
 		int rows = message.Length/SIZE_PER_ROW;
 
@@ -440,6 +457,30 @@ public class ChatUI {
 
 
 		return balloon;
+	}
+
+
+	/// <summary>
+	/// Choose the appropriate speech balloon, based on who (or what) is speaking.
+	/// </summary>
+	/// <returns>The balloon image.</returns>
+	/// <param name="type">The type of speech balloon.</param>
+	private Sprite AssignBalloonImage(ChatUI.BalloonTypes type){
+		switch (type){
+			case ChatUI.BalloonTypes.Player:
+				return Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
+				break;
+			case ChatUI.BalloonTypes.Opponent:
+				return Resources.Load<Sprite>(OPPONENT_BALLOON_IMG);
+				break;
+			case ChatUI.BalloonTypes.Object:
+				return Resources.Load<Sprite>(OBJECT_BALLOON_IMG);
+				break;
+			default:
+				Debug.Log("Invalid balloon type: " + type.ToString());
+				return Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
+				break;
+		}
 	}
 
 

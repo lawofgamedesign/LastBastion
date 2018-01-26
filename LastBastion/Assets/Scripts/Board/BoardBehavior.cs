@@ -326,6 +326,28 @@ public class BoardBehavior {
 	}
 
 
+	/// <summary>
+	/// Get everything to the south of a given space.
+	/// </summary>
+	/// <returns>A dictionary of gameobjects to the south.</returns>
+	/// <param name="x">The x grid coordinate of the starting space.</param>
+	/// <param name="z">The z grid coordinate of the starting space.</param>
+	/// <param name="dist">How far south to look.</param>
+	public Dictionary<int, GameObject> GetThingsToSouth(int x, int z, int dist){
+		Debug.Assert(CheckValidSpace(x, z), "Getting things to the south from an invalid space.");
+
+		Dictionary<int, GameObject> temp = new Dictionary<int, GameObject>();
+
+		for (int i = z - 1; i >= z - dist; i--){
+			if (GeneralSpaceQuery(x, i) != SpaceBehavior.ContentType.None){
+				temp.Add(i, GetThingInSpace(x, i));
+			}
+		}
+
+		return temp;
+	}
+
+
 	#endregion space contents
 
 
