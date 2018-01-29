@@ -372,6 +372,9 @@ public class TurnManager {
 
 
 		private void HandleFightInputs(Event e){
+			//don't allow the player to interact with the board if the combat explanation screen is displayed
+			if (Services.Tasks.CheckForTaskOfType<CombatExplanationTask>()) return;
+
 			InputEvent inputEvent = e as InputEvent;
 
 			if (inputEvent.selected.tag == DEFENDER_TAG){
