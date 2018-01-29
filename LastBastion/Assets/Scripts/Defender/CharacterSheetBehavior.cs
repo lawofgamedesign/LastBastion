@@ -21,7 +21,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private const string STAT_OBJ = "Stat block";
 	private const string SPEED_LABEL = "Speed: ";
 	private const string ATTACK_MOD_LABEL = "Attack: +";
-	private const string ARMOR_LABEL = "Armor: -";
+	private const string ARMOR_LABEL = "Armor: ";
 	private const string NEW_LINE = "\n";
 
 

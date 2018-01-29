@@ -20,13 +20,13 @@ public class GuardianBehavior : DefenderSandbox {
 
 
 	//Single Combat track
-	private enum SingleCombatTrack { None, Single_Combat, Youre_Mine, Challenger, Champion };
+	private enum SingleCombatTrack { None, Single_Combat, Youre_Mine, Run_Fools, Champion };
 	private List<string> singleCombatDescriptions = new List<string>() {
 		"<b>Prepare for single combat</b>",
 		"<b>Single Combat</b>\n\nWhen you defeat a Warlord, upgrade immediately.",
 		"<b>You're Mine!</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack.",
-		"<b>Challenger</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack and +5 armor.",
-		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +5 attack and +5 armor.\n\nWhen you defeat a Leader, also defeat their retinue.",
+		"<b>Run, Fools!</b>\n\nWhen you defeat a Warlord, upgrade immediately and reduce Momentum by 1.\n\nWhen attacking a Warlord, gain +5 attack.",
+		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +5 attack.\n\nWhen you defeat a Leader, also defeat their retinue and reduce Momentum by 1.",
 		"<b>Master of single combat!</b>"
 	};
 	private SingleCombatTrack currentSingleCombat;
@@ -126,6 +126,8 @@ public class GuardianBehavior : DefenderSandbox {
 		Debug.Assert(e.GetType() == typeof(NewTurnEvent), "Non-NewTurnEvent in AlternateBlockingColumns");
 
 		alternateTurn++;
+
+		Debug.Log("AlternateBlockingColumns called; alternateTurn == " + alternateTurn);
 		if (alternateTurn%2 == 0){
 			BlockAllColumns();
 			Services.UI.OpponentStatement(ALL_BLOCKED);
@@ -239,6 +241,7 @@ public class GuardianBehavior : DefenderSandbox {
 	public override void WinFight(AttackerSandbox attacker){
 		DefeatedSoFar = DetermineDefeatedSoFar(attacker);
 		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
+		if (currentSingleCombat >= SingleCombatTrack.Run_Fools) Services.Events.Fire(new ReduceMomentumEvent());
 		if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
 		powerupReadyParticle.SetActive(CheckUpgradeStatus());
 
@@ -317,7 +320,7 @@ public class GuardianBehavior : DefenderSandbox {
 
 		if ((currentSingleCombat == SingleCombatTrack.Single_Combat ||
 			 currentSingleCombat == SingleCombatTrack.Youre_Mine ||
-			 currentSingleCombat == SingleCombatTrack.Challenger) && attacker.tag == LEADER_TAG){
+			 currentSingleCombat == SingleCombatTrack.Run_Fools) && attacker.tag == LEADER_TAG){
 			temp = defeatsToNextUpgrade;
 		} else temp++;
 
@@ -402,13 +405,13 @@ public class GuardianBehavior : DefenderSandbox {
 				//if not, unregister for input events--the player isn't going to need to make that choice
 				//either way, start listening for the event that the Guardian uses to decide whether to block columns
 				} else if (currentHold == HoldTrack.The_Last_Bastion) {
-					Services.Events.Register<NewTurnEvent>(AlternateBlockingColumns);
 					if (blockedColumn != BLANK_COLUMN) {
 						MakeColumnLure(blockedColumn, false);
 						UnholdLine();
 						CreateLastBastionMarkers(); //create markers for The Last Bastion
 						Services.Tasks.AddTask(new RemoveBlockFeedbackTask(LINE_MARKER_OBJ));
 					} else Services.Events.Unregister<InputEvent>(ChooseColumn);
+					Services.Events.Register<NewTurnEvent>(AlternateBlockingColumns);
 				}
 				break;
 			case (int)UpgradeTracks.Single_Combat:

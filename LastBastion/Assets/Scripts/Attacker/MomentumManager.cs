@@ -27,6 +27,10 @@ public class MomentumManager {
 	private const float MAX_ROTATION = 359.9f;
 
 
+	//an alternative tag for removed markers, so that they aren't removed more than once
+	private const string REMOVED_TAG = "Removed";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -36,6 +40,7 @@ public class MomentumManager {
 	public void Setup(){
 		Momentum = START_MOMENTUM;
 		Services.Events.Register<MissedFightEvent>(IncreaseMomentum);
+		Services.Events.Register<ReduceMomentumEvent>(DecreaseMomentum);
 		Services.Events.Register<EndPhaseEvent>(ResetMomentum);
 		marker = Resources.Load<GameObject>(MARKER_OBJ);
 		markerCenter = GameObject.Find(MARKER_CANVAS_OBJ).transform.position;
@@ -52,6 +57,14 @@ public class MomentumManager {
 	}
 
 
+	public void DecreaseMomentum(Event e){
+		if (Momentum > 0){
+			Momentum--;
+			RemoveMarker(GameObject.FindGameObjectWithTag(MARKER_OBJ));
+		}
+	}
+
+
 	public virtual void ResetMomentum(Event e){
 		Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in ResetMomentum");
 
@@ -63,11 +76,7 @@ public class MomentumManager {
 			GameObject[] momentumMarkers = GameObject.FindGameObjectsWithTag(MARKER_OBJ);
 
 			foreach (GameObject marker in momentumMarkers){
-
-				//use tasks written for attackers; they work fine for this purpose
-				EjectAttackerTask ejectTask = new EjectAttackerTask(marker.GetComponent<Rigidbody>());
-				ejectTask.Then(new DestroyAttackerTask(marker));
-				Services.Tasks.AddTask(ejectTask);
+				RemoveMarker(marker);
 			}
 		}
 	}
@@ -84,5 +93,17 @@ public class MomentumManager {
 		Vector3 rot = new Vector3(0.0f, Random.Range(0.0f, MAX_ROTATION), 0.0f);
 
 		MonoBehaviour.Instantiate(marker, pos, Quaternion.Euler(rot), markerOrganizer);
+	}
+
+
+	/// <summary>
+	/// Take a marker off the board. This uses tasks written for attackers; they work fine for this purpose.
+	/// </summary>
+	/// <param name="marker">Marker.</param>
+	private void RemoveMarker(GameObject marker){
+		marker.tag = REMOVED_TAG;
+		EjectAttackerTask ejectTask = new EjectAttackerTask(marker.GetComponent<Rigidbody>());
+		ejectTask.Then(new DestroyAttackerTask(marker));
+		Services.Tasks.AddTask(ejectTask);
 	}
 }
