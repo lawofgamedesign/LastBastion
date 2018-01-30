@@ -13,7 +13,6 @@ public class AttackerSandbox : MonoBehaviour {
 	/// Fields
 	/////////////////////////////////////////////
 
-
 	//position in the grid and speed
 	public int XPos { get; set; }
 	public int ZPos { get; set; }
@@ -260,8 +259,7 @@ public class AttackerSandbox : MonoBehaviour {
 			for (int i = 0; i < moveTasks.Count - 1; i++){
 				moveTasks[i].Then(moveTasks[i + 1]);
 			}
-
-			Services.Tasks.AddTask(moveTasks[0]);
+			Services.Tasks.AddOrderedTask(moveTasks[0]);
 		}
 
 
@@ -270,7 +268,7 @@ public class AttackerSandbox : MonoBehaviour {
 				pushTasks[i].Then(pushTasks[i + 1]);
 			}
 
-			Services.Tasks.AddTask(pushTasks[0]);
+			Services.Tasks.AddOrderedTask(pushTasks[0]);
 		}
 	}
 
@@ -328,8 +326,9 @@ public class AttackerSandbox : MonoBehaviour {
 		if (Services.Board.GeneralSpaceQuery(XPos + dir, ZPos) == SpaceBehavior.ContentType.None){
 			Services.Board.TakeThingFromSpace(XPos, ZPos);
 			Services.Board.PutThingInSpace(gameObject, XPos + dir, ZPos, SpaceBehavior.ContentType.Attacker);
-			Services.Tasks.AddTask(new MoveTask(transform, XPos + dir, ZPos, Services.Attackers.MoveSpeed));
+			Services.Tasks.AddOrderedTask(new MoveTask(transform, XPos + dir, ZPos, Services.Attackers.MoveSpeed));
 			NewLoc(XPos + dir, ZPos);
+			Services.Rulebook.IncreaseAdvanceDuration();
 			return true;
 		} else return false;
 	}
@@ -340,6 +339,7 @@ public class AttackerSandbox : MonoBehaviour {
 		Services.Board.PutThingInSpace(gameObject, XPos, ZPos - speed, SpaceBehavior.ContentType.Attacker);
 		moveTasks.Add(new MoveTask(transform, XPos, ZPos - speed, Services.Attackers.MoveSpeed));
 		NewLoc(XPos, ZPos - speed);
+		Services.Rulebook.IncreaseAdvanceDuration();
 	}
 
 
@@ -373,7 +373,7 @@ public class AttackerSandbox : MonoBehaviour {
 		defender.GetComponent<DefenderSandbox>().NewLoc(XPos, ZPos - 2);
 
 		pushTasks.Add(new MoveDefenderTask(defender.GetComponent<Rigidbody>(),
-										   defender.GetComponent<DefenderSandbox>().Speed,
+										   Services.Attackers.MoveSpeed,
 										   new System.Collections.Generic.List<TwoDLoc>() { new TwoDLoc(XPos, ZPos - 1),
 										   new TwoDLoc(XPos, ZPos - 2)}));
 	}

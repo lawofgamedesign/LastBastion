@@ -59,7 +59,7 @@ public class AttackerManager {
 	public virtual void Setup(){
 		spawnPoints = CreateSpawnPoints();
 		attackerOrganizer = GameObject.Find(ATTACKER_ORGANIZER).transform;
-		MoveSpeed = 5.0f;
+		MoveSpeed = 30.0f;
 		waves = new List<Wave>() {
 			new Wave(new List<string>() { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ }, 3),
 			new Wave(new List<string>() { ARMORED_WARLORD_OBJ, SKILLED_WARLORD_OBJ, ENRAGED_WARLORD_OBJ }, 6),

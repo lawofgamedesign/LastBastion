@@ -10,12 +10,29 @@ public class TaskManager {
 	private readonly List<Task> tasks = new List<Task>();
 
 
+	//sequenced tasks
+	//private Dictionary<string, Queue<Task>> queuedTasks = new Dictionary<string, Queue<Task>>();
+	private Dictionary<string, LinkedList<Task>> orderedTasks = new Dictionary<string, LinkedList<Task>>();
+	private List<string> finishedKeys = new List<string>();
+
+
 	/// <summary>
 	/// Add a task to the list of tasks to address.
 	/// </summary>
 	/// <param name="task">Task.</param>
 	public void AddTask(Task task){
 		tasks.Add(task);
+		task.SetStatus(Task.TaskStatus.Pending);
+	}
+
+
+	public void AddOrderedTask(Task task){
+		if (orderedTasks.ContainsKey(task.GetType().ToString())) orderedTasks[task.GetType().ToString()].AddLast(task);
+		else {
+			LinkedList<Task> temp = new LinkedList<Task>();
+			temp.AddFirst(task);
+			orderedTasks.Add(task.GetType().ToString(), temp);
+		}
 		task.SetStatus(Task.TaskStatus.Pending);
 	}
 
@@ -39,6 +56,26 @@ public class TaskManager {
 				}
 			}
 		}
+			
+		foreach (string key in orderedTasks.Keys){
+			if (orderedTasks[key].Count > 0){
+				Task task = orderedTasks[key].First.Value;
+
+					if (task.IsPending) { task.SetStatus(Task.TaskStatus.Working); }
+
+				if (task.IsFinished) { 
+					HandleOrderedCompletion(task);
+				} else {
+					task.Tick();
+
+					if (task.IsFinished){
+						HandleOrderedCompletion(task);
+					}
+				}
+			}
+		}
+
+		CleanUpQueues();
 	}
 
 
@@ -52,6 +89,26 @@ public class TaskManager {
 
 		tasks.RemoveAt(taskIndex);
 		task.SetStatus(Task.TaskStatus.Detached);
+	}
+
+
+	private void HandleOrderedCompletion(Task task){
+		orderedTasks[task.GetType().ToString()].RemoveFirst();
+		if (task.NextTask != null && task.IsSuccessful) { orderedTasks[task.GetType().ToString()].AddFirst(task.NextTask); }
+		if (orderedTasks[task.GetType().ToString()].Count <= 0) finishedKeys.Add(task.GetType().ToString());
+		task.SetStatus(Task.TaskStatus.Detached);
+	}
+
+
+	private void CleanUpQueues(){
+		if (finishedKeys.Count > 0){
+			foreach (string key in finishedKeys){
+				Debug.Assert(orderedTasks[key].Count == 0);
+				orderedTasks.Remove(key);
+			}
+
+			finishedKeys.Clear();
+		}
 	}
 
 

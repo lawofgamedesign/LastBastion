@@ -130,10 +130,10 @@ public class GuardianBehavior : DefenderSandbox {
 		Debug.Log("AlternateBlockingColumns called; alternateTurn == " + alternateTurn);
 		if (alternateTurn%2 == 0){
 			BlockAllColumns();
-			Services.UI.OpponentStatement(ALL_BLOCKED);
+			Services.UI.PlayerPhaseStatement(ALL_BLOCKED);
 		} else {
 			UnblockAllColumns();
-			Services.UI.OpponentStatement(NONE_BLOCKED);
+			Services.UI.PlayerPhaseStatement(NONE_BLOCKED);
 		}
 	}
 
@@ -182,7 +182,7 @@ public class GuardianBehavior : DefenderSandbox {
 				if (currentHold != HoldTrack.Hold_the_Line) MakeColumnLure(blockedColumn, true); //attackers move into blocked columns at higher Hold the Line levels
 
 				Services.Events.Unregister<InputEvent>(ChooseColumn);
-				Services.UI.OpponentStatement(COLUMN_CHOSEN);
+				Services.UI.PlayerPhaseStatement(COLUMN_CHOSEN);
 
 				RemoveBlockFeedbackTask pickUpTask = new RemoveBlockFeedbackTask(LINE_MARKER_OBJ);
 				pickUpTask.Then(new BlockFeedbackTask(blockedColumn, LINE_MARKER_OBJ));
@@ -204,6 +204,21 @@ public class GuardianBehavior : DefenderSandbox {
 		List<SpaceBehavior> spaces = Services.Board.GetAllSpacesInColumn(column);
 
 		foreach (SpaceBehavior space in spaces) space.Lure = newState;
+	}
+
+
+	/// <summary>
+	/// The Guardian has to shut off any highlighted columns before undoing the move phase.
+	/// </summary>
+	public override void UndoMovePhase(){
+		if (currentHold > HoldTrack.None && currentHold < HoldTrack.The_Last_Bastion){
+			Services.Events.Unregister<InputEvent>(ChooseColumn);
+			Services.Board.HighlightColumn(GridLoc.x - 1, BoardBehavior.OnOrOff.Off);
+			Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.Off);
+			blockedColumn = JUST_STARTED; //intentional nonsense value so that the system will allow re-registration
+		}
+
+		base.UndoMovePhase();
 	}
 
 

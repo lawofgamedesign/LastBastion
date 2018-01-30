@@ -12,6 +12,7 @@ TagManager:
   - UI
   - Tankard
   - Momentum marker
+  - Removed
   layers:
   - Default
   - TransparentFX

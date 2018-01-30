@@ -23,6 +23,8 @@ public class TurnManager {
 
 	//how long the system waits during each phase
 	protected float attackerAdvanceDuration = 1.0f;
+	protected const float BASE_ADVANCE_DURATION = 1.0f; //minimum duration of the advance phase
+	protected const float INCREMENTAL_ADV_DURATION = 0.1f; //added each time an attacker moves
 
 
 	//tags for selecting and clicking on things
@@ -137,6 +139,11 @@ public class TurnManager {
 	/// </summary>
 	protected void PlayerLoseFeedback(){
 		Services.UI.OpponentStatement(LOSE_MSG);
+	}
+
+
+	public void IncreaseAdvanceDuration(){
+		attackerAdvanceDuration += INCREMENTAL_ADV_DURATION;
 	}
 
 
@@ -273,6 +280,7 @@ public class TurnManager {
 		//this is routed through the attacker manager to avoid spreading control over the attackers over multiple classes.
 		public override void OnEnter(){
 			timer = 0.0f;
+			Context.attackerAdvanceDuration = TurnManager.BASE_ADVANCE_DURATION;
 			Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
 			Services.Attackers.PrepareAttackerMove();
 			Services.Attackers.MoveAttackers();
@@ -284,9 +292,9 @@ public class TurnManager {
 		public override void Tick(){
 			timer += Time.deltaTime;
 			if (timer >= Context.attackerAdvanceDuration){
-
+				if (Services.Tasks.CheckForAnyTasks()) return;
 				//if the defenders are being pushed, don't transition to the next phase until that happens.
-				if (Services.Tasks.CheckForTaskOfType<MoveDefenderTask>()) return;
+				//if (Services.Tasks.CheckForTaskOfType<MoveDefenderTask>()) return;
 
 				//go to the Defenders Move phase, unless the player has now lost.
 				if (!Context.CheckForLoss()) TransitionTo<PlayerMove>();

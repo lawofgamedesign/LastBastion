@@ -681,6 +681,19 @@ public class BoardBehavior {
 	}
 
 
+	/// <summary>
+	/// Highlight the entire board, or remove highlights from the entire board.
+	/// </summary>
+	/// <param name="onOrOff">Should the highlight be turned on or switched off?</param>
+	public void HighlightAll(OnOrOff onOrOff){
+		for (int x = 0; x < BOARD_WIDTH; x++){
+			for (int z = 0; z < BOARD_HEIGHT; z++){
+				HighlightSpace(x, z, onOrOff, false);
+			}
+		}
+	}
+
+
 	#endregion highlighting
 
 
