@@ -25,7 +25,7 @@ public class BoardBehavior {
 
 	//the wall
 	private List<WallBehavior> walls = new List<WallBehavior>();
-	private const string WALL_OBJ = "Wall_1_Str";
+	private const string WALL_OBJ = "Wall_2_Str";
 
 
 	//where is the wall? Rows higher than this number are offset to make space for the wall
