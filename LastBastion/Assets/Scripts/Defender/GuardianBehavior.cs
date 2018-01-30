@@ -212,6 +212,8 @@ public class GuardianBehavior : DefenderSandbox {
 	/// </summary>
 	public override void UndoMovePhase(){
 		if (currentHold > HoldTrack.None && currentHold < HoldTrack.The_Last_Bastion){
+			if (blockedColumn != JUST_STARTED && blockedColumn != BLANK_COLUMN) MakeColumnLure(blockedColumn, false);
+			UnholdLine();
 			Services.Events.Unregister<InputEvent>(ChooseColumn);
 			Services.Board.HighlightColumn(GridLoc.x - 1, BoardBehavior.OnOrOff.Off);
 			Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.Off);

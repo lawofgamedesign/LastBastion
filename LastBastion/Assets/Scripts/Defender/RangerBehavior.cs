@@ -110,6 +110,7 @@ public class RangerBehavior : DefenderSandbox {
 	/// The Ranger needs to show how many attacks they get when selected to fight while showboating.
 	/// </summary>
 	public override void BeSelectedForFight(){
+		if (currentShowboat > ShowboatTrack.None && currentAttacks <= 0) return; //don't allow the Ranger to be selected when out of attacks
 		base.BeSelectedForFight();
 
 		if (currentShowboat != ShowboatTrack.None) Services.UI.OpponentStatement(ReviseAttackText());

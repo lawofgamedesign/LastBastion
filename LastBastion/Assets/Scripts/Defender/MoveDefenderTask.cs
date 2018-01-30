@@ -46,7 +46,7 @@ public class MoveDefenderTask : Task {
 		//so long as there's still a waypoint, move toward it. If there are no more waypoints, this task is complete 
 		if (index <= waypoints.Count - 1){ 
 			if (Vector3.Distance(defender.position, nextWaypointLoc) <= speed * Time.deltaTime) { //sanity check; don't overshoot 
-				defender.MovePosition(nextWaypointLoc); 
+				defender.MovePosition(nextWaypointLoc);
 			} else { 
 				defender.MovePosition(defender.position + (nextWaypointLoc - defender.position).normalized * speed * Time.deltaTime); 
 			} 

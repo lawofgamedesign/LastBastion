@@ -9,7 +9,7 @@ public class EnvironmentManager {
 
 
 	//the places the game can take place
-	public enum Place { Kitchen, Tavern };
+	public enum Place { Kitchen, Tavern, Battlefield };
 
 
 	//the current place
@@ -17,7 +17,9 @@ public class EnvironmentManager {
 
 
 	//tavern environment settings
+	private const string KITCHEN_LIGHT_HEX = "#F9F9F9FF";
 	private const string TAVERN_LIGHT_HEX = "#7E7E7EFF";
+	private const string BATTLEFIELD_LIGHT_HEX = "#B01E1EFF";
 
 
 	/////////////////////////////////////////////
@@ -56,9 +58,13 @@ public class EnvironmentManager {
 			case Place.Kitchen:
 				temp = Place.Tavern;
 				break;
+			case Place.Tavern:
+				temp = Place.Battlefield;
+				break;
+			case Place.Battlefield:
+				temp = Place.Kitchen;
+				break;
 		}
-
-		Debug.Assert(temp != Place.Kitchen, "Failed to get next place.");
 
 		return temp;
 	}
@@ -68,9 +74,15 @@ public class EnvironmentManager {
 		Color temp = Color.white; //default initializtion
 
 		switch (newPlace){
+			case Place.Kitchen:
+				ColorUtility.TryParseHtmlString(KITCHEN_LIGHT_HEX, out temp);
+				break;
 			case Place.Tavern:
-			ColorUtility.TryParseHtmlString(TAVERN_LIGHT_HEX, out temp);
-			break;
+				ColorUtility.TryParseHtmlString(TAVERN_LIGHT_HEX, out temp);
+				break;
+			case Place.Battlefield:
+				ColorUtility.TryParseHtmlString(BATTLEFIELD_LIGHT_HEX, out temp);
+				break;
 		}
 
 		Debug.Assert(temp != Color.white, "Could not get next color");
