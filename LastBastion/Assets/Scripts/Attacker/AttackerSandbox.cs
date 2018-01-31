@@ -219,15 +219,16 @@ public class AttackerSandbox : MonoBehaviour {
 		}
 		 
 		while (attemptedMove > 0){
+			//if something immobile is in the way, stop
+			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - 1) == SpaceBehavior.ContentType.Attacker ||
+				Services.Board.CheckIfBlock(XPos, ZPos - 1)){
+				attemptedMove = 0;
+			}
 			//if nothing's in the way, move
-			if (Services.Board.GeneralSpaceQuery(XPos, ZPos - 1) == SpaceBehavior.ContentType.None){
+			else if (Services.Board.GeneralSpaceQuery(XPos, ZPos - 1) == SpaceBehavior.ContentType.None){
 				GoToSouth(1);
 				MoveTankard();
 				attemptedMove--;
-			}
-			//if an attacker is in the way, stop
-			else if (Services.Board.GeneralSpaceQuery(XPos, ZPos - 1) == SpaceBehavior.ContentType.Attacker){
-				attemptedMove = 0;
 			}
 
 			//if a defender is in the way, see if the attacker can push them back
