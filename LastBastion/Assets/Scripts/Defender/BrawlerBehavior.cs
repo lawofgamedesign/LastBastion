@@ -387,10 +387,13 @@ public class BrawlerBehavior : DefenderSandbox {
 		} else if (currentRampage == RampageTrack.Berserk){
 			if (GetNumLateralAttacks() >= 2 && attacksSoFar.Contains(Directions.North)) return true;
 			else return false;
+		} else if (currentRampage == RampageTrack.The_Last_One_Standing){
+			if (attacksSoFar.Contains(Directions.North) && !defeatedLastTarget) return true;
+			else return false;
+		} else {
+			Debug.Log("Fell out of CheckUsedAllLimitedAttacks");
+			return false;
 		}
-
-		//at The Last One Standing, the computer never decides all attacks are used up
-		return false;
 	}
 
 
@@ -455,7 +458,10 @@ public class BrawlerBehavior : DefenderSandbox {
 //			putDownTask.Then(resetTask);
 			if (currentRampage == RampageTrack.None) defenderCards.ShutCardsOff();//resetTask.Then(new ShutOffCardsTask());
 		} else if (currentRampage == RampageTrack.None) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
-		else if (CheckUsedAllLimitedAttacks()) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
+		else if (CheckUsedAllLimitedAttacks()){
+			defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
+			DoneFighting();
+		}
 
 		//Services.Tasks.AddTask(flipTask);
 	}
