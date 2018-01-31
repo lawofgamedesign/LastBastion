@@ -77,7 +77,7 @@ public class GuardianBehavior : DefenderSandbox {
 		AttackMod = guardianAttack;
 		Armor = guardianArmor;
 
-		currentHold = HoldTrack.Bulwark;
+		currentHold = HoldTrack.None;
 		currentSingleCombat = SingleCombatTrack.None;
 	}
 

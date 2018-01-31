@@ -165,8 +165,6 @@ public class RangerBehavior : DefenderSandbox {
 														 damage));
 
 
-		//the Ranger can keep fighting until they run out of attacks
-		if (currentAttacks <= 0) DoneFighting();
 		Services.UI.ReviseCardsAvail(GetAvailableValues());
 	}
 
@@ -185,18 +183,21 @@ public class RangerBehavior : DefenderSandbox {
 		}
 
 		FinishWithCard();
+		if (currentAttacks <= 0 && currentShowboat > ShowboatTrack.None) DoneFighting();
 	}
 
 
 	public override void TieFight(AttackerSandbox attacker){
 		Services.Events.Fire(new MissedFightEvent());
-		FinishWithCard();
 
 		if (currentShowboat > ShowboatTrack.None){
 			currentAttacks--;
 			Services.UI.OpponentStatement(ReviseAttackText());
 			DisplayAvailableAttacks();
 		}
+
+		FinishWithCard();
+		if (currentAttacks <= 0 && currentShowboat > ShowboatTrack.None) DoneFighting();
 	}
 
 
