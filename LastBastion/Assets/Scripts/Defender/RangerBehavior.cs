@@ -40,6 +40,8 @@ public class RangerBehavior : DefenderSandbox {
 	private const string ATTACKS_REMAINING = " attacks left";
 	private const string RANGER_GETS = "Ranger gets ";
 	private const string NEXT_ATTACKS = " extra attacks next turn";
+	private Transform ammoOrganizer;
+	private const string ATTACK_REMAINING_ORGANIZER = "Available attack icons";
 
 
 	//the Lay Traps upgrade track
@@ -69,6 +71,8 @@ public class RangerBehavior : DefenderSandbox {
 		Armor = rangerArmor;
 
 		currentShowboat = ShowboatTrack.None;
+		ammoOrganizer = transform.Find(PRIVATE_UI_CANVAS).Find(ATTACK_REMAINING_ORGANIZER);
+
 		currentTrap = TrapTrack.None;
 	}
 
@@ -92,6 +96,8 @@ public class RangerBehavior : DefenderSandbox {
 		base.PrepareToFight();
 
 		ResetCurrentAttacks();
+
+		if (currentShowboat > ShowboatTrack.None) DisplayAvailableAttacks();
 	}
 
 
@@ -102,6 +108,19 @@ public class RangerBehavior : DefenderSandbox {
 		if (currentShowboat != ShowboatTrack.None){
 			currentAttacks = BASE_ATTACKS + extraAttacks;
 			extraAttacks = 0; //reset the Ranger's extra attacks; these must be built up again.
+		}
+	}
+
+
+	private void DisplayAvailableAttacks(){
+		if (currentShowboat == ShowboatTrack.None) return; //don't show any extra attack UI if the Ranger doesn't have extra attacks
+
+		foreach (Transform child in ammoOrganizer){
+			child.gameObject.SetActive(false);
+		}
+
+		for (int i = 0; i < currentAttacks; i++){
+			ammoOrganizer.GetChild(i).gameObject.SetActive(true);
 		}
 	}
 
@@ -158,9 +177,12 @@ public class RangerBehavior : DefenderSandbox {
 		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 
 		//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
-		currentAttacks--;
-		extraAttacks++;
-		Services.UI.OpponentStatement(ReviseAttackText());
+		if (currentShowboat > ShowboatTrack.None){
+			currentAttacks--;
+			extraAttacks++;
+			Services.UI.OpponentStatement(ReviseAttackText());
+			DisplayAvailableAttacks();
+		}
 
 		FinishWithCard();
 	}
@@ -169,8 +191,12 @@ public class RangerBehavior : DefenderSandbox {
 	public override void TieFight(AttackerSandbox attacker){
 		Services.Events.Fire(new MissedFightEvent());
 		FinishWithCard();
-		currentAttacks--;
-		Services.UI.OpponentStatement(ReviseAttackText());
+
+		if (currentShowboat > ShowboatTrack.None){
+			currentAttacks--;
+			Services.UI.OpponentStatement(ReviseAttackText());
+			DisplayAvailableAttacks();
+		}
 	}
 
 
@@ -212,18 +238,22 @@ public class RangerBehavior : DefenderSandbox {
 	private int DetermineAttackerModifier(AttackerSandbox attacker){
 		if (attacker.ZPos >= GridLoc.z) return attacker.AttackMod; //the Ranger has to be behind the attacker (greater Z position) to get a benefit
 
+		int temp = 0;
+
 		switch(currentShowboat){
 			case ShowboatTrack.Effortless:
-				return attacker.AttackMod - 1;
+				temp = attacker.AttackMod - 1;
 				break;
 			case ShowboatTrack.Pull_Ahead:
 			case ShowboatTrack.Set_the_Standard:
-				return 0;
+				temp = 0;
 				break;
 			default:
-				return attacker.AttackMod;
+				temp = attacker.AttackMod;
 				break;
 		}
+
+		return temp;
 	}
 
 
@@ -288,6 +318,14 @@ public class RangerBehavior : DefenderSandbox {
 		} else if (currentShowboat == ShowboatTrack.None || currentAttacks <= 0) defenderCards.ShutCardsOff();//putDownTask.Then(new ShutOffCardsTask());
 
 		//Services.Tasks.AddTask(flipTask);
+	}
+
+
+	public override void DoneFighting(){
+		currentAttacks = 0;
+		DisplayAvailableAttacks();
+
+		base.DoneFighting();
 	}
 
 

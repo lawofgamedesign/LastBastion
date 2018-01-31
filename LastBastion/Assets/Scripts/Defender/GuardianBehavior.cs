@@ -53,7 +53,7 @@ public class GuardianBehavior : DefenderSandbox {
 	private const int BLANK_COLUMN = 999; //nonsense value
 	private const int JUST_STARTED = 111; //nonsense value
 	private int blockedColumn = BLANK_COLUMN;
-	private int alternateTurn = 1;
+	private int alternateTurn = 0;
 	private const string ALL_BLOCKED = "The Last Bastion blocks all columns";
 	private const string NONE_BLOCKED = "The Last Bastion inactive this turn";
 	private const string LINE_MARKER_OBJ = "Line held marker";
@@ -77,7 +77,7 @@ public class GuardianBehavior : DefenderSandbox {
 		AttackMod = guardianAttack;
 		Armor = guardianArmor;
 
-		currentHold = HoldTrack.None;
+		currentHold = HoldTrack.Bulwark;
 		currentSingleCombat = SingleCombatTrack.None;
 	}
 
@@ -123,11 +123,30 @@ public class GuardianBehavior : DefenderSandbox {
 	/// Handle blocking and unblocking all columns when the Guardian has reached The Last Bastion on the Hold the Line track.
 	/// </summary>
 	private void AlternateBlockingColumns(Event e){
-		Debug.Assert(e.GetType() == typeof(NewTurnEvent), "Non-NewTurnEvent in AlternateBlockingColumns");
+		Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-NewTurnEvent in AlternateBlockingColumns");
+
+		EndPhaseEvent endEvent = e as EndPhaseEvent;
+
+		if (endEvent.Phase.GetType() != typeof(TurnManager.AttackersAdvance)) return;
 
 		alternateTurn++;
 
-		Debug.Log("AlternateBlockingColumns called; alternateTurn == " + alternateTurn);
+		if (alternateTurn%2 == 0){
+			BlockAllColumns();
+			Services.UI.PlayerPhaseStatement(ALL_BLOCKED);
+		} else {
+			UnblockAllColumns();
+			Services.UI.PlayerPhaseStatement(NONE_BLOCKED);
+		}
+	}
+
+
+	/// <summary>
+	/// Overload for the above method for this script's use.
+	/// </summary>
+	private void AlternateBlockingColumns(){
+		alternateTurn++;
+
 		if (alternateTurn%2 == 0){
 			BlockAllColumns();
 			Services.UI.PlayerPhaseStatement(ALL_BLOCKED);
@@ -422,13 +441,23 @@ public class GuardianBehavior : DefenderSandbox {
 				//if not, unregister for input events--the player isn't going to need to make that choice
 				//either way, start listening for the event that the Guardian uses to decide whether to block columns
 				} else if (currentHold == HoldTrack.The_Last_Bastion) {
+					//handle leftover issues from HoldTrack.Bulwark
 					if (blockedColumn != BLANK_COLUMN) {
 						MakeColumnLure(blockedColumn, false);
 						UnholdLine();
-						CreateLastBastionMarkers(); //create markers for The Last Bastion
 						Services.Tasks.AddTask(new RemoveBlockFeedbackTask(LINE_MARKER_OBJ));
-					} else Services.Events.Unregister<InputEvent>(ChooseColumn);
-					Services.Events.Register<NewTurnEvent>(AlternateBlockingColumns);
+					} else {
+						Services.Events.Unregister<InputEvent>(ChooseColumn);
+					}
+
+					//get ready for The Last Bastion
+					CreateLastBastionMarkers(); //create markers for The Last Bastion
+					Services.Events.Register<EndPhaseEvent>(AlternateBlockingColumns);
+
+					for (int i = 0; i < BoardBehavior.BOARD_WIDTH; i++){
+						Services.Tasks.AddTask(new BlockFeedbackTask(i, LINE_MARKER_OBJ + i.ToString()));
+						Services.Events.Fire(new BlockColumnEvent(i));
+					}
 				}
 				break;
 			case (int)UpgradeTracks.Single_Combat:

@@ -49,8 +49,8 @@ public class MoveBalloonTask : Task {
 
 
 	//starting X and Y size
-	private readonly float xSize;
-	private readonly float ySize;
+	private float xSize;
+	private float ySize;
 	private const float CHAT_WINDOW_WIDTH = 150.0f;
 
 
@@ -105,21 +105,25 @@ public class MoveBalloonTask : Task {
 	/// <returns>The balloon image.</returns>
 	/// <param name="type">The type of speech balloon.</param>
 	private Sprite AssignBalloonImage(ChatUI.BalloonTypes type){
+		Sprite temp;
+
 		switch (type){
 			case ChatUI.BalloonTypes.Player:
-				return Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
+				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
 				break;
 			case ChatUI.BalloonTypes.Opponent:
-				return Resources.Load<Sprite>(OPPONENT_BALLOON_IMG);
+				temp = Resources.Load<Sprite>(OPPONENT_BALLOON_IMG);
 				break;
 			case ChatUI.BalloonTypes.Object:
-				return Resources.Load<Sprite>(OBJECT_BALLOON_IMG);
+				temp = Resources.Load<Sprite>(OBJECT_BALLOON_IMG);
 				break;
 			default:
 				Debug.Log("Invalid balloon type: " + type.ToString());
-				return Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
+				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
 				break;
 		}
+
+		return temp;
 	}
 
 
