@@ -484,16 +484,19 @@ public class GuardianBehavior : DefenderSandbox {
 
 		AttackerDefeatedEvent defeatEvent = e as AttackerDefeatedEvent;
 
+		//call DefeatAttacker rather than incrementing DefeatedSoFar in order to make sure the ready-to-power-up particle plays appropriately
+
 		if (currentHold == HoldTrack.The_Last_Bastion){ //the Guardian gets 2 total experience when any attacker is defeated while at The Last Bastion
 			if (defeatEvent.location.x == GridLoc.x &&
-				defeatEvent.location.z == GridLoc.z + 1) DefeatedSoFar++;
+				defeatEvent.location.z == GridLoc.z + 1) DefeatAttacker();
 			else {
-				DefeatedSoFar += 2;
+				DefeatAttacker();
+				DefeatAttacker();
 			}
 		} else if (defeatEvent.location.x == blockedColumn) {
-			DefeatedSoFar++;
+			DefeatAttacker();
 
-			if (currentHold == HoldTrack.Bulwark) DefeatedSoFar++; //gain extra experience at higher levels of the Hold the Line track
+			if (currentHold == HoldTrack.Bulwark) DefeatAttacker(); //gain extra experience at higher levels of the Hold the Line track
 		}
 	}
 
