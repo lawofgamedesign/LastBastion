@@ -82,7 +82,7 @@ public class MoveBalloonTask : Task {
 
 		this.message = message;
 
-		balloon.transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>().text = this.message;
+		balloon.transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>().text = "";
 
 		this.change = change;
 

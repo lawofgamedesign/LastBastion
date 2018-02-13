@@ -35,8 +35,8 @@ public class ChatUI {
 
 
 	//common statements
-	protected const string MOVE_DONE_MSG = "I'm done moving. My defenders will fight now";
-	protected const string FIGHT_DONE_MSG = "My defenders are done fighting.";
+	protected const string MOVE_DONE_MSG = "I'm done moving. Time to fight!";
+	protected const string FIGHT_DONE_MSG = "I'm done fighting.";
 
 
 	//the character sheet 
@@ -62,6 +62,9 @@ public class ChatUI {
 	protected const string TURN_CANVAS = "Turn canvas";
 	protected const string TURN_TEXT_OBJ = "Turn text";
 	protected const string TURN = "Turn ";
+	protected const string SPACE = " ";
+	protected const string COLOR_TAG = "<color=#ff0000>";
+	protected const string END_COLOR_TAG = "</color>";
 	protected const string BACKSLASH = "/";
 
 
@@ -412,7 +415,7 @@ public class ChatUI {
 
 
 	public void SetTurnText(int currentTurn, int totalTurns){
-		turnText.text = TURN + currentTurn.ToString() + BACKSLASH + totalTurns.ToString();
+		turnText.text = SetTrackerText(TURN, currentTurn, totalTurns);
 
 		string turnMessage = "This is turn " + currentTurn.ToString() + " of " + totalTurns.ToString() + " this wave.";
 
@@ -421,7 +424,7 @@ public class ChatUI {
 
 
 	public void SetWaveText(int currentWave, int totalWaves){
-		waveText.text = WAVE + currentWave.ToString() + BACKSLASH + totalWaves.ToString();
+		waveText.text = SetTrackerText(WAVE, currentWave, totalWaves);
 
 		string waveMessage = "We're starting a new wave. This is wave " + currentWave.ToString() + " of " + totalWaves.ToString();
 
@@ -491,7 +494,7 @@ public class ChatUI {
 		Vector2 offset = new Vector2(0.0f, 0.0f);
 
 		if (type == BalloonTypes.Opponent) offset.y = -TEXT_OFFSET;
-		else if (type == BalloonTypes.Player) offset.y = TEXT_OFFSET;
+		else if (type == BalloonTypes.Player || type == BalloonTypes.Object) offset.y = TEXT_OFFSET;
 
 		balloonText.GetComponent<RectTransform>().anchoredPosition += offset;
 
@@ -789,4 +792,24 @@ public class ChatUI {
 
 
 	#endregion
+
+
+	#region turn tracker
+
+
+	private string SetTrackerText(string type, int current, int total){
+		string temp = type;
+
+		for (int i = 1; i <= total; i++){
+			if (i != current) temp += i.ToString() + SPACE;
+			else {
+				temp += COLOR_TAG + i.ToString() + END_COLOR_TAG + SPACE;
+			}
+		}
+
+		return temp;
+	}
+
+
+	#endregion turn tracker
 }
