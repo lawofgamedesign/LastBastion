@@ -51,10 +51,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	public enum DrinkTrack { None, Party_Foul, Liquid_Courage, Open_The_Tap, Buy_A_Round };
 	private List<string> drinkDescriptions = new List<string>() {
 		"<b>Start drinking</b>",
-		"<b>Party Foul</b>\n\nPut a tankard on the field. When you stop on it, take a drink and then kick it.\n\nAny Horde member it hits takes 1 damage.",
-		"<b>Liquid Courage</b>\n\nWhen you drink, gain 1 Inspiration and kick the tankard. Any Horde member it hits takes 1 damage.",
-		"<b>Open the Tap</b>\n\nWhen you drink, gain 2 Inspiration and kick the tankard. Any Horde member it hits takes 2 damage.",
-		"<b>Buy a Round</b>\n\nPut two more tankards on the field. All defenders can drink for 2 Inspiration. When you drink, kick the tankard. Any Horde member it hits takes 2 damage.",
+		"<b>Party Foul</b>\n\nPut a tankard on the field. When you stop on it, take a drink and then kick it.\n\nAny Horde member it hits takes 2 damage.",
+		"<b>Liquid Courage</b>\n\nWhen you drink, gain 1 Inspiration and kick the tankard. Any Horde member it hits takes 2 damage.",
+		"<b>Open the Tap</b>\n\nWhen you drink, gain 2 Inspiration and kick the tankard. Any Horde member it hits takes 4 damage.",
+		"<b>Buy a Round</b>\n\nPut two more tankards on the field.\n\nWhen you drink, kick the tankard. Any Horde member it hits takes 4 damage.",
 		"<b>Here we go!</b>"
 	};
 	private DrinkTrack currentDrink;
@@ -63,8 +63,8 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const string KICK_MSG = "Gave it the boot!";
 	private int drinkDamage = 0;
 	private int drinkInspiration = 0;
-	private const int START_DRINK_DAMAGE = 1;
-	private const int BETTER_DRINK_DAMAGE = 2;
+	private const int START_DRINK_DAMAGE = 2;
+	private const int BETTER_DRINK_DAMAGE = 4;
 	private const int START_DRINK_INSP = 1;
 	private const int BETTER_DRINK_INSP = 2;
 	private int tankardsToDrop = 0;
