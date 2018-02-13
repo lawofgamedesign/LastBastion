@@ -66,12 +66,19 @@ public class ChatUI {
 	protected const string COLOR_TAG = "<color=#ff0000>";
 	protected const string END_COLOR_TAG = "</color>";
 	protected const string BACKSLASH = "/";
+	protected RectTransform turnMarker;
+	protected const string TURN_MARKER_OBJ = "Turn marker";
+	protected Vector3 turnMarkerStart = new Vector3(-1.65f, 0.67f, 0.0f);
+	protected const float MARKER_STEP = 0.8f;
 
 
 	//wave UI
 	protected TextMeshProUGUI waveText;
 	protected const string WAVE_TEXT_OBJ = "Wave text";
 	protected const string WAVE = "Wave ";
+	protected RectTransform waveMarker;
+	protected const string WAVE_MARKER_OBJ = "Wave marker";
+	protected Vector3 waveMarkerStart = new Vector3(-0.83f, -0.75f, 0.0f);
 
 
 	//phase reminder
@@ -149,10 +156,12 @@ public class ChatUI {
 
 		//turn UI setup
 		turnText = GameObject.Find(TURN_CANVAS).transform.Find(TURN_TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		turnMarker = GameObject.Find(TURN_CANVAS).transform.Find(TURN_MARKER_OBJ).GetComponent<RectTransform>();
 
 
 		//wave UI setup
 		waveText = GameObject.Find(TURN_CANVAS).transform.Find(WAVE_TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		waveMarker = GameObject.Find(TURN_CANVAS).transform.Find(WAVE_MARKER_OBJ).GetComponent<RectTransform>();
 
 
 		//phase reminder setup
@@ -416,6 +425,7 @@ public class ChatUI {
 
 	public void SetTurnText(int currentTurn, int totalTurns){
 		turnText.text = SetTrackerText(TURN, currentTurn, totalTurns);
+		turnMarker.anchoredPosition = SetMarkerPos(turnMarkerStart, currentTurn);
 
 		string turnMessage = "This is turn " + currentTurn.ToString() + " of " + totalTurns.ToString() + " this wave.";
 
@@ -425,6 +435,7 @@ public class ChatUI {
 
 	public void SetWaveText(int currentWave, int totalWaves){
 		waveText.text = SetTrackerText(WAVE, currentWave, totalWaves);
+		waveMarker.anchoredPosition = SetMarkerPos(waveMarkerStart, currentWave);
 
 		string waveMessage = "We're starting a new wave. This is wave " + currentWave.ToString() + " of " + totalWaves.ToString();
 
@@ -806,6 +817,15 @@ public class ChatUI {
 				temp += COLOR_TAG + i.ToString() + END_COLOR_TAG + SPACE;
 			}
 		}
+
+		return temp;
+	}
+
+
+	private Vector3 SetMarkerPos(Vector3 startPos, int current){
+		Vector3 temp = startPos;
+
+		temp.x += MARKER_STEP * (current - 1);
 
 		return temp;
 	}
