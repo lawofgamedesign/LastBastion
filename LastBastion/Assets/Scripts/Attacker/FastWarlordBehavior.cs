@@ -1,7 +1,7 @@
 ﻿using UnityEngine; //needed to serialize fields
 using UnityEngine.UI;
 
-public class FastWarlordBehavior : AttackerSandbox {
+public class FastWarlordBehavior : WarlordSandbox {
 
 	/////////////////////////////////////////////
 	/// Fields
@@ -16,12 +16,6 @@ public class FastWarlordBehavior : AttackerSandbox {
 	private const string NAME = "Fast Warlord";
 
 
-	//UI for Petty Warlord health
-	private Image healthUI;
-	private const string HEALTH_CANVAS = "Health canvas";
-	private const string HEALTH_IMAGE = "Health image";
-
-
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -34,18 +28,7 @@ public class FastWarlordBehavior : AttackerSandbox {
 		AttackMod = fastAttack;
 		Armor = fastArmor;
 		Health = fastHealth;
-		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
+		startHealth = fastHealth;
 		attackerName = NAME;
-	}
-
-
-	/// <summary>
-	/// In addition to normal damage effects, update the Petty Warlord's health UI.
-	/// </summary>
-	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
-	public override void TakeDamage (int damage){
-		base.TakeDamage(damage);
-
-		healthUI.fillAmount = (float)Health/(float)fastHealth;
 	}
 }

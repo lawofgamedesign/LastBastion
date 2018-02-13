@@ -1,6 +1,6 @@
 ﻿using UnityEngine.UI;
 
-public class ArmoredWarlordBehavior : AttackerSandbox {
+public class ArmoredWarlordBehavior : WarlordSandbox {
 
 	/////////////////////////////////////////////
 	/// Fields
@@ -9,16 +9,10 @@ public class ArmoredWarlordBehavior : AttackerSandbox {
 
 	//armored warlord stats
 	private int armoredSpeed = 1;
-	private int armoredAttack = 1;
-	private int armoredArmor = 2;
+	private int armoredAttack = 0;
+	private int armoredArmor = 3;
 	private int armoredHealth = 4;
 	private const string NAME = "Armored Warlord";
-
-
-	//UI for Armored Warlord health
-	private Image healthUI;
-	private const string HEALTH_CANVAS = "Health canvas";
-	private const string HEALTH_IMAGE = "Health image";
 
 
 	/////////////////////////////////////////////
@@ -33,18 +27,7 @@ public class ArmoredWarlordBehavior : AttackerSandbox {
 		AttackMod = armoredAttack;
 		Armor = armoredArmor;
 		Health = armoredHealth;
-		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
+		startHealth = armoredHealth;
 		attackerName = NAME;
-	}
-
-
-	/// <summary>
-	/// In addition to normal damage effects, update the Armored Warlord's health UI.
-	/// </summary>
-	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
-	public override void TakeDamage (int damage){
-		base.TakeDamage(damage);
-
-		healthUI.fillAmount = (float)Health/(float)armoredHealth;
 	}
 }

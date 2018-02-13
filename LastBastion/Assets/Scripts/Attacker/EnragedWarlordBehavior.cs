@@ -1,6 +1,7 @@
-﻿using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
-public class EnragedWarlordBehavior : AttackerSandbox {
+public class EnragedWarlordBehavior : WarlordSandbox {
 
 	/////////////////////////////////////////////
 	/// Fields
@@ -15,10 +16,8 @@ public class EnragedWarlordBehavior : AttackerSandbox {
 	private const string NAME = "Enraged Warlord";
 
 
-	//UI for Enraged Warlord health
-	private Image healthUI;
-	private const string HEALTH_CANVAS = "Health canvas";
-	private const string HEALTH_IMAGE = "Health image";
+	//animation
+	private const string ATTACK_ANIM = "WK_heavy_infantry_07_attack_A";
 
 
 	/////////////////////////////////////////////
@@ -33,19 +32,17 @@ public class EnragedWarlordBehavior : AttackerSandbox {
 		AttackMod = enragedAttack;
 		Armor = enragedArmor;
 		Health = enragedHealth;
-		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
+		startHealth = enragedHealth;
 		attackerName = NAME;
-		Services.AttackDeck.PutCardInDeck(transform, 5); //the Enraged Warlord puts a 5 in the deck when it enters the board
-	}
 
 
-	/// <summary>
-	/// In addition to normal damage effects, update the Skilled Warlord's health UI.
-	/// </summary>
-	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
-	public override void TakeDamage (int damage){
-		base.TakeDamage(damage);
+		//pose the Enraged Warlord
+		transform.Find(MODEL_ORGANIZER).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.5f;
+		transform.Find(MODEL_ORGANIZER).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(MODEL_ORGANIZER).Find(MINI_OBJ).GetComponent<Animation>().Play();
 
-		healthUI.fillAmount = (float)Health/(float)enragedHealth;
+
+		//the Enraged Warlord puts a 5 in the deck when it enters the board
+		Services.AttackDeck.PutCardInDeck(transform, 5);
 	}
 }

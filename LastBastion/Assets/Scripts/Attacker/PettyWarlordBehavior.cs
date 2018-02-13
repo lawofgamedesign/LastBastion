@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class PettyWarlordBehavior : AttackerSandbox {
+public class PettyWarlordBehavior : WarlordSandbox {
 
 
 	/////////////////////////////////////////////
@@ -17,10 +17,7 @@ public class PettyWarlordBehavior : AttackerSandbox {
 	private const string NAME = "Petty Warlord";
 
 
-	//UI for Petty Warlord health
-	private Image healthUI;
-	private const string HEALTH_CANVAS = "Health canvas";
-	private const string HEALTH_IMAGE = "Health image";
+
 
 
 	/////////////////////////////////////////////
@@ -35,18 +32,7 @@ public class PettyWarlordBehavior : AttackerSandbox {
 		AttackMod = pettyAttack;
 		Armor = pettyArmor;
 		Health = pettyHealth;
-		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
+		startHealth = pettyHealth;
 		attackerName = NAME;
-	}
-
-
-	/// <summary>
-	/// In addition to normal damage effects, update the Petty Warlord's health UI.
-	/// </summary>
-	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
-	public override void TakeDamage (int damage){
-		base.TakeDamage(damage);
-
-		healthUI.fillAmount = (float)Health/(float)pettyHealth;
 	}
 }

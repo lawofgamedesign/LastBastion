@@ -1,6 +1,7 @@
-﻿using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
-public class SkilledWarlordBehavior : AttackerSandbox {
+public class SkilledWarlordBehavior : WarlordSandbox {
 
 
 	/////////////////////////////////////////////
@@ -16,10 +17,8 @@ public class SkilledWarlordBehavior : AttackerSandbox {
 	private const string NAME = "Skilled Warlord";
 
 
-	//UI for Skilled Warlord health
-	private Image healthUI;
-	private const string HEALTH_CANVAS = "Health canvas";
-	private const string HEALTH_IMAGE = "Health image";
+	//animation
+	private const string ATTACK_ANIM = "WK_heavy_infantry_07_attack_A";
 
 
 	/////////////////////////////////////////////
@@ -34,8 +33,15 @@ public class SkilledWarlordBehavior : AttackerSandbox {
 		AttackMod = skilledAttack;
 		Armor = skilledArmor;
 		Health = skilledHealth;
-		healthUI = transform.Find(HEALTH_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
+		startHealth = skilledHealth;
 		attackerName = NAME;
+
+
+		//pose the Skilled Warlord
+		transform.Find(MODEL_ORGANIZER).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.3f;
+		transform.Find(MODEL_ORGANIZER).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(MODEL_ORGANIZER).Find(MINI_OBJ).GetComponent<Animation>().Play();
+
 
 		//the Skilled Warlord takes a 1 out of the deck when it enters the board, if any are available
 		//like the UIManager, this uses a somewhat elaborate system to make sure the tasks get queued correctly
@@ -47,16 +53,5 @@ public class SkilledWarlordBehavior : AttackerSandbox {
 		} else { //second attempt
 			Services.Tasks.GetLastTaskOfType<RemoveCardTask>().Then(new RemoveCardTask(transform, 1));
 		}
-	}
-
-
-	/// <summary>
-	/// In addition to normal damage effects, update the Skilled Warlord's health UI.
-	/// </summary>
-	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
-	public override void TakeDamage (int damage){
-		base.TakeDamage(damage);
-
-		healthUI.fillAmount = (float)Health/(float)skilledHealth;
 	}
 }

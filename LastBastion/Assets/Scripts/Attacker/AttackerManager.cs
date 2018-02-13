@@ -10,7 +10,7 @@ public class AttackerManager {
 
 
 	//attackers the manager can create, and the transform they're parented to
-	protected const string EVIL_WARRIOR_OBJ = "Evil Warrior";
+	protected const string SKELETON_OBJ = "Skeleton";
 	protected const string PETTY_WARLORD_OBJ = "Petty Warlord";
 	protected const string ARMORED_WARLORD_OBJ = "Armored Warlord";
 	protected const string SKILLED_WARLORD_OBJ = "Skilled Warlord";
@@ -228,7 +228,7 @@ public class AttackerManager {
 		//try to make the retinue member to the west
 		if (Services.Board.GeneralSpaceQuery(x - 1, z) == SpaceBehavior.ContentType.None){
 			Vector3 startLoc = Services.Board.GetWorldLocation(x - 1, z) + new Vector3(0.0f, 0.0f, Services.Board.SpaceSize * 2); //they start off the board
-			newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(EVIL_WARRIOR_OBJ),
+			newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(SKELETON_OBJ),
 																	 startLoc,
 																	 Quaternion.identity,	
 																	 attackerOrganizer);
@@ -252,7 +252,7 @@ public class AttackerManager {
 		//try to make the retinue member to the south
 		if (Services.Board.GeneralSpaceQuery(x, z - 1) == SpaceBehavior.ContentType.None){
 			Vector3 startLoc = Services.Board.GetWorldLocation(x, z - 1) + new Vector3(0.0f, 0.0f, Services.Board.SpaceSize * 2); //they start off the board
-			newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(EVIL_WARRIOR_OBJ),
+			newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(SKELETON_OBJ),
 																	 startLoc,
 																	 Quaternion.identity,
 																	 attackerOrganizer);
@@ -277,7 +277,7 @@ public class AttackerManager {
 		//try to make the retinue member to the east
 		if (Services.Board.GeneralSpaceQuery(x + 1, z) == SpaceBehavior.ContentType.None){
 			Vector3 startLoc = Services.Board.GetWorldLocation(x + 1, z) + new Vector3(0.0f, 0.0f, Services.Board.SpaceSize * 2); //they start off the board
-			newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(EVIL_WARRIOR_OBJ),
+			newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(SKELETON_OBJ),
 																	 startLoc,
 																	 Quaternion.identity,
 																	 attackerOrganizer);
@@ -355,6 +355,7 @@ public class AttackerManager {
 
 
 	public void EliminateAttacker(AttackerSandbox attacker){
+		attacker.UnregisterForEvents();
 		attackers.Remove(attacker);
 	}
 
@@ -363,7 +364,11 @@ public class AttackerManager {
 	/// Pulls all attackers off the board (both visually and within the grid logic).
 	/// </summary>
 	public void RemoveAllAttackers(){
-		foreach (AttackerSandbox attacker in attackers) attacker.BeRemovedFromBoard();
+		foreach (AttackerSandbox attacker in attackers){
+			attacker.BeRemovedFromBoard();
+			attacker.UnregisterForEvents();
+		}
+			
 		attackers.Clear();
 	}
 

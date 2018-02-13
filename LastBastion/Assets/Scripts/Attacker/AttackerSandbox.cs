@@ -70,6 +70,15 @@ public class AttackerSandbox : MonoBehaviour {
 	protected List<MoveTask> moveTasks = new List<MoveTask>();
 
 
+	//access to the mini's animation, for those attackers that need to control it via code
+	protected const string MODEL_ORGANIZER = "Model";
+	protected const string MINI_OBJ = "Miniature";
+
+
+
+
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -86,6 +95,7 @@ public class AttackerSandbox : MonoBehaviour {
 		Health = baseHealth;
 		Blocked = false;
 		noDamageParticle = transform.Find(NO_DMG_PARTICLE_OBJ).GetComponent<ParticleSystem>();
+
 		RegisterForEvents();
 	}
 
@@ -127,7 +137,7 @@ public class AttackerSandbox : MonoBehaviour {
 	/// <summary>
 	/// Call this when the attacker is being taken off the board to unregister.
 	/// </summary>
-	protected virtual void UnregisterForEvents(){
+	public virtual void UnregisterForEvents(){
 		Services.Events.Unregister<BlockColumnEvent>(BecomeBlocked);
 		Services.Events.Unregister<UnblockColumnEvent>(BecomeBlocked);
 	}
@@ -418,6 +428,7 @@ public class AttackerSandbox : MonoBehaviour {
 		Services.Attackers.EliminateAttacker(this);
 		Services.Board.TakeThingFromSpace(XPos, ZPos);
 		Services.Events.Fire(new AttackerDefeatedEvent(this));
+		UnregisterForEvents();
 
 		AttackerFallTask fallTask = new AttackerFallTask(GetComponent<Rigidbody>());
 		EjectAttackerTask throwTask = new EjectAttackerTask(GetComponent<Rigidbody>());
