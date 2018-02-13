@@ -78,7 +78,7 @@
 			//try to make the retinue member to the west
 			if (Services.Board.GeneralSpaceQuery(x - 1, z) == SpaceBehavior.ContentType.None){
 				Vector3 startLoc = Services.Board.GetWorldLocation(x - 1, z);
-				newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(EVIL_WARRIOR_OBJ),
+				newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(SKELETON_OBJ),
 																		 startLoc,
 																		 Quaternion.identity,
 																		 attackerOrganizer);
@@ -96,7 +96,7 @@
 			//try to make the retinue member to the south
 			if (Services.Board.GeneralSpaceQuery(x, z - 1) == SpaceBehavior.ContentType.None){
 				Vector3 startLoc = Services.Board.GetWorldLocation(x, z - 1);
-				newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(EVIL_WARRIOR_OBJ),
+				newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(SKELETON_OBJ),
 																		 startLoc,
 																		 Quaternion.identity,
 																		 attackerOrganizer);
@@ -115,7 +115,7 @@
 			//try to make the retinue member to the east
 			if (Services.Board.GeneralSpaceQuery(x + 1, z) == SpaceBehavior.ContentType.None){
 				Vector3 startLoc = Services.Board.GetWorldLocation(x + 1, z);
-				newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(EVIL_WARRIOR_OBJ),
+				newRetinueMember = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(SKELETON_OBJ),
 																		 startLoc,
 																		 Quaternion.identity,
 																		 attackerOrganizer);

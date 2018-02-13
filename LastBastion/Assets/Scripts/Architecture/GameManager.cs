@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
@@ -14,6 +15,14 @@ public class GameManager : MonoBehaviour {
 
 	//the canvas for the character sheet
 	private const string CHAR_SHEET_UI = "Defender sheet canvas";
+
+
+	//is the game paused right now?
+	private bool paused = false;
+
+
+	//scenes this scene can load
+	private const string GAME_SCENE = "Game";
 
 
 	//initialize variables and establish the game's starting state
@@ -44,6 +53,26 @@ public class GameManager : MonoBehaviour {
 		Services.PlayerEyes = new CameraBehavior();
 		Services.PlayerEyes.Setup();
 		Services.Environment = new EnvironmentManager();
+		Services.EscapeMenu = new GameEscMenuBehavior();
+		Services.EscapeMenu.Setup();
+		Services.Events.Register<PauseEvent>(HandlePausing);
+	}
+
+
+	private void HandlePausing(global::Event e){
+		Debug.Assert(e.GetType() == typeof(PauseEvent), "Non-PauseEvent in HandlePausing.");
+
+		PauseEvent pauseEvent = e as PauseEvent;
+
+		if (pauseEvent.action == PauseEvent.Pause.Pause) paused = true;
+		else paused = false;
+	}
+
+
+	public void Restart(){
+		Services.Events.Unregister<PauseEvent>(HandlePausing);
+		Services.EscapeMenu.Cleanup();
+		SceneManager.LoadScene(GAME_SCENE);
 	}
 
 
@@ -52,6 +81,8 @@ public class GameManager : MonoBehaviour {
 	/// frame-by-frame is controlled from here.
 	/// </summary>
 	private void Update(){
+		if (paused) return;
+
 		Services.Inputs.Tick();
 		Services.Rulebook.Tick();
 		Services.Tasks.Tick();

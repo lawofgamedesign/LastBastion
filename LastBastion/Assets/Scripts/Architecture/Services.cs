@@ -150,4 +150,14 @@ public static class Services {
 		}
 		set { environment = value; }
 	}
+
+
+	private static EscMenuBehavior escapeMenu;
+	public static EscMenuBehavior EscapeMenu {
+		get {
+			Debug.Assert(escapeMenu != null, "No escape menu. Did you forget to create one?");
+			return escapeMenu;
+		}
+		set { escapeMenu = value; }
+	}
 }

@@ -27,9 +27,11 @@ public class ChatUI {
 	//buttons the player can press
 	protected GameObject phaseOverButton;
 	protected GameObject undoButton;
+	protected GameObject explainButton;
 	protected TextMeshProUGUI phaseText;
 	protected const string PHASE_BUTTON_OBJ = "Phase over button";
 	protected const string UNDO_BUTTON_OBJ = "Phase undo button";
+	protected const string EXPLAIN_BUTTON_OBJ = "Explanation button";
 
 
 	//common statements
@@ -85,7 +87,9 @@ public class ChatUI {
 	//balloon sizing
 	protected const int SIZE_PER_ROW = 15; //used to determine how many rows a message needs to be divided into
 	protected const int TEXT_ROW_SIZE = 20; //the amount of space each line should have, measured--roughly--in font size.
-	protected const int BALLOON_PADDING = 5;
+	protected const int BALLOON_EXTRA_SIZE = 30; //increase the size of balloons to make them a reasonable size
+	protected const int BALLOON_PADDING = 5; //creates extra space between balloons in the chat window
+	protected const int TEXT_OFFSET = 10; //move the text up or down this much to avoid the speech balloon's arrow
 
 
 	//balloon types
@@ -131,7 +135,13 @@ public class ChatUI {
 		phaseOverButton.SetActive(false);
 		undoButton = GameObject.Find(UNDO_BUTTON_OBJ);
 		undoButton.SetActive(false);
+		explainButton = GameObject.Find(EXPLAIN_BUTTON_OBJ);
+		explainButton.SetActive(false);
 		Services.Events.Register<PhaseStartEvent>(PhaseStartHandling);
+
+
+		//piece explanation button setup
+		explainButton.GetComponent<ExplainButtonBehavior>().Setup();
 
 
 		//turn UI setup
@@ -339,6 +349,19 @@ public class ChatUI {
 
 
 	/// <summary>
+	/// Switch the button that requests an explanation of the attacker's pieces on or off.
+	/// </summary>
+	/// <param name="onOrOff">Whether the button should be on (gameobject active) or off (inactive).</param>
+	public virtual void ToggleExplainButton(OnOrOff onOrOff){
+		if (onOrOff == OnOrOff.On){
+			explainButton.SetActive(true);
+		} else {
+			explainButton.SetActive(false);
+		}
+	}
+
+
+	/// <summary>
 	/// Defenders call this when they fight to explain the result of the combat.
 	/// </summary>
 	/// <param name="playerValue">The value of the player's card.</param>
@@ -439,9 +462,11 @@ public class ChatUI {
 	/// </summary>
 	/// <returns>The balloon's TextMeshPro component, so that its text can be set.</returns>
 	protected TextMeshProUGUI AddBalloon(string message, BalloonTypes type){
-		TextMeshProUGUI balloon = MonoBehaviour.Instantiate<GameObject>(speechBalloon, chatContent).transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		GameObject balloon = MonoBehaviour.Instantiate<GameObject>(speechBalloon, chatContent);
+		TextMeshProUGUI balloonText = balloon.transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		Image balloonImage = balloon.transform.Find(IMAGE_OBJ).GetComponent<Image>();
 
-		balloon.transform.parent.Find(IMAGE_OBJ).GetComponent<Image>().sprite = AssignBalloonImage(type);
+		balloonImage.sprite = AssignBalloonImage(type);
 
 		int rows = message.Length/SIZE_PER_ROW;
 
@@ -449,14 +474,28 @@ public class ChatUI {
 
 		int height = TEXT_ROW_SIZE * rows;
 
-		balloon.transform.parent.GetComponent<RectTransform>().sizeDelta = new Vector2(balloon.rectTransform.rect.width, height + BALLOON_PADDING);
 
-		foreach (Transform child in balloon.transform.parent){
-			child.GetComponent<RectTransform>().sizeDelta = new Vector2(balloon.rectTransform.rect.width, height);
-		}
+		//resize the balloon's elements
+
+		//the balloon object needs to be big enough for the speech balloon, plus some extra to create space between balloons
+		balloon.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height + BALLOON_EXTRA_SIZE + BALLOON_PADDING);
+
+		//the speech balloon image needs to be big enough to accommodate the text, plus some extra for the balloon's arrow
+		balloonImage.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height + BALLOON_EXTRA_SIZE);
+
+		//the text only needs to be big enough for the text itself
+		balloonText.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height);
 
 
-		return balloon;
+		//move the text to avoid the arrow
+		Vector2 offset = new Vector2(0.0f, 0.0f);
+
+		if (type == BalloonTypes.Opponent) offset.y = -TEXT_OFFSET;
+		else if (type == BalloonTypes.Player) offset.y = TEXT_OFFSET;
+
+		balloonText.GetComponent<RectTransform>().anchoredPosition += offset;
+
+		return balloonText;
 	}
 
 

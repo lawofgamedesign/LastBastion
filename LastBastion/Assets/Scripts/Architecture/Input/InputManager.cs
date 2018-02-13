@@ -13,17 +13,24 @@ public class InputManager {
 			GameObject selected = GetClickedThing();
 
 			if (selected != null) Services.Events.Fire(new InputEvent(selected));
+		} else if (Input.GetKeyDown(KeyCode.Escape)){
+			Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Pause));
+			Services.Events.Fire(new EscMenuEvent());
 		}
 
-		if (Input.mousePosition.y/Screen.height >= (100.0f - SCREEN_MARGIN)/100.0f){
-			Services.PlayerEyes.CameraUp();
-		} else if (Input.mousePosition.x/Screen.width <= SCREEN_MARGIN/100.0f) {
-			Services.PlayerEyes.CameraLeft();
-		} else if (Input.mousePosition.x/Screen.width >= (100.0f - SCREEN_MARGIN)/100.0f) {
-			Services.PlayerEyes.CameraRight();
-		} else {
-			Services.PlayerEyes.CameraToTable();
-		}
+
+
+		//player looking around is disabled for now
+
+//		if (Input.mousePosition.y/Screen.height >= (100.0f - SCREEN_MARGIN)/100.0f){
+//			Services.PlayerEyes.CameraUp();
+//		} else if (Input.mousePosition.x/Screen.width <= SCREEN_MARGIN/100.0f) {
+//			Services.PlayerEyes.CameraLeft();
+//		} else if (Input.mousePosition.x/Screen.width >= (100.0f - SCREEN_MARGIN)/100.0f) {
+//			Services.PlayerEyes.CameraRight();
+//		} else {
+//			Services.PlayerEyes.CameraToTable();
+//		}
 	}
 
 
