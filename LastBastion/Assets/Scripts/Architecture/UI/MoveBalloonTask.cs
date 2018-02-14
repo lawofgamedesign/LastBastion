@@ -29,10 +29,13 @@ public class MoveBalloonTask : Task {
 
 
 	//the image for the balloon
-	private const string IMAGE_OBJ = "Balloon image";
-	private const string PLAYER_BALLOON_IMG = "Sprites/Player Speech Balloon";
-	private const string OPPONENT_BALLOON_IMG = "Sprites/Opponent Speech Balloon";
-	private const string OBJECT_BALLOON_IMG = "Sprites/Object Speech Balloon";
+	private const string IMAGE_OBJ = "Background";
+	private const string PLAYER_BALLOON_IMG = "Sprites/Box";
+	private const string PLAYER_BALLOON_COLOR_HEX = "#09EA14C8";
+	private const string OPPONENT_BALLOON_IMG = "Sprites/Grey Box";
+	private const string OPPONENT_BALLOON_COLOR_HEX = "#FFFFFFFF";
+	private const string OBJECT_BALLOON_IMG = "Sprites/Orange Box";
+	private const string OBJECT_BALLOON_COLOR_HEX = "#FFFFFFFF"; //intentionally the same as for opponents
 
 
 	//speed
@@ -72,6 +75,7 @@ public class MoveBalloonTask : Task {
 		this.balloonType = balloonType;
 	
 		balloon.Find(IMAGE_OBJ).GetComponent<Image>().sprite = AssignBalloonImage(this.balloonType);
+		//balloon.Find(IMAGE_OBJ).GetComponent<Image>().color = AssignBalloonColor(this.balloonType);
 
 		balloon.transform.position = position;
 
@@ -122,6 +126,28 @@ public class MoveBalloonTask : Task {
 				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
 				break;
 		}
+
+		return temp;
+	}
+
+
+	private Color AssignBalloonColor(ChatUI.BalloonTypes type){
+		Color temp = Color.magenta; //nonsense initialization for error-checking
+
+		switch (type){
+		case ChatUI.BalloonTypes.Player:
+			ColorUtility.TryParseHtmlString(PLAYER_BALLOON_COLOR_HEX, out temp);
+			break;
+		case ChatUI.BalloonTypes.Opponent:
+		case ChatUI.BalloonTypes.Object:
+			ColorUtility.TryParseHtmlString(OPPONENT_BALLOON_COLOR_HEX, out temp);
+			break;
+		default:
+			Debug.Log("Invalid balloon type: " + type.ToString());
+			break;
+		}
+
+		Debug.Assert(temp != Color.magenta, "Failed to parse color string.");
 
 		return temp;
 	}

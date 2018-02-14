@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,13 +12,13 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 
 	//the name button
-	private Text nameButton;
+	private TextMeshProUGUI nameButton;
 	private const string NAME_OBJ = "Sheet button";
 	private const string TEXT_OBJ = "Text";
 
 
 	//the stat block
-	private Text statBlock;
+	private TextMeshProUGUI statBlock;
 	private const string STAT_OBJ = "Stat block";
 	private const string SPEED_LABEL = "Speed: ";
 	private const string ATTACK_MOD_LABEL = "Attack: +";
@@ -26,7 +27,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 
 	//the label for next abilities
-	private Text nextLabel;
+	private TextMeshProUGUI nextLabel;
 	private const string NEXT_LABEL_OBJ = "Next label";
 	private const string NEXT_IN = "Next upgrade in ";
 	private const string DEFEATS = " Inspiration";
@@ -37,21 +38,21 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 
 	//upgrade track 1
-	private Text track1Next;
-	private Text track1Current;
+	private TextMeshProUGUI track1Next;
+	private TextMeshProUGUI track1Current;
 	private const string TRACK_1_NEXT_OBJ = "Track 1 next";
 	private const string TRACK_1_CURRENT_OBJ = "Track 1 current";
 
 
 	//upgrade track 2
-	private Text track2Next;
-	private Text track2Current;
+	private TextMeshProUGUI track2Next;
+	private TextMeshProUGUI track2Current;
 	private const string TRACK_2_NEXT_OBJ = "Track 2 next";
 	private const string TRACK_2_CURRENT_OBJ = "Track 2 current";
 
 
 	//available cards
-	private Text availCards;
+	private TextMeshProUGUI availCards;
 	private const string AVAILABLE_CARDS_OBJ = "Available cards";
 	private const string AVAIL_MSG = "Cards available: ";
 	private const string COMMA = ", ";
@@ -69,14 +70,14 @@ public class CharacterSheetBehavior : MonoBehaviour {
 
 	//initialize variables and turn the sheet off
 	public void Setup(){
-		nameButton = transform.Find(NAME_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
-		statBlock = transform.Find(STAT_OBJ).GetComponent<Text>();
-		nextLabel = transform.Find(NEXT_LABEL_OBJ).GetComponent<Text>();
-		track1Next = transform.Find(TRACK_1_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
-		track1Current = transform.Find(TRACK_1_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
-		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
-		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<Text>();
-		availCards = transform.Find(AVAILABLE_CARDS_OBJ).GetComponent<Text>();
+		nameButton = transform.Find(NAME_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		statBlock = transform.Find(STAT_OBJ).GetComponent<TextMeshProUGUI>();
+		nextLabel = transform.Find(NEXT_LABEL_OBJ).GetComponent<TextMeshProUGUI>();
+		track1Next = transform.Find(TRACK_1_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		track1Current = transform.Find(TRACK_1_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
+		availCards = transform.Find(AVAILABLE_CARDS_OBJ).GetComponent<TextMeshProUGUI>();
 		Services.Events.Register<InputEvent>(HandleClicks);
 		CurrentStatus = SheetStatus.Hidden;
 		ChangeSheetState();
