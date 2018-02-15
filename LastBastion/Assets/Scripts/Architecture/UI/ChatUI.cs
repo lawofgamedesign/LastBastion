@@ -112,18 +112,18 @@ public class ChatUI {
 
 
 	//generic balloon size, for the opponent's statements
-	protected const float CHAT_WINDOW_WIDTH = 150.0f;
+	protected const float CHAT_WINDOW_WIDTH = 140.0f;
 	protected const float TUTORIAL_WINDOW_HEIGHT = 41.0f;
 
 
 	//chat balloon sprites
 	private const string IMAGE_OBJ = "Background";
-	private const string PLAYER_BALLOON_IMG = "Sprites/Box";
-	private const string PLAYER_BALLOON_COLOR_HEX = "#FFFFFFFF";
+	private const string PLAYER_BALLOON_IMG = "Sprites/Box Greyscale";
+	private const string PLAYER_BALLOON_COLOR_HEX = "#E5FDFFAF";
 	private const string OPPONENT_BALLOON_IMG = "Sprites/Grey Box";
-	private const string OPPONENT_BALLOON_COLOR_HEX = "#FFFFFFFF";
+	private const string OPPONENT_BALLOON_COLOR_HEX = "#FFE5E5AF";
 	private const string OBJECT_BALLOON_IMG = "Sprites/Orange Box";
-	private const string OBJECT_BALLOON_COLOR_HEX = "#FFFFFFFF"; //intentionally the same as for opponents
+	private const string OBJECT_BALLOON_COLOR_HEX = "#E6FFE5AF";
 
 
 	//tutorial text
@@ -484,9 +484,7 @@ public class ChatUI {
 		Image balloonImage = balloon.transform.Find(IMAGE_OBJ).GetComponent<Image>();
 
 		balloonImage.sprite = AssignBalloonImage(type);
-
-		//the opponent needs to use white text to be seen against the black background
-		if (type == BalloonTypes.Opponent) balloonText.color = Color.white;
+		balloonImage.color = AssignBalloonColor(type);
 
 		int rows = message.Length/SIZE_PER_ROW;
 
@@ -500,11 +498,8 @@ public class ChatUI {
 		//the balloon object needs to be big enough for the speech balloon, plus some extra to create space between balloons
 		balloon.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height + BALLOON_PADDING);
 
-//		//the speech balloon image needs to be big enough to accommodate the text, plus some extra for the balloon's arrow
-//		balloonImage.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height + BALLOON_EXTRA_SIZE);
-//
-//		//the text only needs to be big enough for the text itself
-//		balloonText.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height);
+		//the balloon image doesn't need the extra space
+		balloonImage.GetComponent<RectTransform>().sizeDelta = new Vector2(CHAT_WINDOW_WIDTH, height);
 
 
 		return balloonText;
@@ -513,6 +508,8 @@ public class ChatUI {
 
 	/// <summary>
 	/// Choose the appropriate speech balloon, based on who (or what) is speaking.
+	/// 
+	/// Right now everyone uses the same image. If that changes, this function allows for that.
 	/// </summary>
 	/// <returns>The balloon image.</returns>
 	/// <param name="type">The type of speech balloon.</param>
@@ -521,13 +518,9 @@ public class ChatUI {
 
 		switch (type){
 			case ChatUI.BalloonTypes.Player:
-				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
-				break;
 			case ChatUI.BalloonTypes.Opponent:
-				temp = Resources.Load<Sprite>(OPPONENT_BALLOON_IMG);
-				break;
 			case ChatUI.BalloonTypes.Object:
-				temp = Resources.Load<Sprite>(OBJECT_BALLOON_IMG);
+				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
 				break;
 			default:
 				Debug.Log("Invalid balloon type: " + type.ToString());
@@ -544,9 +537,13 @@ public class ChatUI {
 
 		switch (type){
 			case ChatUI.BalloonTypes.Player:
+				ColorUtility.TryParseHtmlString(PLAYER_BALLOON_COLOR_HEX, out temp);
+				break;
 			case ChatUI.BalloonTypes.Opponent:
-			case ChatUI.BalloonTypes.Object:
 				ColorUtility.TryParseHtmlString(OPPONENT_BALLOON_COLOR_HEX, out temp);
+				break;
+			case ChatUI.BalloonTypes.Object:
+				ColorUtility.TryParseHtmlString(OBJECT_BALLOON_COLOR_HEX, out temp);
 				break;
 			default:
 				Debug.Log("Invalid balloon type: " + type.ToString());

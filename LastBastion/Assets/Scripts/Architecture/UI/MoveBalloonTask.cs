@@ -30,12 +30,12 @@ public class MoveBalloonTask : Task {
 
 	//the image for the balloon
 	private const string IMAGE_OBJ = "Background";
-	private const string PLAYER_BALLOON_IMG = "Sprites/Box";
-	private const string PLAYER_BALLOON_COLOR_HEX = "#09EA14C8";
+	private const string PLAYER_BALLOON_IMG = "Sprites/Box Greyscale";
+	private const string PLAYER_BALLOON_COLOR_HEX = "#E5FDFFAF";
 	private const string OPPONENT_BALLOON_IMG = "Sprites/Grey Box";
-	private const string OPPONENT_BALLOON_COLOR_HEX = "#FFFFFFFF";
+	private const string OPPONENT_BALLOON_COLOR_HEX = "#FFE5E5AF";
 	private const string OBJECT_BALLOON_IMG = "Sprites/Orange Box";
-	private const string OBJECT_BALLOON_COLOR_HEX = "#FFFFFFFF"; //intentionally the same as for opponents
+	private const string OBJECT_BALLOON_COLOR_HEX = "#E6FFE5AF"; //intentionally the same as for opponents
 
 
 	//speed
@@ -75,7 +75,7 @@ public class MoveBalloonTask : Task {
 		this.balloonType = balloonType;
 	
 		balloon.Find(IMAGE_OBJ).GetComponent<Image>().sprite = AssignBalloonImage(this.balloonType);
-		//balloon.Find(IMAGE_OBJ).GetComponent<Image>().color = AssignBalloonColor(this.balloonType);
+		balloon.Find(IMAGE_OBJ).GetComponent<Image>().color = AssignBalloonColor(this.balloonType);
 
 		balloon.transform.position = position;
 
@@ -105,6 +105,9 @@ public class MoveBalloonTask : Task {
 
 	/// <summary>
 	/// Choose the appropriate speech balloon, based on who (or what) is speaking.
+	/// 
+	/// Right now everyone uses the greyscale box and changes its color. This function provides
+	/// functionality for doing it differently in the future.
 	/// </summary>
 	/// <returns>The balloon image.</returns>
 	/// <param name="type">The type of speech balloon.</param>
@@ -113,13 +116,9 @@ public class MoveBalloonTask : Task {
 
 		switch (type){
 			case ChatUI.BalloonTypes.Player:
-				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
-				break;
 			case ChatUI.BalloonTypes.Opponent:
-				temp = Resources.Load<Sprite>(OPPONENT_BALLOON_IMG);
-				break;
 			case ChatUI.BalloonTypes.Object:
-				temp = Resources.Load<Sprite>(OBJECT_BALLOON_IMG);
+				temp = Resources.Load<Sprite>(PLAYER_BALLOON_IMG);
 				break;
 			default:
 				Debug.Log("Invalid balloon type: " + type.ToString());
@@ -139,8 +138,10 @@ public class MoveBalloonTask : Task {
 			ColorUtility.TryParseHtmlString(PLAYER_BALLOON_COLOR_HEX, out temp);
 			break;
 		case ChatUI.BalloonTypes.Opponent:
-		case ChatUI.BalloonTypes.Object:
 			ColorUtility.TryParseHtmlString(OPPONENT_BALLOON_COLOR_HEX, out temp);
+			break;
+		case ChatUI.BalloonTypes.Object:
+			ColorUtility.TryParseHtmlString(OBJECT_BALLOON_COLOR_HEX, out temp);
 			break;
 		default:
 			Debug.Log("Invalid balloon type: " + type.ToString());
