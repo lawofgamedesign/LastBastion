@@ -19,7 +19,7 @@
 
 
 			//turn UI setup
-			turnText = GameObject.Find(TURN_CANVAS).transform.Find(TEXT_OBJ).GetComponent<Text>();
+			turnText = GameObject.Find(TURN_CANVAS).transform.Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
 
 
 			//character sheet setup
