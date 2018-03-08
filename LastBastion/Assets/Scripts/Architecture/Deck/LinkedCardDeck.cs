@@ -37,7 +37,7 @@ public class LinkedCardDeck {
 		LinkedListNode<LinkedCard> currentCard = deck.First;
 
 		while (currentCard.Value.CheckIfDrawn()){
-			if (currentCard.Value != null) currentCard = currentCard.Next;
+			if (currentCard.Next != null) currentCard = currentCard.Next;
 			else {
 				ShuffleDeck();
 				reshuffled = true;
@@ -145,6 +145,7 @@ public class LinkedCardDeck {
 
 		while (numSteps > 0){
 			currentCard = currentCard.Next;
+			numSteps--;
 		}
 
 

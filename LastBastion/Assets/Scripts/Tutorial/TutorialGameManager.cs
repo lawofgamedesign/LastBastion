@@ -20,8 +20,8 @@
 		//initialize variables and establish the game's starting state
 		private void Awake(){
 			Services.Tasks = new TaskManager();
-			Services.AttackDeck = new AttackerDeck();
-			Services.AttackDeck.Setup();
+//			Services.AttackDeck = new AttackerDeck();
+//			Services.AttackDeck.Setup();
 			Services.Events = new EventManager();
 			Services.UI = new TutorialChatUI();
 			Services.UI.Setup();

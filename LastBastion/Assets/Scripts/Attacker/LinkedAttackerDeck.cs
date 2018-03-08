@@ -55,4 +55,14 @@ public class LinkedAttackerDeck {
 			else Services.UI.RemoveCardFromDiscard(attacker, value);
 		}
 	}
+
+
+	public void Reshuffle(){
+		attackerDeck.ShuffleDeck();
+	}
+
+
+	public int GetDeckCount(){
+		return attackerDeck.GetDeck().Count;
+	}
 }

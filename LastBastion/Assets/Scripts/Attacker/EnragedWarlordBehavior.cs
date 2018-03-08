@@ -43,6 +43,6 @@ public class EnragedWarlordBehavior : WarlordSandbox {
 
 
 		//the Enraged Warlord puts a 5 in the deck when it enters the board
-		Services.AttackDeck.PutCardInDeck(transform, 5);
+		Services.AttackDeck.AddCard(transform, 5);
 	}
 }

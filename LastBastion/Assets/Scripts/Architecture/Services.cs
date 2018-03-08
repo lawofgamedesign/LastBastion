@@ -42,8 +42,8 @@ public static class Services {
 	}
 
 
-	private static AttackerDeck attackDeck;
-	public static AttackerDeck AttackDeck {
+	private static LinkedAttackerDeck attackDeck;
+	public static LinkedAttackerDeck AttackDeck {
 		get {
 			Debug.Assert(attackDeck != null, "No attacker deck. Did you forget to create one?");
 			return attackDeck;

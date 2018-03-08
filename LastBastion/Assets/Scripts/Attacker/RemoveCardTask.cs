@@ -29,7 +29,7 @@ public class RemoveCardTask : Task {
 	/// Remove a card from the deck, then be done.
 	/// </summary>
 	public override void Tick (){
-		Services.AttackDeck.RemoveCardFromDeck(attacker, value);
+		Services.AttackDeck.RemoveCard(attacker, value);
 		SetStatus(TaskStatus.Success);
 	}
 }
