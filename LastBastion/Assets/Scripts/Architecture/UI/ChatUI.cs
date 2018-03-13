@@ -57,6 +57,21 @@ public class ChatUI {
 	protected const float Y_AXIS_MESSINESS = 45.0f;
 
 
+	//the written list of the attacker's cards
+	protected const string DECK_LIST_CANVAS = "Attacker deck canvas";
+	protected const string DECK_LIST_LEFT_OBJ = "Deck column left";
+	protected const string DECK_LIST_RIGHT_OBJ = "Deck column right";
+	protected TextMeshProUGUI deckList;
+	protected TextMeshProUGUI deckListOverflow;
+	protected const string DECK_LIST_LABEL = "Attacker's cards";
+	protected const string NEWLINE = "\n";
+	protected const string START_STRIKETHROUGH = "<s>";
+	protected const string END_STRIKETHROUGH = "</s>";
+	protected const string DRAWN_CARD_COLOR = "<color=#A59E9EFF>";
+	protected const string END_COLOR = "</color>";
+	protected const int MAX_DECKLIST_SIZE = 9; //how many numbers can appear in the decklist before it needs to start writing in the overflow column?
+
+
 	//turn UI
 	protected TextMeshProUGUI turnText;
 	protected const string TURN_CANVAS = "Turn canvas";
@@ -64,7 +79,6 @@ public class ChatUI {
 	protected const string TURN = "Turn ";
 	protected const string SPACE = " ";
 	protected const string COLOR_TAG = "<color=#ff0000>";
-	protected const string END_COLOR_TAG = "</color>";
 	protected const string BACKSLASH = "/";
 	protected RectTransform turnMarker;
 	protected const string TURN_MARKER_OBJ = "Turn marker";
@@ -180,6 +194,12 @@ public class ChatUI {
 		discardOrganizer = GameObject.Find(DISCARD_ORGANIZER).transform;
 		combatDeck.Clear(); //sanity check
 		combatDeck = CreateCombatDeck();
+
+
+		//attacker decklist setup
+		deckList = GameObject.Find(DECK_LIST_CANVAS).transform.Find(DECK_LIST_LEFT_OBJ).GetComponent<TextMeshProUGUI>();
+		deckListOverflow = GameObject.Find(DECK_LIST_CANVAS).transform.Find(DECK_LIST_RIGHT_OBJ).GetComponent<TextMeshProUGUI>();
+		RewriteDecklist();
 
 
 		//speech balloon setup
@@ -819,6 +839,45 @@ public class ChatUI {
 
 	#endregion
 
+	#region decklist
+
+
+	/// <summary>
+	/// Create a decklist, written in order with drawn cards struck through
+	/// </summary>
+	public void RewriteDecklist(){
+		List<LinkedCard> attackerDeck = Services.AttackDeck.GetOrderedDeck();
+
+		string deckListText = DECK_LIST_LABEL + NEWLINE;
+		string overflowDeckListText = "";
+
+		for (int i = 0; i < attackerDeck.Count; i++){
+			if (i <= MAX_DECKLIST_SIZE) {
+				if (attackerDeck[i].CheckIfDrawn()) deckListText += DRAWN_CARD_COLOR + START_STRIKETHROUGH;
+
+				deckListText += attackerDeck[i].Value.ToString();
+
+				if (attackerDeck[i].CheckIfDrawn()) deckListText += END_STRIKETHROUGH + END_COLOR;
+
+				//add a newline after every number except the last that can go into this column
+				if (i < MAX_DECKLIST_SIZE) deckListText += NEWLINE;
+			} else {
+				if (attackerDeck[i].CheckIfDrawn()) deckListText += DRAWN_CARD_COLOR + START_STRIKETHROUGH;
+
+				overflowDeckListText += attackerDeck[i].Value.ToString();
+
+				if (attackerDeck[i].CheckIfDrawn()) deckListText += END_STRIKETHROUGH + END_COLOR;
+
+				//add a newline after every number except the last to be written
+				if (i < attackerDeck.Count - 1) overflowDeckListText += NEWLINE;
+			}
+		}
+
+		deckList.text = deckListText;
+		deckListOverflow.text = overflowDeckListText;
+	}
+
+	#endregion decklist
 
 	#region turn tracker
 
@@ -829,7 +888,7 @@ public class ChatUI {
 		for (int i = 1; i <= total; i++){
 			if (i != current) temp += i.ToString() + SPACE;
 			else {
-				temp += COLOR_TAG + i.ToString() + END_COLOR_TAG + SPACE;
+				temp += COLOR_TAG + i.ToString() + END_COLOR + SPACE;
 			}
 		}
 

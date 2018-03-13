@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class LinkedAttackerDeck {
 
@@ -37,6 +38,7 @@ public class LinkedAttackerDeck {
 
 		if (reshuffled) Services.UI.RecreateCombatDeck();
 		Services.UI.DrawCombatCard(temp.Value);
+		Services.UI.RewriteDecklist();
 
 		return temp;
 	}
@@ -45,6 +47,7 @@ public class LinkedAttackerDeck {
 	public void AddCard(Transform attacker, int value){
 		attackerDeck.AddCard(value);
 		Services.UI.AddCardToDeck(attacker, value);
+		Services.UI.RewriteDecklist();
 	}
 
 
@@ -54,6 +57,7 @@ public class LinkedAttackerDeck {
 			if (!removedFromDiscard) Services.UI.RemoveCardFromDeck(attacker, value);
 			else Services.UI.RemoveCardFromDiscard(attacker, value);
 		}
+		Services.UI.RewriteDecklist();
 	}
 
 
@@ -64,5 +68,10 @@ public class LinkedAttackerDeck {
 
 	public int GetDeckCount(){
 		return attackerDeck.GetDeck().Count;
+	}
+
+
+	public List<LinkedCard> GetOrderedDeck(){
+		return attackerDeck.GetOrderedDeck();
 	}
 }

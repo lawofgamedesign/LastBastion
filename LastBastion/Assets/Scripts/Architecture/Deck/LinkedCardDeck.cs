@@ -57,13 +57,7 @@ public class LinkedCardDeck {
 	public void ShuffleDeck(){
 		if (deck.Count < 2) return; //sanity check; don't try to shuffle a 1-card deck
 
-		List<LinkedCard> temp = new List<LinkedCard>();
-
-		for (LinkedListNode<LinkedCard> card = deck.First; card != null; card = card.Next){
-			temp.Add(card.Value);
-		}
-
-		Debug.Assert(temp.Count == deck.Count, "Failed to find all cards for shuffling");
+		List<LinkedCard> temp = GetCardList();
 
 		temp = ShuffleList(temp);
 
@@ -78,6 +72,23 @@ public class LinkedCardDeck {
 		}
 
 		Debug.Assert(deck.Count == temp.Count, "Failed to add all cards back in");
+	}
+
+
+	/// <summary>
+	/// Makes a list of cards in the deck, in no particular order.
+	/// </summary>
+	/// <returns>The card list.</returns>
+	protected List<LinkedCard> GetCardList(){
+		List<LinkedCard> temp = new List<LinkedCard>();
+
+		for (LinkedListNode<LinkedCard> card = deck.First; card != null; card = card.Next){
+			temp.Add(card.Value);
+		}
+
+		Debug.Assert(temp.Count == deck.Count, "Failed to add all cards to the decklist");
+
+		return temp;
 	}
 
 
@@ -158,5 +169,20 @@ public class LinkedCardDeck {
 
 	public LinkedList<LinkedCard> GetDeck(){
 		return deck;
+	}
+
+
+	/// <summary>
+	/// Get a list of all cards in the deck, ordered by their value lowest to highest.
+	/// </summary>
+	/// <returns>The ordered list.</returns>
+	public List<LinkedCard> GetOrderedDeck(){
+		List<LinkedCard> cardlist = GetCardList();
+
+		Debug.Assert(cardlist.Count > 0, "Failed to get any cards");
+
+		cardlist.Sort((card1, card2) => { return card1.Value.CompareTo(card2.Value); });
+
+		return cardlist;
 	}
 }
