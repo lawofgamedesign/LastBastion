@@ -14,6 +14,7 @@ public class TaskManager {
 	//private Dictionary<string, Queue<Task>> queuedTasks = new Dictionary<string, Queue<Task>>();
 	private Dictionary<string, LinkedList<Task>> orderedTasks = new Dictionary<string, LinkedList<Task>>();
 	private List<string> finishedKeys = new List<string>();
+	private List<Task> tasksToOrder = new List<Task>();
 
 
 	/// <summary>
@@ -26,14 +27,33 @@ public class TaskManager {
 	}
 
 
+	/// <summary>
+	/// Call this to add a new ordered task.
+	/// </summary>
+	/// <param name="task">The task to be added.</param>
 	public void AddOrderedTask(Task task){
-		if (orderedTasks.ContainsKey(task.GetType().ToString())) orderedTasks[task.GetType().ToString()].AddLast(task);
-		else {
-			LinkedList<Task> temp = new LinkedList<Task>();
-			temp.AddFirst(task);
-			orderedTasks.Add(task.GetType().ToString(), temp);
+		tasksToOrder.Add(task);
+	}
+
+
+	/// <summary>
+	/// Adds tasks that should be ordered to the linkedlist that will resolve them.
+	/// 
+	/// This adds from the back of the tasksToOrder list so that if new tasks are added at an unpredicted or undesired moment,
+	/// they will not be removed--but also will not interfere with adding tasks this frame. The list is not cleared,
+	/// so they will be added next frame.
+	/// </summary>
+	private void PrepareNewOrderedTasks(){
+		for (int i = tasksToOrder.Count - 1; i >= 0; i--){
+			if (orderedTasks.ContainsKey(tasksToOrder[i].GetType().ToString())) orderedTasks[tasksToOrder[i].GetType().ToString()].AddLast(tasksToOrder[i]);
+			else {
+				LinkedList<Task> temp = new LinkedList<Task>();
+				temp.AddFirst(tasksToOrder[i]);
+				orderedTasks.Add(tasksToOrder[i].GetType().ToString(), temp);
+			}
+			tasksToOrder[i].SetStatus(Task.TaskStatus.Pending);
+			tasksToOrder.Remove(tasksToOrder[i]);
 		}
-		task.SetStatus(Task.TaskStatus.Pending);
 	}
 
 
@@ -75,6 +95,7 @@ public class TaskManager {
 			}
 		}
 
+		PrepareNewOrderedTasks();
 		CleanUpQueues();
 	}
 
@@ -92,6 +113,15 @@ public class TaskManager {
 	}
 
 
+	/// <summary>
+	/// Handle the completion of ordered tasks, by doing the following:
+	/// 
+	/// 1. Remove the now-completed task from the linked list of ordered tasks. The following task in the linked list now becomes first, and will be worked on.
+	/// 2. If the now-completed task has a next task, add that to the beginning of the linked list. Now it becomes the task to be worked on.
+	/// 3. If there are no more ordered tasks of the completed task's type, remove the key for that task.
+	/// 4. Detach the completed task.
+	/// </summary>
+	/// <param name="task">The finished task.</param>
 	private void HandleOrderedCompletion(Task task){
 		orderedTasks[task.GetType().ToString()].RemoveFirst();
 		if (task.NextTask != null && task.IsSuccessful) { orderedTasks[task.GetType().ToString()].AddFirst(task.NextTask); }

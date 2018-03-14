@@ -82,8 +82,8 @@ public class GameManager : MonoBehaviour {
 	private void Update(){
 		if (paused) return;
 
+		Services.Tasks.Tick();
 		Services.Inputs.Tick();
 		Services.Rulebook.Tick();
-		Services.Tasks.Tick();
 	}
 }

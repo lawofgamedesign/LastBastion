@@ -806,11 +806,13 @@ public class ChatUI {
 			combatDeck = CreateCombatDeck();
 		}
 
-		if (!Services.Tasks.CheckForTaskOfType<ThrowAwayCardTask>()){
-			Services.Tasks.AddTask(new ThrowAwayCardTask(deckOrganizer, attacker, value));
-		} else {
-			Services.Tasks.GetLastTaskOfType<ThrowAwayCardTask>().Then(new ThrowAwayCardTask(deckOrganizer, attacker, value));
-		}
+
+		Services.Tasks.AddOrderedTask(new ThrowAwayCardTask(deckOrganizer, attacker, value));
+//		if (!Services.Tasks.CheckForTaskOfType<ThrowAwayCardTask>()){
+//			Services.Tasks.AddTask(new ThrowAwayCardTask(deckOrganizer, attacker, value));
+//		} else {
+//			Services.Tasks.GetLastTaskOfType<ThrowAwayCardTask>().Then(new ThrowAwayCardTask(deckOrganizer, attacker, value));
+//		}
 	}
 
 

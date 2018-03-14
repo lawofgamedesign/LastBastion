@@ -44,14 +44,16 @@ public class SkilledWarlordBehavior : WarlordSandbox {
 
 
 		//the Skilled Warlord takes a 1 out of the deck when it enters the board, if any are available
-		//like the UIManager, this uses a somewhat elaborate system to make sure the tasks get queued correctly
+		Services.Tasks.AddOrderedTask(new RemoveCardTask(transform, 1));
+
+
 		//tasks are used to avoid undefined resolution orders for AttackerDeck's RemoveCard functions
-		if (!Services.Tasks.CheckForTaskOfType<RemoveCardTask>()){ //this is the first attempt to remove a card
-			Services.Tasks.AddTask(new RemoveCardTask(transform, 1));
-		} else if (Services.Tasks.GetLastTaskOfType<RemoveCardTask>() == null){ //third attempt; can't find the second yet
-			Services.Tasks.AddTask(new DelayedRemoveCardTask(transform, 1));
-		} else { //second attempt
-			Services.Tasks.GetLastTaskOfType<RemoveCardTask>().Then(new RemoveCardTask(transform, 1));
-		}
+//		if (!Services.Tasks.CheckForTaskOfType<RemoveCardTask>()){ //this is the first attempt to remove a card
+//			Services.Tasks.AddTask(new RemoveCardTask(transform, 1));
+//		} else if (Services.Tasks.GetLastTaskOfType<RemoveCardTask>() == null){ //third attempt; can't find the second yet
+//			Services.Tasks.AddTask(new DelayedRemoveCardTask(transform, 1));
+//		} else { //second attempt
+//			Services.Tasks.GetLastTaskOfType<RemoveCardTask>().Then(new RemoveCardTask(transform, 1));
+//		}
 	}
 }

@@ -18,7 +18,7 @@ public class ThrowAwayCardTask : Task {
 
 
 	//the card to be discarded
-	private Transform card;
+	private RectTransform card;
 	private readonly int value;
 	private const string CARD_OBJ = "Combat card";
 	private const string VALUE_OBJ = "Value";
@@ -49,7 +49,8 @@ public class ThrowAwayCardTask : Task {
 	/// </summary>
 	protected override void Init (){
 		card = MonoBehaviour.Instantiate(Resources.Load<GameObject>(CARD_OBJ), 
-										 startLoc).transform;
+				startLoc).GetComponent<RectTransform>();
+		card.name = endLoc.name + CARD_OBJ;
 		card.position = startLoc.position;
 		card.Find(VALUE_OBJ).GetComponent<Text>().text = value.ToString();
 	}
