@@ -23,8 +23,13 @@ public class UpgradeTask : Task {
 	}
 
 
+	/// <summary>
+	/// Register for the correct type of event, based on whether this is the tutorial or the full game.
+	/// </summary>
 	protected override void Init (){
-		Services.Events.Register<PowerChoiceEvent>(HandlePowerChoices);
+		if (Services.Rulebook.GetType() == typeof(Tutorial.TutorialTurnManager)) Services.Events.Register<TutorialPowerChoiceEvent>(HandlePowerChoices);
+		else Services.Events.Register<PowerChoiceEvent>(HandlePowerChoices);
+
 		Services.Defenders.SelectDefenderForUpgrade(defender);
 	}
 
@@ -55,20 +60,31 @@ public class UpgradeTask : Task {
 	/// No matter how the task finishes, unregister for PowerChoiceEvents.
 	/// </summary>
 	protected override void Cleanup (){
-		Services.Events.Unregister<PowerChoiceEvent>(HandlePowerChoices);
+		if (Services.Rulebook.GetType() == typeof(Tutorial.TutorialTurnManager)) Services.Events.Unregister<TutorialPowerChoiceEvent>(HandlePowerChoices);
+		else Services.Events.Unregister<PowerChoiceEvent>(HandlePowerChoices);
 	}
 
 
 	/// <summary>
 	/// When the player chooses a new ability, direct that choice appropriately.
 	/// </summary>
-	/// <param name="e">A PowerChoiceEvent.</param>
+	/// <param name="e">A PowerChoiceEvent (or TutorialPowerChoiceEvent, if it's the tutorial).</param>
 	private void HandlePowerChoices(Event e){
-		Debug.Assert(e.GetType() == typeof(PowerChoiceEvent), "Non-PowerChoiceEvent in HandlePowerChoices.");
+		if (Services.Rulebook.GetType() == typeof(Tutorial.TutorialTurnManager)){
+			Debug.Assert(e.GetType() == typeof(TutorialPowerChoiceEvent), "Non-TutorialPowerChoiceEvent in HandlePowerChoices.");
 
-		PowerChoiceEvent powerEvent = e as PowerChoiceEvent;
+			TutorialPowerChoiceEvent powerEvent = e as TutorialPowerChoiceEvent;
 
-		powerEvent.defender.PowerUp(powerEvent.tree);
+			powerEvent.defender.PowerUp(powerEvent.tree);
+		} else {
+			Debug.Assert(e.GetType() == typeof(PowerChoiceEvent), "Non-PowerChoiceEvent in HandlePowerChoices.");
+
+			PowerChoiceEvent powerEvent = e as PowerChoiceEvent;
+
+			powerEvent.defender.PowerUp(powerEvent.tree);
+		}
+
+
 
 		SetStatus(TaskStatus.Success);
 	}

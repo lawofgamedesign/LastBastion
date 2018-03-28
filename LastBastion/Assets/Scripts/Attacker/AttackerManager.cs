@@ -47,7 +47,7 @@ public class AttackerManager {
 
 	//formatting for enemy names
 	public const string DIVIDER = "_";
-	private const int CLONE_LENGTH = 7; //number of characters in "(Clone)";
+	protected const int CLONE_LENGTH = 7; //number of characters in "(Clone)";
 
 
 	/////////////////////////////////////////////
@@ -350,6 +350,15 @@ public class AttackerManager {
 
 		foreach (AttackerSandbox attacker in currentAttackers){
 			attacker.TryMove();
+		}
+	}
+
+
+	public void RemoveAttackersSpawnedState(){
+		List<AttackerSandbox> currentAttackers = Services.Board.GetOrderedAttackerList();
+
+		foreach (AttackerSandbox attacker in currentAttackers){
+			attacker.SpawnedThisTurn = false;
 		}
 	}
 

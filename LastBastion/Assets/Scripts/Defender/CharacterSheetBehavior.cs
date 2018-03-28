@@ -217,8 +217,15 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	/// <param name="tree">The upgrade tree the player clicked on. Left is 0, right is 1.</param>
 	public void PowerUpButton(int tree){
 
+		//if the tutorial is running, communicate with that
+		if (Services.Rulebook.GetType() == typeof(Tutorial.TutorialTurnManager)){
+			Services.Events.Fire(new TutorialPowerChoiceEvent(Services.Defenders.GetSelectedDefender(), tree));
+		}
+
+		//if the code gets this far, the tutorial is not running
+
 		//if it's the upgrade phase, allow the player to upgrade
-		if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerUpgrade)) {
+		else if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerUpgrade)) {
 			Services.Events.Fire(new PowerChoiceEvent(Services.Defenders.GetSelectedDefender(), tree));
 		}
 

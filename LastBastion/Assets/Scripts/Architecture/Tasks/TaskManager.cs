@@ -45,7 +45,7 @@ public class TaskManager {
 	/// </summary>
 	private void PrepareNewOrderedTasks(){
 		for (int i = tasksToOrder.Count - 1; i >= 0; i--){
-			if (orderedTasks.ContainsKey(tasksToOrder[i].GetType().ToString())) orderedTasks[tasksToOrder[i].GetType().ToString()].AddLast(tasksToOrder[i]);
+			if (orderedTasks.ContainsKey(tasksToOrder[i].GetType().ToString())) orderedTasks[tasksToOrder[i].GetType().ToString()].AddFirst(tasksToOrder[i]);
 			else {
 				LinkedList<Task> temp = new LinkedList<Task>();
 				temp.AddFirst(tasksToOrder[i]);

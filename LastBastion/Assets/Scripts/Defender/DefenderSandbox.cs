@@ -651,7 +651,9 @@ public class DefenderSandbox : MonoBehaviour {
 	/// </summary>
 	public virtual void DefeatAttacker(){
 		DefeatedSoFar++;
-		powerupReadyParticle.SetActive(CheckUpgradeStatus());
+
+		//don't display the power up particle during the tutorial; it's distracting
+		if (Services.Rulebook.GetType() != typeof(Tutorial.TutorialTurnManager)) powerupReadyParticle.SetActive(CheckUpgradeStatus());
 	}
 
 

@@ -1,6 +1,7 @@
 ﻿namespace Tutorial
 {
 	using UnityEngine;
+	using UnityEngine.SceneManagement;
 
 	public class TutorialGameManager : MonoBehaviour {
 
@@ -17,21 +18,28 @@
 		private const string CHAR_SHEET_UI = "Defender sheet canvas";
 
 
+		//is the game paused right now?
+		private bool paused = false;
+
+
+		//scenes this scene can load
+		private const string TUTORIAL_SCENE = "Tutorial3";
+
+
 		//initialize variables and establish the game's starting state
 		private void Awake(){
 			Services.Tasks = new TaskManager();
-//			Services.AttackDeck = new AttackerDeck();
-//			Services.AttackDeck.Setup();
+			Services.AttackDeck = new LinkedAttackerDeck();
 			Services.Events = new EventManager();
-			Services.UI = new TutorialChatUI();
+			Services.UI = new ChatUI();
 			Services.UI.Setup();
 			Services.Board = new BoardBehavior();
 			Services.Board.Setup();
-			Services.Attackers = new TutorialAttackerManager();
+			Services.Attackers = new AttackerManager();
 			Services.Attackers.Setup();
 			Services.Rulebook = new TutorialTurnManager();
 			Services.Rulebook.Setup();
-			Services.Defenders = new TutorialDefenderManager();
+			Services.Defenders = new DefenderManager();
 			Services.Defenders.Setup();
 			GameObject.Find(DEFENDER_UI).GetComponent<DefenderUIBehavior>().Setup();
 			Services.Inputs = new InputManager();
@@ -44,6 +52,27 @@
 			Services.Sound.Setup();
 			Services.PlayerEyes = new CameraBehavior();
 			Services.PlayerEyes.Setup();
+			Services.Environment = new EnvironmentManager();
+			Services.EscapeMenu = new TutorialEscMenuBehavior();
+			Services.EscapeMenu.Setup();
+			Services.Events.Register<PauseEvent>(HandlePausing);
+		}
+
+
+		private void HandlePausing(global::Event e){
+			Debug.Assert(e.GetType() == typeof(PauseEvent), "Non-PauseEvent in HandlePausing.");
+
+			PauseEvent pauseEvent = e as PauseEvent;
+
+			if (pauseEvent.action == PauseEvent.Pause.Pause) paused = true;
+			else paused = false;
+		}
+
+
+		public void Restart(){
+			Services.Events.Unregister<PauseEvent>(HandlePausing);
+			Services.EscapeMenu.Cleanup();
+			SceneManager.LoadScene(TUTORIAL_SCENE);
 		}
 
 
@@ -52,9 +81,11 @@
 		/// frame-by-frame is controlled from here.
 		/// </summary>
 		private void Update(){
+			if (paused) return;
+
+			Services.Tasks.Tick();
 			Services.Inputs.Tick();
 			Services.Rulebook.Tick();
-			Services.Tasks.Tick();
 		}
 	}
 }

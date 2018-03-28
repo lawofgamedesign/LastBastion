@@ -13,6 +13,9 @@ TagManager:
   - Tankard
   - Momentum marker
   - Removed
+  - Indicator
+  - Wall
+  - Notice
   layers:
   - Default
   - TransparentFX

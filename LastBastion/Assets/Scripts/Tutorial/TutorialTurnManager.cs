@@ -1,6 +1,8 @@
 ﻿namespace Tutorial
 {
+	using System.Collections.Generic;
 	using UnityEngine;
+	using UnityEngine.SceneManagement;
 	using UnityEngine.UI;
 
 	public class TutorialTurnManager : TurnManager {
@@ -15,8 +17,31 @@
 		private FSM<TutorialTurnManager> tutMachine;
 		public FSM<TutorialTurnManager> TutMachine { 
 			get { return tutMachine; } 
-			protected set { tutMachine = value; }
+			private set { tutMachine = value; }
 		}
+
+
+		//used to turn indicators on and off
+		public enum Indicate { Start, Stop };
+		private GameObject indicator;
+		private const string INDICATOR_OBJ = "Indicator particle";
+		private const string INDICATOR_TAG = "Indicator";
+
+
+		//the notices explaining where to move to
+		private List<GameObject> moveNotices = new List<GameObject>();
+		private GameObject rangerNotice;
+		private GameObject guardianNotice;
+		private GameObject brawlerNotice;
+		private const string NOTICE = " move notice";
+		private const string RANGER = "Ranger";
+		private const string GUARDIAN = "Guardian";
+		private const string BRAWLER = "Brawler";
+		private const string NOTICE_TAG = "Notice";
+
+
+		//scene to load when the tutorial is finished
+		private const string NEXT_SCENE = "Game";
 
 
 		/////////////////////////////////////////////
@@ -26,16 +51,75 @@
 
 		//initialize variables
 		public override void Setup(){
-			ResetTurnUI();
 			tutMachine = new FSM<TutorialTurnManager>(this);
 			TutMachine = tutMachine;
-			tutMachine.TransitionTo<StartOfTutorial>();
+			indicator = Resources.Load<GameObject>(INDICATOR_OBJ);
+			rangerNotice = GameObject.Find(RANGER + NOTICE);
+			guardianNotice = GameObject.Find(GUARDIAN + NOTICE);
+			brawlerNotice = GameObject.Find(BRAWLER + NOTICE);
+			moveNotices.AddRange(GameObject.FindGameObjectsWithTag(NOTICE_TAG));
+			rangerNotice.SetActive(false);
+			guardianNotice.SetActive(false);
+			brawlerNotice.SetActive(false);
+
+			TutMachine.TransitionTo<StartOfTutorial>();
 		}
 
 
 		//go through one loop of the current state
 		public override void Tick(){
-			tutMachine.Tick();
+			TutMachine.Tick();
+		}
+
+
+		/// <summary>
+		/// Move from one set of tutorial statements--tutorial text and button text--to the next.
+		/// </summary>
+		/// <param name="newTutorialText">The next thing the opponent says.</param>
+		/// <param name="newPlayerText">The next thing the player says.</param>
+		private void ChangeUIText(string newTutorialText, string newPlayerText){
+			Services.UI.SimultaneousStatements(Services.UI.GetTutorialText(), Services.UI.GetPhaseButtonText());
+			Services.UI.SetTutorialText(newTutorialText);
+			Services.UI.SetButtonText(newPlayerText);
+		}
+
+
+		private void NoteObject(string tag, Indicate startOrStop){
+			if (startOrStop == Indicate.Start){
+				foreach (GameObject obj in GameObject.FindGameObjectsWithTag(tag)){
+					MonoBehaviour.Instantiate<GameObject>(indicator,
+														  new Vector3(obj.transform.position.x, indicator.transform.position.y, obj.transform.position.z + 
+																																indicator.transform.position.z),
+														  indicator.transform.rotation);
+				}
+			} else {
+				foreach (GameObject indicator in GameObject.FindGameObjectsWithTag(INDICATOR_TAG)){
+					indicator.SetActive(false);
+				}
+			}
+		}
+
+
+		/// <summary>
+		/// Switch on the UI element indicating where a given defender should move.
+		/// </summary>
+		/// <param name="defender">The moving defender, or null if all notices should be off.</param>
+		private void ToggleMoveNotice(DefenderSandbox defender){
+			foreach (GameObject notice in moveNotices) notice.SetActive(false);
+
+			if (defender == null) return;
+
+			switch (defender.gameObject.name) {
+				case RANGER:
+					rangerNotice.SetActive(true);
+					break;
+				case GUARDIAN:
+					guardianNotice.SetActive(true);
+					break;
+				case BRAWLER:
+					brawlerNotice.SetActive(true);
+					break;
+			}
 		}
 			
 
@@ -48,57 +132,46 @@
 		//update the turn counter
 		public class StartOfTutorial : FSM<TutorialTurnManager>.State {
 
+			//things the tutorial uses
+			GameObject clickHereNotice;
+			private const string CLICK_HERE_OBJ = "Click here notice";
+			private const string DEFENDER_TAG = "Defender";
+
+
 
 			private const string WELCOME_MSG = "OK, we're all set up.";
 			private const string HOW_MSG = "How do we play?";
-			private const string THEME_MSG = "I'm the evil Necromancer. I try to get my horde to the bottom row of tiles.";
-			private const string NEVER_MSG = "Never!";
-			private const string HORDE_MSG = "My skeletal horde is endless. You have to hold out until daybreak, which dispels my necromancy.";
-			private const string NONE_MSG = "None shall pass!";
-			private const string WAVES_MSG = "My horde attacks in waves. Each wave lasts a certain number of turns.";
-			private const string UNDERSTAND_MSG = "I understand.";
-			private const string ONE_THREE_MSG = "We start with the first wave. It lasts three turns.";
-			private const string END_OF_WAVE_MSG = "You win by surviving through the last turn of the third wave. That's when daybreak happens.";
-			private const string VALIANT_MSG = "Great!";
-			private const string ADVANCE_MSG = "Each turn begins with my horde advancing.";
-			private const string DASTARDLY_MSG = "Stop that!";
+			private const string THEME_MSG = "In <b>Last Bastion</b>, you have to defend an innocent town from my skeleton horde.";
+			private const string DEFENDERS_WHERE_MSG = "Defend with what?";
+			private const string DEFENDERS_HERE_MSG = "These are your three defenders. Each one is a mighty champion--my horde can never hurt or kill them.";
+			private const string CANT_LOSE_MSG = "Then then I always win?";
+			private const string HOW_LOSE_MSG = "Your defenders can't die, but they might fail. If my horde ever reaches the back row of tiles, I win.";
+			private const string TOWN_LOCATION_MSG = "That's the town.";
+			private const string START_TURN_MSG = "Right. Are you ready to see how each turn goes?";
+			private const string OK_MSG = "Sure.";
 
 
 			private void OnButtonClick(global::Event e){
 				switch (Services.UI.GetTutorialText()){
 					case WELCOME_MSG:
-						Services.UI.SimultaneousStatements(WELCOME_MSG, HOW_MSG);
-						Services.UI.SetTutorialText(THEME_MSG);
-						Services.UI.SetButtonText(NEVER_MSG);
-						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.On);
+						clickHereNotice.SetActive(false);
+						Context.ChangeUIText(THEME_MSG, DEFENDERS_WHERE_MSG);
 						break;
 					case THEME_MSG:
-						Services.UI.SimultaneousStatements(THEME_MSG, NEVER_MSG);
-						Services.UI.SetTutorialText(HORDE_MSG);
-						Services.UI.SetButtonText(NONE_MSG);
+						Context.NoteObject(DEFENDER_TAG, Indicate.Start);
+						Context.ChangeUIText(DEFENDERS_HERE_MSG, CANT_LOSE_MSG);
+						break;
+					case DEFENDERS_HERE_MSG:
+						Context.NoteObject(DEFENDER_TAG, Indicate.Stop);
+						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.On);
+						Context.ChangeUIText(HOW_LOSE_MSG, TOWN_LOCATION_MSG);
+						break;
+					case HOW_LOSE_MSG:
 						Services.Board.HighlightRow(0, BoardBehavior.OnOrOff.Off);
+						Context.ChangeUIText(START_TURN_MSG, OK_MSG);
 						break;
-					case HORDE_MSG:
-						Services.UI.SimultaneousStatements(HORDE_MSG, NONE_MSG);
-						Services.UI.SetTutorialText(WAVES_MSG);
-						Services.UI.SetButtonText(UNDERSTAND_MSG);
-						break;
-					case WAVES_MSG:
-						Services.UI.SimultaneousStatements(WAVES_MSG, UNDERSTAND_MSG);
-						Services.UI.SetTutorialText(ONE_THREE_MSG);
-						break;
-					case ONE_THREE_MSG:
-						Services.UI.SimultaneousStatements(ONE_THREE_MSG, UNDERSTAND_MSG);
-						Services.UI.SetTutorialText(END_OF_WAVE_MSG);
-						Services.UI.SetButtonText(VALIANT_MSG);
-						break;
-					case END_OF_WAVE_MSG:
-						Services.UI.SimultaneousStatements(END_OF_WAVE_MSG, VALIANT_MSG);
-						Services.UI.SetTutorialText(ADVANCE_MSG);
-						Services.UI.SetButtonText(DASTARDLY_MSG);
-						break;
-					case ADVANCE_MSG:
-						Services.UI.SimultaneousStatements(ADVANCE_MSG, DASTARDLY_MSG);
+					case START_TURN_MSG:
+						Services.UI.TogglePhaseButton(ChatUI.OnOrOff.Off);
 						TransitionTo<AttackersAdvance>();
 						break;
 				}
@@ -106,19 +179,22 @@
 
 
 			public override void OnEnter (){
-				Context.NewTurn();
 				Services.UI.SetTutorialText(WELCOME_MSG);
 				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
 				Services.UI.SetButtonText(HOW_MSG);
+				Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
 				Services.Events.Register<TutorialClick>(OnButtonClick);
-				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
+				FindTutorialObjects();
+			}
 
+
+			private void FindTutorialObjects(){
+				clickHereNotice = GameObject.Find(CLICK_HERE_OBJ);
 			}
 
 
 			public override void OnExit (){
 				Services.Events.Unregister<TutorialClick>(OnButtonClick);
-				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.Off);
 			}
 		}
 
@@ -128,6 +204,32 @@
 		/// </summary>
 		public class AttackersAdvance : FSM<TutorialTurnManager>.State {
 			float timer;
+			bool doneAdvancing = false;
+
+			private const string WALL_TAG = "Wall";
+			private const string MOVE_PHASE_MSG = "Each turn starts with my horde advancing one space toward town.";
+			private const string WALL_Q_MSG = "What about that wall?";
+			private const string WALL_A_MSG = "Good question! My horde can't move through any part of the wall with guards on top.";
+			private const string GUARDS_Q_MSG = "Can I lose guards?";
+			private const string GUARDS_A_MSG = "Yes--we'll talk about it at the end of the turn. For now, let's talk about your defenders";
+			private const string READY_PROGRESS_MSG = "OK.";
+
+
+			private void OnButtonClick(global::Event e){
+				switch (Services.UI.GetTutorialText()){
+					case MOVE_PHASE_MSG:
+						Context.ChangeUIText(WALL_A_MSG, GUARDS_Q_MSG);
+						break;
+					case WALL_A_MSG:
+						Context.ChangeUIText(GUARDS_A_MSG, READY_PROGRESS_MSG);
+						break;
+					case GUARDS_A_MSG:
+						Context.NoteObject(WALL_TAG, Indicate.Stop);
+						TransitionTo<PlayerMove>();
+						break;
+				}
+			}
+
 
 			//tell the attacker manager to move the attackers.
 			//this is routed through the attacker manager to avoid spreading control over the attackers over multiple classes.
@@ -135,19 +237,28 @@
 				timer = 0.0f;
 				Services.Attackers.SpawnNewAttackers(); //when the wave is done, don't spawn more attackers
 				Services.Attackers.PrepareAttackerMove();
+				Services.Attackers.RemoveAttackersSpawnedState();
 				Services.Attackers.MoveAttackers();
-				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
+				Services.UI.SetTutorialText(MOVE_PHASE_MSG);
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+				//Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
 			}
 
 
 			//wait while the attackers move
 			public override void Tick(){
 				timer += Time.deltaTime;
-				if (timer >= Context.attackerAdvanceDuration){
-
-					//go to the Defenders Move phase
-					TransitionTo<PlayerMove>();
+				if (timer >= Context.attackerAdvanceDuration && !doneAdvancing){
+					doneAdvancing = true;
+					Services.UI.SetButtonText(WALL_Q_MSG);
+					Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
+					Context.NoteObject(WALL_TAG, Indicate.Start);
 				}
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
 			}
 		}
 
@@ -158,139 +269,98 @@
 		public class PlayerMove : FSM<TutorialTurnManager>.State {
 
 
-			private const string YOUR_TURN_MSG = "After my horde advances, it's your turn to move your defenders.";
-			private const string OK_MSG = "Got it.";
-			private const string SELECT_MSG = "Plan your move by clicking the spaces you want to move to. First, click your defender.";
-			private const string PLAN_MSG = "Now choose your move by clicking each highlighted space.";
-			private const string DONE_MSG = "Right, now lock in your move with the \"Go here\" button.";
-			private const string PLEASE_MOVE_MSG = "Oops, you didn't move far enough. Try going to the last highlighted space.";
-			private const string MOVE_ALL_MSG = "Great! In the real game, you'll have three defenders you can move, not just one.";
-			private TwoDLoc[] requiredMoves = new TwoDLoc[2] { new TwoDLoc(3, 2), new TwoDLoc(3, 3) };
-			private int moveIndex = 0;
-			private DefenderSandbox defender; //assumes there is only one defender in the tutorial
+			//the defenders; used to check their locations at the end of the tutorial
+			private RangerBehavior ranger;
+			private GuardianBehavior guardian;
+			private BrawlerBehavior brawler;
+
+
+			private const string MOVE_START_MSG = "After my horde advances, your defenders can move.";
+			private const string HOW_MOVE_MSG = "Where do I click?";
+			private const string MOVE_EXPLANATION_MSG = "Click each defender, then click tiles to make a path to a highlighted space.";
+			private const string THERE_MSG = "They're there.";
+
 
 
 			private void OnButtonClick(global::Event e){
 				switch (Services.UI.GetTutorialText()){
-					case YOUR_TURN_MSG:
-						Services.UI.SimultaneousStatements(YOUR_TURN_MSG, OK_MSG);
-						Services.UI.SetTutorialText(SELECT_MSG);
+					case MOVE_START_MSG:
+						Services.UI.SetTutorialText(MOVE_EXPLANATION_MSG);
 						Services.UI.TogglePhaseButton(ChatUI.OnOrOff.Off);
+						Services.UI.ToggleUndoButton(ChatUI.OnOrOff.On);
+						HighlightGoalSpaces();
 						break;
-					case MOVE_ALL_MSG:
-						Services.UI.SimultaneousStatements(MOVE_ALL_MSG, OK_MSG);
+					case MOVE_EXPLANATION_MSG:
 						TransitionTo<PlayerFight>();
 						break;
 				}
 			}
 
 
+			private void HighlightGoalSpaces(){
+				Services.Board.HighlightSpace(0, 3, BoardBehavior.OnOrOff.On);
+				Services.Board.HighlightSpace(5, 3, BoardBehavior.OnOrOff.On);
+				Services.Board.HighlightSpace(8, 3, BoardBehavior.OnOrOff.On);
+			}
 
-			private void HandleHighlight(){
-				if (moveIndex < requiredMoves.Length){
-					Services.Board.HighlightSpace(requiredMoves[moveIndex].x, requiredMoves[moveIndex].z, BoardBehavior.OnOrOff.On);
-				}
 
-				if (moveIndex > 0 && moveIndex <= requiredMoves.Length){
-					Services.Board.HighlightSpace(requiredMoves[moveIndex - 1].x, requiredMoves[moveIndex - 1].z, BoardBehavior.OnOrOff.Off);
+			private void HandleMoves(global::Event e){
+				Context.ToggleMoveNotice(null);
+
+				if (ranger.ReportGridLoc().x == 0 && ranger.ReportGridLoc().z == 3){
+					if (guardian.ReportGridLoc().x == 5 && guardian.ReportGridLoc().z == 3){
+						if (brawler.ReportGridLoc().x == 8 && brawler.ReportGridLoc().z == 3){
+							Services.Board.HighlightAll(BoardBehavior.OnOrOff.Off);
+							Services.UI.SetButtonText(THERE_MSG);
+							Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
+							Services.UI.ToggleUndoButton(ChatUI.OnOrOff.Off);
+						}
+					}
 				}
 			}
+
 
 			private void HandleMoveInputs(global::Event e){
 				InputEvent inputEvent = e as InputEvent;
 
+				//don't double-count inputs that are intended to hide the character sheet
+				if (Services.UI.GetCharSheetStatus() == CharacterSheetBehavior.SheetStatus.Displayed) return;
 
-				if (Services.UI.GetTutorialText() == SELECT_MSG ||
-					Services.UI.GetTutorialText() == PLEASE_MOVE_MSG){
-					if (inputEvent.selected.tag == DEFENDER_TAG){
-						Services.Defenders.SelectDefenderForMovement(inputEvent.selected.GetComponent<DefenderSandbox>());
-						Services.UI.SetTutorialText(PLAN_MSG);
-						HandleHighlight();
+				if (Services.UI.GetTutorialText() != MOVE_EXPLANATION_MSG) return; //only move after the player has seen the explanation
+
+				if (inputEvent.selected.tag == DEFENDER_TAG){
+					Services.Defenders.SelectDefenderForMovement(inputEvent.selected.GetComponent<DefenderSandbox>());
+					Context.ToggleMoveNotice(Services.Defenders.GetSelectedDefender());
+				} else if (inputEvent.selected.tag == BOARD_TAG){
+					if (Services.Defenders.IsAnyoneSelected()){
+						Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
 					}
-				} else if (Services.UI.GetTutorialText() == PLAN_MSG){
-					if (moveIndex >= requiredMoves.Length) return; //don't do anything with extra clicks on the board
-					else if (inputEvent.selected.tag == BOARD_TAG){
-						SpaceBehavior space = inputEvent.selected.GetComponent<SpaceBehavior>();
-
-						if (space.GridLocation.x == requiredMoves[moveIndex].x &&
-							space.GridLocation.z == requiredMoves[moveIndex].z){
-
-							Services.Defenders.GetSelectedDefender().TryPlanMove(space.GridLocation);
-
-							moveIndex++;
-
-							HandleHighlight();
-						}
-
-						//upon arrival, tell the player to move on
-						if (moveIndex == requiredMoves.Length){
-							Services.UI.SetTutorialText(DONE_MSG);
-						}
-					}
-				}
-			}
-
-
-			private void ResetMoveTutorial(global::Event e){
-				Debug.Assert(e.GetType() == typeof(UndoMoveEvent), "Non-UndoMoveEvent in ResetMoveTutorial");
-
-				//if the player is resetting while in the middle of the path, clear the highlight for the
-				//next space
-				if (moveIndex != 0 && moveIndex < requiredMoves.Length){
-					Services.Board.HighlightSpace(requiredMoves[moveIndex].x,
-												  requiredMoves[moveIndex].z,
-												  BoardBehavior.OnOrOff.Off);
-				}
-
-				moveIndex = 0;
-				HandleHighlight();
-				Services.Undo.UndoMovePhase();
-
-				Services.UI.SetTutorialText(PLAN_MSG);
-			}
-
-
-			private void TestMove(global::Event e){
-				Debug.Assert(e.GetType() == typeof(MoveEvent), "Non-MoveEvent in TestMove");
-
-				MoveEvent moveEvent = e as MoveEvent;
-
-
-				if (moveEvent.endPos.x == requiredMoves[requiredMoves.Length - 1].x &&
-					moveEvent.endPos.z == requiredMoves[requiredMoves.Length - 1].z){
-
-					Services.UI.OpponentStatement(DONE_MSG);
-					Services.UI.SetTutorialText(MOVE_ALL_MSG);
-					Services.UI.SetButtonText(OK_MSG);
-					Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
-				} else {
-					ResetMoveTutorial(new UndoMoveEvent());
-					Services.Defenders.PrepareDefenderMovePhase();
-					Services.UI.SetTutorialText(PLEASE_MOVE_MSG);
 				}
 			}
 
 
 			public override void OnEnter(){
 				Services.Defenders.PrepareDefenderMovePhase();
-				Services.Events.Fire(new TutorialPhaseStartEvent(Context.TutMachine.CurrentState));
-				Services.UI.SetTutorialText(YOUR_TURN_MSG);
-				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
-				Services.UI.SetButtonText(OK_MSG);
-				Services.Events.Register<TutorialClick>(OnButtonClick);
 				Services.Events.Register<InputEvent>(HandleMoveInputs);
-				Services.Events.Register<UndoMoveEvent>(ResetMoveTutorial);
-				Services.Events.Register<MoveEvent>(TestMove);
+				Services.Events.Register<MoveEvent>(HandleMoves);
 				Services.Undo.PrepareToUndoMoves();
-				defender = GameObject.FindGameObjectWithTag(DEFENDER_TAG).GetComponent<DefenderSandbox>();
+				Context.imSure = false;
+
+				Context.ChangeUIText(MOVE_START_MSG, HOW_MOVE_MSG);
+
+				ranger = GameObject.Find(RANGER).GetComponent<RangerBehavior>();
+				guardian = GameObject.Find(GUARDIAN).GetComponent<GuardianBehavior>();
+				brawler = GameObject.Find(BRAWLER).GetComponent<BrawlerBehavior>();
+
+				Services.Events.Register<TutorialClick>(OnButtonClick);
 			}
 
 
 			public override void OnExit(){
-				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+				Services.Defenders.CompleteMovePhase();
 				Services.Events.Unregister<InputEvent>(HandleMoveInputs);
-				Services.Events.Unregister<UndoMoveEvent>(ResetMoveTutorial);
-				Services.Events.Unregister<MoveEvent>(TestMove);
+				Services.Events.Unregister<MoveEvent>(HandleMoves);
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
 			}
 		}
 //
@@ -302,111 +372,103 @@
 		public class PlayerFight : FSM<TutorialTurnManager>.State {
 
 
-			private const string FIGHT_NOW_MSG = "After your defenders move, they can fight my horde.";
-			private const string SEQUENCE_MSG = "Move, then fight.";
-			private const string FACING_MSG = "Normally your defenders can only fight someone directly ahead of them.";
-			private const string OK_MSG = "In front, OK.";
-			private const string CARD_MSG = "When we fight we each play a card and add any modifier our characters have. High value wins.";
-			private const string CARD_WHERE_MSG = "What cards?";
-			private const string ATK_CARD_MSG = "I have a deck of cards in the upper-left. Next to it is a list of cards still in my deck, and what I've played.";
-			private const string SEE_ATK_MSG = "I see the list.";
-			private const string DEF_CARD_MSG = "Click on your defender to see your cards.";
-			private const string HOW_FIGHT_MSG = "Click on a card (in the lower-left), then click the skeleton in front of your defender.";
-//			private const string RESULT_MSG = "If your total is higher, the skeleton is removed. If not, my horde gains momentum.";
-//			private const string MOMENTUM_WHAT_MSG = "Momentum?";
-//			private const string MOMENTUM_MEAN_MSG = "Each momentum makes my horde advance one space further next turn.";
-//			private const string CAREFUL_MSG = "Dangerous!";
-//			private const string CARD_RULES_MSG = "A defender has to use all their cards once before they can use any again.";
-//			private const string RESET_OK_MSG = "All three, OK.";
-//			private const string ARMOR_RULES_MSG = "Skeletons are easy to beat, but the warlords are tough. Click my pieces to see their stats.";
-//			private const string EXTRA_INFO_MSG = "In the lower left.";
-//			private const string MATH_MSG = "The lower-left sheet will also show the math behind each combat, if you want precise information.";
-//			private const string HELPFUL_MSG = "That's a help.";
-//			private const string DONE_FIGHT_MSG = "Click \"Done fighting\" in the upper-right when you're finished.";
-//
-//
+			private int completedCombats = 0;
+			private const int TOTAL_DEFENDERS = 3;
+			private const string FIGHT_INTRO_MSG = "After your defenders move, they have the chance to fight my horde.";
+			private const string HOW_FIGHT_MSG = "How do I fight?";
+			private const string FIGHT_MECHANICS_MSG = "In this game we fight with cards. Each defender has three cards--these are the Guardian's.";
+			private const string SAME_CARDS_MSG = "Can they be different?";
+			private const string DIFFERENT_CARDS_MSG = "Yes. Each defender has their own cards. Try clicking them to see--let me know when you're done.";
+			private const string DONE_CARDS_MSG = "OK, I'm ready.";
+			private const string COMBAT_SEQUENCE_MSG = "When we fight, you choose one of your cards. I'll draw a card at random. High card wins.";
+			private const string TIE_Q_MSG = "What if it's a tie?";
+			private const string TIE_A_MSG = "I win ties. You're the heroines and heroes--it's not enough just to do OK against evil, you have to win!";
+			private const string SENSE_MSG = "Makes sense.";
+			private const string CHOOSE_CARDS_MSG = "To choose your card, pick a defender and one of their cards. Then click the skeleton in front of them.";
+			private const string KEEP_FIGHTING_MSG = "Nice! Keep going--pick another defender, then a card, and then click the skeleton in front of them.";
+			private const string WELL_FOUGHT_MSG = "Cool. I have some bad news about fighting, and some good news. First, the bad news:";
+			private const string TWO_QS_MSG = "???";
+			private const string MOMENTUM_MSG = "When I win, I gain 1 momentum. Every momentum moves <i>all</i> my horde 1 more space next turn.";
+			private const string OUCH_MSG = "Ouch.";
+			private const string INSPIRATION_MSG = "The good news is, when a defender wins enough fights, they power up.";
+			private const string POWER_NOW_MSG = "Let's do that.";
+
+
 			private void OnButtonClick(global::Event e){
 				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick event in PlayerFight's OnButtonClick");
 
 
 				switch(Services.UI.GetTutorialText()){
-					case FIGHT_NOW_MSG:
-						Services.UI.SimultaneousStatements(FIGHT_NOW_MSG, SEQUENCE_MSG);
-						Services.UI.SetTutorialText(FACING_MSG);
-						Services.UI.SetButtonText(OK_MSG);
+					case FIGHT_INTRO_MSG:
+						Context.ChangeUIText(FIGHT_MECHANICS_MSG, SAME_CARDS_MSG);
+						Services.Defenders.SelectDefenderForFight(GameObject.Find(GUARDIAN).GetComponent<DefenderSandbox>());
 						break;
-					case FACING_MSG:
-						Services.UI.SimultaneousStatements(FACING_MSG, OK_MSG);
-						Services.UI.SetTutorialText(CARD_MSG);
-						Services.UI.SetButtonText(CARD_WHERE_MSG);
+					case FIGHT_MECHANICS_MSG:
+						Context.ChangeUIText(DIFFERENT_CARDS_MSG, DONE_CARDS_MSG);
 						break;
-					case CARD_MSG:
-						Services.UI.SimultaneousStatements(CARD_MSG, CARD_WHERE_MSG);
-						Services.UI.SetTutorialText(ATK_CARD_MSG);
-						Services.UI.SetButtonText(SEE_ATK_MSG);
+					case DIFFERENT_CARDS_MSG:
+						Context.ChangeUIText(COMBAT_SEQUENCE_MSG, TIE_Q_MSG);
+						Services.Defenders.CompleteFightPhase();
+						Services.Defenders.PrepareDefenderFightPhase();
 						break;
-					case ATK_CARD_MSG:
-						Services.UI.SimultaneousStatements(ATK_CARD_MSG, SEE_ATK_MSG);
-						Services.UI.SetTutorialText(DEF_CARD_MSG);
+					case COMBAT_SEQUENCE_MSG:
+						Context.ChangeUIText(TIE_A_MSG, SENSE_MSG);
+						break;
+					case TIE_A_MSG:
+						Services.UI.SetTutorialText(CHOOSE_CARDS_MSG);
 						Services.UI.TogglePhaseButton(ChatUI.OnOrOff.Off);
+						break;
+					case WELL_FOUGHT_MSG:
+						Context.ChangeUIText(MOMENTUM_MSG, OUCH_MSG);
+						break;
+					case MOMENTUM_MSG:
+						Context.ChangeUIText(INSPIRATION_MSG, POWER_NOW_MSG);
+						break;
+					case INSPIRATION_MSG:
+						TransitionTo<PowerUp>();
 						break;
 				}
 			}
 
 
 			private void HandleFightInputs(global::Event e){
+				Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in HandleFightInputs");
+
 				InputEvent inputEvent = e as InputEvent;
 
 				if (inputEvent.selected.tag == DEFENDER_TAG &&
-					Services.UI.GetTutorialText() == DEF_CARD_MSG){
+					(Services.UI.GetTutorialText() == DIFFERENT_CARDS_MSG ||
+					 Services.UI.GetTutorialText() == CHOOSE_CARDS_MSG ||
+					 Services.UI.GetTutorialText() == KEEP_FIGHTING_MSG)){
 					Services.Defenders.SelectDefenderForFight(inputEvent.selected.GetComponent<DefenderSandbox>());
-					Services.UI.SetTutorialText(HOW_FIGHT_MSG);
 				} else if ((inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) &&
 					Services.Defenders.IsAnyoneSelected() &&
 					Services.Defenders.GetSelectedDefender().GetChosenCardValue() != DefenderSandbox.NO_CARD_SELECTED &&
-					Services.UI.GetTutorialText() == HOW_FIGHT_MSG){
+					(Services.UI.GetTutorialText() == CHOOSE_CARDS_MSG ||
+					 Services.UI.GetTutorialText() == KEEP_FIGHTING_MSG)){
 
 					Services.Defenders.GetSelectedDefender().TryFight(inputEvent.selected.GetComponent<AttackerSandbox>());
+					Services.UI.SetTutorialText(KEEP_FIGHTING_MSG);
+					completedCombats++;
+
+					if (completedCombats >= TOTAL_DEFENDERS){
+						Context.ChangeUIText(WELL_FOUGHT_MSG, TWO_QS_MSG);
+						Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
+					}
 				}
-//				} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG) {
-//					TutorialGameManager.OldUI.SetExtraText(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
-//				}
 			}
-//
-//
-//			/// <summary>
-//			/// End the phase, but only if the player has reached the end of the tutorial for the phase.
-//			/// </summary>
-//			/// <param name="e">E.</param>
-//			private void HandlePhaseEndInput(global::Event e){
-//				Debug.Assert(e.GetType() == typeof(EndPhaseEvent), "Non-EndPhaseEvent in HandlePhaseEndInput");
-//
-//				if (Context.GetTutorialText() == DONE_FIGHT_MSG) TransitionTo<PowerUp>();
-//			}
 
 
 			public override void OnEnter(){
-				Services.UI.SetTutorialText(FIGHT_NOW_MSG);
-				Services.UI.SetButtonText(SEQUENCE_MSG);
 				Services.Defenders.PrepareDefenderFightPhase();
-//				Context.phaseText.text = PLAYER_FIGHT;
-//				Context.TurnRulebookPage();
 				Services.Events.Register<InputEvent>(HandleFightInputs);
-//				Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
-//				Context.phaseButtonText.text = STOP_FIGHTING_MSG;
-//				Context.ToggleNextPhaseButton();
-//				Context.SetTutorialText(FACING_MSG);
-//				Context.SetButtonText(OK_MSG);
-//				Context.ToggleAdvanceButton();
 				Services.Events.Register<TutorialClick>(OnButtonClick);
+				Context.ChangeUIText(FIGHT_INTRO_MSG, HOW_FIGHT_MSG);
 			}
 
 
 			public override void OnExit(){
 				Services.Events.Unregister<InputEvent>(HandleFightInputs);
-//				Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
-//				Services.Defenders.CompleteFightPhase();
-//				Context.ToggleNextPhaseButton();
 				Services.Events.Unregister<TutorialClick>(OnButtonClick);
 			}
 		}
@@ -416,197 +478,263 @@
 //		/// State for demonstrating powering up.
 //		/// </summary>
 		public class PowerUp : FSM<TutorialTurnManager>.State {
-//
-//
-//			private const string UI_TAG = "UI";
-//			private const string POWER_MSG = "Let's stop for a second, and make your defender more awesome.";
-//			private const string AWESOME_MSG = "Awesome is good.";
-//			private const string SHEET_MSG = "Select your defender, then click the character sheet in the lower-right.";
-//			private const string NEXT_CURRENT_MSG = "The upgrades you have so far are on the bottom row. You can choose from upgrades on the top row.";
-//			private const string OK_MSG = "OK.";
-//			private const string TRACKS_MSG = "Each column is a different set of upgrades. You can choose either column each time you upgrade.";
-//			private const string CHOOSE_MSG = "Choose an upgrade by clicking either of the choices in the top row.";
-//			private const string FREE_MSG = "Great! You can upgrade your defenders at the start of the game for free.";
-//			private const string WHEN_MSG = "And after that?";
-//			private const string HOPE_MSG = "Defenders earn upgrades by defeating my horde. The next one takes three victories, then four, etc.";
-//			private const string HOW_MUCH_MSG = "If I forget?";
-//			private const string NEXT_UPGRADE_MSG = "Check the defender's character sheet. It will tell you.";
-//			private const string HIDE_MSG = "Click the board to put the character sheet back down.";
-//			private const string READY_MSG = "Ready.";
-//
-//
-//			public override void OnEnter (){
-//				Context.SetTutorialText(POWER_MSG);
-//				Context.SetButtonText(AWESOME_MSG);
-//				Context.ToggleAdvanceButton();
-//				Services.Events.Register<UpgradeEvent>(HandlePowerUpgrade);
-//				Services.Events.Register<TutorialClick>(OnButtonClick);
-//			}
-//
-//
-//			public override void OnExit (){
-//				Services.Events.Unregister<UpgradeEvent>(HandlePowerUpgrade);
-//				Services.Events.Unregister<InputEvent>(HandlePowerInputs);
-//				Services.Events.Unregister<TutorialClick>(OnButtonClick);
-//			}
-//
-//
-//			private void OnButtonClick(global::Event e){
-//				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in PowerUp's OnButtonClick");
-//
-//				switch (Context.GetTutorialText()){
-//					case POWER_MSG:
-//						Context.SetTutorialText(SHEET_MSG);
-//						Context.ToggleAdvanceButton();
-//						Services.Events.Register<InputEvent>(HandlePowerInputs);
-//						break;
-//					case NEXT_CURRENT_MSG:
-//						Context.SetTutorialText(TRACKS_MSG);
-//						break;
-//					case TRACKS_MSG:
-//						Context.SetTutorialText(CHOOSE_MSG);
-//						Context.ToggleAdvanceButton();
-//						break;
-//					case FREE_MSG:
-//						Context.SetTutorialText(HOPE_MSG);
-//						Context.SetButtonText(HOW_MUCH_MSG);
-//						break;
-//					case HOPE_MSG:
-//						Context.SetTutorialText(NEXT_UPGRADE_MSG);
-//						Context.SetButtonText(OK_MSG);
-//						break;
-//					case NEXT_UPGRADE_MSG:
-//						Context.SetTutorialText(HIDE_MSG);
-//						Context.SetButtonText(READY_MSG);
-//						break;
-//					case HIDE_MSG:
-//						TransitionTo<BesiegeWalls>();
-//						break;
-//				}
-//			}
-//
-//
-//			private void HandlePowerInputs(global::Event e){
-//				Debug.Assert(e.GetType() == typeof(InputEvent), "Non-InputEvent in PowerUp's HandlePowerEvents");
-//
-//				InputEvent inputEvent = e as InputEvent;
-//
-//				if (inputEvent.selected.tag == UI_TAG){
-//					if (Context.GetTutorialText() == SHEET_MSG){
-//						Context.SetTutorialText(NEXT_CURRENT_MSG);
-//						Context.SetButtonText(OK_MSG);
-//						Context.ToggleAdvanceButton();
-//					}
-//				}
-//
-//				if (inputEvent.selected.tag == DEFENDER_TAG){
-//					if (Context.GetTutorialText() == SHEET_MSG){
-//						Services.Defenders.PrepareDefenderFightPhase();
-//						Services.Defenders.SelectDefenderForFight(inputEvent.selected.GetComponent<DefenderSandbox>());
-//					}
-//				}
-//			}
-//
-//			private void HandlePowerUpgrade(global::Event e){
-//				Debug.Assert(e.GetType() == typeof(UpgradeEvent), "Non-UpgradeEvent in HandlePowerUpgrade");
-//
-//				if (Context.GetTutorialText() == CHOOSE_MSG){
-//					Context.SetTutorialText(FREE_MSG);
-//					Context.SetButtonText(WHEN_MSG);
-//					Context.ToggleAdvanceButton();
-//				} else if (Context.GetTutorialText() == NEXT_CURRENT_MSG ||
-//						   Context.GetTutorialText() == TRACKS_MSG){
-//					Context.SetTutorialText(FREE_MSG);
-//					Context.SetButtonText(WHEN_MSG);
-//				}
-//			}
+
+
+			private const string WHEN_POWER_MSG = "At the start of your turn, you'll choose a new power for every defender who's ready to power up.";
+			private const string WHERE_CLICK_MSG = "How do I do that?";
+			private const string SHEET_EXPLANATION_MSG = "You'll see the defender's character sheet. Click the power you want them to have.";
+			private const string READY_MSG = "OK, let's try it.";
+
+
+			#region upgrade code
+
+			List<DefenderSandbox> upgraders = new List<DefenderSandbox>();
+
+
+			private void BeginUpgrading(){
+				Services.Events.Register<TutorialPowerChoiceEvent>(HandlePowerChoice);
+
+				foreach (DefenderSandbox defender in upgraders){
+
+					//if this is the first defender who needs to upgrade, add an appropriate task
+					if (!Services.Tasks.CheckForTaskOfType<UpgradeTask>()) {
+						Services.Tasks.AddTask(new UpgradeTask(defender));
+					}
+
+
+					//this is the second or third defender who needs to upgrade. If it's the third, GetLastTaskOfType() will still return null;
+					//delay the third defender's UpgradeTask until the second's can be found
+					else if (Services.Tasks.GetLastTaskOfType<UpgradeTask>() == null){
+						Services.Tasks.AddTask(new DelayedUpgradeTask(defender));
+					}
+
+
+					//this is the second defender who needs to upgrade; add an appropriate task
+					else {
+						Services.Tasks.GetLastTaskOfType<UpgradeTask>().Then(new UpgradeTask(defender));
+					}
+				}
+			}
+
+
+			/// <summary>
+			/// When the player chooses a power, see if the player is done upgrading and it's time to move on to the next phase.
+			/// </summary>
+			/// <param name="e">A PowerChoiceEvent sent out by the character sheet.</param>
+			private void HandlePowerChoice(global::Event e){
+				Debug.Assert(e.GetType() == typeof(TutorialPowerChoiceEvent), "Non-TutorialPowerChoiceEvent in HandlePowerChoice");
+
+				TutorialPowerChoiceEvent powerEvent = e as TutorialPowerChoiceEvent;
+
+				CheckForAllFinished(powerEvent.defender);
+			}
+
+
+			/// <summary>
+			/// Remove an upgrading defender from the list of defenders who need to upgrade. If that was the last defender who needed to upgrade,
+			/// move on.
+			/// </summary>
+			/// <param name="defender">The defender who upgraded.</param>
+			public void CheckForAllFinished(DefenderSandbox defender){
+				Debug.Assert(upgraders.Contains(defender), "Trying to remove a defender who doesn't need to upgrade.");
+
+				upgraders.Remove(defender);
+
+				if (upgraders.Count <= 0) {
+					Services.Events.Unregister<TutorialPowerChoiceEvent>(HandlePowerChoice);
+					Services.Defenders.NoSelectedDefender();
+				}
+			}
+
+
+			#endregion upgrade code
+
+
+			private void OnButtonClick(global::Event e){
+				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in PowerUp's OnButtonClick");
+
+				switch (Services.UI.GetTutorialText()){
+				case WHEN_POWER_MSG:
+					Context.ChangeUIText(SHEET_EXPLANATION_MSG, READY_MSG);
+					break;
+				case SHEET_EXPLANATION_MSG:
+					Services.UI.ToggleTutorialText(ChatUI.OnOrOff.Off);
+					Services.UI.TogglePhaseButton(ChatUI.OnOrOff.Off);
+					BeginUpgrading();
+					break;
+				}
+			}
+
+
+			public override void OnEnter (){
+				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
+				Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
+				Context.ChangeUIText(WHEN_POWER_MSG, WHERE_CLICK_MSG);
+				upgraders = Services.Defenders.GetAllDefenders();
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+			}
+
+			public override void Tick(){
+				//only go on if no one needs to upgrade and there are no tasks running (i.e., wait for tankards to be dropped, etc.)
+				if (upgraders.Count == 0 &&
+					!Services.Tasks.CheckForAnyTasks() &&
+					Services.UI.GetTutorialText() == SHEET_EXPLANATION_MSG) TransitionTo<BesiegeWalls>();
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+			}
 		}
 //
 //
 		public class BesiegeWalls : FSM<TutorialTurnManager>.State {
-//
-//
-//			private const string BESIEGE_MSG = "The last thing that happens each turn is my horde besieges the wall.";
-//			private const string BACK_MSG = "Back off!";
-//			private const string ADJACENT_MSG = "Any piece I have that's in front of the wall plays a card and defeats its guard.";
-//			private const string POOR_MSG = "Poor guard!";
-//			private const string HAHA_MSG = "Behold, the power of my skeleton!";
-//			private const string REVENGE_MSG = "I'll get you!";
-//			private const string READY_MSG = "That's enough to get started. Let's reset the board and start playing. Good luck, have fun!";
-//			private const string GLHF_MSG = "You too!";
-//			private const string GAME_SCENE = "Game";
-//
-//
-//			List<AttackerSandbox> besiegers;
-//
-//
-//			private void OnButtonClick(global::Event e){
-//				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in BesiegeWalls' OnButtonClick");
-//
-//				switch (Context.GetTutorialText()){
-//				case BESIEGE_MSG:
-//					Context.SetTutorialText(ADJACENT_MSG);
-//					Context.SetButtonText(POOR_MSG);
-//					break;
-//				case ADJACENT_MSG:
-//					Context.SetTutorialText(HAHA_MSG);
-//					Context.SetButtonText(REVENGE_MSG);
-//					Besiege();
-//					break;
-//				case HAHA_MSG:
-//					Context.SetTutorialText(READY_MSG);
-//					Context.SetButtonText(GLHF_MSG);
-//					break;
-//				case READY_MSG:
-//					SceneManager.LoadScene(GAME_SCENE);
-//					break;
-//				}
-//			}
+
+
+			private const string POWER_CONCLUSION_MSG = "Great! You can always click a defender, and then the sheet, to see their powers.";
+			private const string FIGHT_BACK_MSG = "When do you fight back?";
+			private const string BESIEGE_INTRO_MSG = "Right now. At the end of the turn, my pieces remove guards from the wall.";
+			private const string HOW_WORK_MSG = "How does that work?";
+			private const string SPEND_CARDS_MSG = "Each of my pieces in front of the wall knocks one guard off the wall.";
+			private const string CARD_USE_MSG = "Do I play a card?";
+			private const string ATK_CARDS_MSG = "No--your defenders aren't fighting, just the guards.";
+			private const string EXAMPLE_MSG = "Can I see an example?";
+
+			
+
+			private List<AttackerSandbox> besiegers;
+
+
+			private void OnButtonClick(global::Event e){
+				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in BesiegeWalls' OnButtonClick");
+
+				switch (Services.UI.GetTutorialText()){
+				case POWER_CONCLUSION_MSG:
+					Services.UI.SetTutorialText(BESIEGE_INTRO_MSG);
+					Services.UI.SetButtonText(HOW_WORK_MSG);
+					break;
+				case BESIEGE_INTRO_MSG:
+					Services.UI.SetTutorialText(SPEND_CARDS_MSG);
+					Services.UI.SetButtonText(CARD_USE_MSG);
+					break;
+				case SPEND_CARDS_MSG:
+					Services.UI.SetTutorialText(ATK_CARDS_MSG);
+					Services.UI.SetButtonText(EXAMPLE_MSG);
+					break;
+				case ATK_CARDS_MSG:
+					Besiege();
+					break;
+				}
+			}
 //
 //
 //			//are any enemies besieging the wall? Get a list of them
-//			public override void OnEnter (){
-//				besiegers = Services.Board.GetBesiegingAttackers();
-//				Context.phaseText.text = BESIEGE;
-//				Context.TurnRulebookPage();
-//				Context.SetTutorialText(BESIEGE_MSG);
-//				Context.SetButtonText(BACK_MSG);
-//				Services.Events.Register<TutorialClick>(OnButtonClick);
-//			}
-//
-//
-//			public override void OnExit (){
-//				Services.Events.Unregister<TutorialClick>(OnButtonClick);
-//			}
-//
-//
-//			/// <summary>
-//			/// Besiege the wall, knocking out any guards adjacent to attackers.
-//			/// </summary>
-//			private void Besiege() {
-//				if (besiegers.Count > 0){
-//					int combatValue = Services.AttackDeck.GetAttackerCard().Value;
-//
-//					if (combatValue > Services.Board.GetWallStrength(besiegers[0].GetColumn())){
-//						Services.Board.ChangeWallDurability(besiegers[0].GetColumn(), -besiegers[0].SiegeStrength);
-//					} else {
-//						Services.Board.FailToDamageWall(besiegers[0].GetColumn());
-//					}
-//
-//					besiegers.RemoveAt(0);
-//				}
-//			}
-//
-//
-//			/// <summary>
-//			/// Shut off the defender's combat cards and character sheet when it's safe to do so.
-//			/// </summary>
-//			public override void Tick (){
-//				if (!Services.Tasks.CheckForTaskOfType<MoveCharSheetTask>() &&
-//					Services.UI.GetCharSheetStatus() == CharacterSheetBehavior.SheetStatus.Hidden){
-//					Services.Defenders.CompleteFightPhase();
-//				}
-//			}
+			public override void OnEnter (){
+				Services.UI.SetTutorialText(POWER_CONCLUSION_MSG);
+				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
+				Services.UI.SetButtonText(FIGHT_BACK_MSG);
+				Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+				besiegers = Services.Board.GetBesiegingAttackers();
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+			}
+
+
+			/// <summary>
+			/// Besiege the wall, knocking out any guards adjacent to attackers.
+			/// </summary>
+			private void Besiege() {
+				if (besiegers.Count > 0){
+					int combatValue = Services.AttackDeck.GetAttackerCard().Value;
+
+					if (combatValue > Services.Board.GetWallStrength(besiegers[0].GetColumn())){
+						Services.Board.ChangeWallDurability(besiegers[0].GetColumn(), -besiegers[0].SiegeStrength);
+					} else {
+						Services.Board.FailToDamageWall(besiegers[0].GetColumn());
+					}
+
+					besiegers.RemoveAt(0);
+
+					if (besiegers.Count > 0) Besiege(); //keep going until all besiegers have attacked the wall
+					else TransitionTo<TutorialEnd>();
+				}
+			}
+		}
+
+
+		public class TutorialEnd : FSM<TutorialTurnManager>.State {
+
+
+			private const string EVERYTHING_MSG = "That's everything we need to start playing.";
+			private const string WARLORD_Q_MSG = "What about those guys in back?";
+			private const string WARLORD_A_MSG = "My skeletons are led by warlords. They're tougher than skeletons.";
+			private const string EXPLANATION_Q_MSG = "What do they do?";
+			private const string EXPLANATION_A_MSG = "There are different types. If you see one you're not sure about during the game, just ask.";
+			private const string OVERVIEW_REQ_MSG = "OK. Let's sum up . . . .";
+			private const string OVERVIEW_1_MSG = "At the start of each turn, any of your defenders who are ready to power up will do that.";
+			private const string ELLIPSIS_MSG = ". . . .";
+			private const string OVERVIEW_2_MSG = "Then my horde moves forward. They move one space, plus 1 for each momentum I've gained.";
+			private const string OVERVIEW_3_MSG = "After my horde moves, your defenders can move. You can move none of them, some, or all of them.";
+			private const string OVERVIEW_4_MSG = "Then your defenders fight. Click a defender, choose a card, and finally click on my piece to attack it.";
+			private const string OVERVIEW_5_MSG = "When you're done, any of my horde that's at the wall will knock a guard off.";
+			private const string WAVES_MSG = "The game lasts three waves. If you reach the end of wave 3, you win!";
+			private const string START_MSG = "Let's play!";
+				
+
+			private void OnButtonClick(global::Event e){
+				Debug.Assert(e.GetType() == typeof(TutorialClick), "Non-TutorialClick in BesiegeWalls' OnButtonClick");
+
+				switch (Services.UI.GetTutorialText()){
+					case EVERYTHING_MSG:
+						Services.UI.SetTutorialText(WARLORD_A_MSG);
+						Services.UI.SetButtonText(EXPLANATION_Q_MSG);
+						break;
+					case WARLORD_A_MSG:
+						Services.UI.SetTutorialText(EXPLANATION_A_MSG);
+						Services.UI.SetButtonText(OVERVIEW_REQ_MSG);
+						break;
+					case EXPLANATION_A_MSG:
+						Services.UI.SetTutorialText(OVERVIEW_1_MSG);
+						Services.UI.SetButtonText(ELLIPSIS_MSG);
+						break;
+					case OVERVIEW_1_MSG:
+						Services.UI.SetTutorialText(OVERVIEW_2_MSG);
+						break;
+					case OVERVIEW_2_MSG:
+						Services.UI.SetTutorialText(OVERVIEW_3_MSG);
+						break;
+					case OVERVIEW_3_MSG:
+						Services.UI.SetTutorialText(OVERVIEW_4_MSG);
+						break;
+					case OVERVIEW_4_MSG:
+						Services.UI.SetTutorialText(OVERVIEW_5_MSG);
+						break;
+					case OVERVIEW_5_MSG:
+						Services.UI.SetTutorialText(WAVES_MSG);
+						Services.UI.SetButtonText(START_MSG);
+						break;
+					case WAVES_MSG:
+						SceneManager.LoadScene(NEXT_SCENE);
+						break;
+
+				}
+			}
+
+
+			public override void OnEnter (){
+				Services.UI.SetTutorialText(EVERYTHING_MSG);
+				Services.UI.SetButtonText(WARLORD_Q_MSG);
+				Services.Events.Register<TutorialClick>(OnButtonClick);
+			}
+
+
+			public override void OnExit (){
+				Services.Events.Unregister<TutorialClick>(OnButtonClick);
+			}
 		}
 	}
 }

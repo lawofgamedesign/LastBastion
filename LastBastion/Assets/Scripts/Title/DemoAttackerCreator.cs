@@ -6,6 +6,18 @@
 	public class DemoAttackerCreator : AttackerManager {
 
 
+		/////////////////////////////////////////////
+		/// Fields
+		/////////////////////////////////////////////
+
+
+		//curated warlords to spawn, rather than the normal random ones
+		private const string DEMO_FAST_OBJ = "Title/Demo Fast Warlord";
+		private const string DEMO_ENRAGED_OBJ = "Title/Demo Enraged Warlord";
+		private int warlordIndex = 0;
+		private List<string> warlords = new List<string>() { PETTY_WARLORD_OBJ, DEMO_FAST_OBJ, DEMO_ENRAGED_OBJ };
+
+
 
 		/////////////////////////////////////////////
 		/// Functions
@@ -135,13 +147,17 @@
 
 
 		/// <summary>
-		/// Randomly select a warlord among those that can be spawned in the demo.
+		/// Select a warlord among those that can be spawned in the demo.
 		/// </summary>
 		/// <returns>The warlord type's name.</returns>
 		protected override string ChooseWarlordType(){
-			string[] warlords = new string[2] { PETTY_WARLORD_OBJ, ARMORED_WARLORD_OBJ };
+			Debug.Assert(warlordIndex < warlords.Count, "Trying to spawn unavailable warlord");
 
-			return warlords[Random.Range(0, warlords.Length)];
+			string temp = warlords[warlordIndex];
+
+			warlordIndex++;
+
+			return temp;
 		}
 	}
 }

@@ -370,6 +370,11 @@ public class ChatUI {
 	}
 
 
+	public string GetPhaseButtonText(){
+		return phaseText.text;
+	}
+
+
 	/// <summary>
 	/// Switch the left button, usually for ending a phase, on or off.
 	/// </summary>
@@ -379,6 +384,19 @@ public class ChatUI {
 			phaseOverButton.SetActive(true);
 		} else {
 			phaseOverButton.SetActive(false);
+		}
+	}
+
+
+	/// <summary>
+	/// Switch the center button, usually for undoing movement, on or off.
+	/// </summary>
+	/// <param name="onOrOff">Whether the button should be on (gameobject active) or off (inactive).</param>
+	public virtual void ToggleUndoButton(OnOrOff onOrOff){
+		if (onOrOff == OnOrOff.On){
+			undoButton.SetActive(true);
+		} else {
+			undoButton.SetActive(false);
 		}
 	}
 
@@ -482,11 +500,11 @@ public class ChatUI {
 		if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerMove)){
 			SetButtonText(MOVE_DONE_MSG);
 			TogglePhaseButton(OnOrOff.On);
-			undoButton.SetActive(true);
+			ToggleUndoButton(OnOrOff.On);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.PlayerFight)){
 			SetButtonText(FIGHT_DONE_MSG);
 			PlayerPhaseStatement(MOVE_DONE_MSG);
-			undoButton.SetActive(false);
+			ToggleUndoButton(OnOrOff.Off);
 		} else if (startEvent.Phase.GetType() == typeof(TurnManager.BesiegeWalls)){
 			TogglePhaseButton(OnOrOff.Off);
 			PlayerPhaseStatement(FIGHT_DONE_MSG);

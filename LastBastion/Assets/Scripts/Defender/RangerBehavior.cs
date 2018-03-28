@@ -171,7 +171,7 @@ public class RangerBehavior : DefenderSandbox {
 
 	public override void WinFight(AttackerSandbox attacker){
 		DefeatedSoFar++;
-		powerupReadyParticle.SetActive(CheckUpgradeStatus());
+		if (Services.Rulebook.GetType() != typeof(Tutorial.TutorialTurnManager)) powerupReadyParticle.SetActive(CheckUpgradeStatus()); //don't play particle in tutorial; it's distracting
 		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 
 		//when the Ranger fights, they use up an attack. If they defeat the attacker, they get an extra attack for next turn.
@@ -369,6 +369,7 @@ public class RangerBehavior : DefenderSandbox {
 					//just started showboating; need to make sure the UI is correct, and displayed if it's the appropriate phase
 					if (currentShowboat == ShowboatTrack.Showboat){
 						ResetCurrentAttacks();
+						if (Services.Rulebook.GetType() == typeof(Tutorial.TutorialTurnManager)) break; //stop here if it's the tutorial
 						if (Services.Rulebook.TurnMachine.CurrentState.GetType() == typeof(TurnManager.PlayerFight)){
 							Services.UI.OpponentStatement(ReviseAttackText());
 						}

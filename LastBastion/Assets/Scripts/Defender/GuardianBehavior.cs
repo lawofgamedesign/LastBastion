@@ -279,7 +279,7 @@ public class GuardianBehavior : DefenderSandbox {
 		Services.UI.ReviseNextLabel(defeatsToNextUpgrade, DefeatedSoFar);
 		if (currentSingleCombat >= SingleCombatTrack.Run_Fools) Services.Events.Fire(new ReduceMomentumEvent());
 		if (currentSingleCombat == SingleCombatTrack.Champion) DefeatRetinue(attacker);
-		powerupReadyParticle.SetActive(CheckUpgradeStatus());
+		if (Services.Rulebook.GetType() != typeof(Tutorial.TutorialTurnManager)) powerupReadyParticle.SetActive(CheckUpgradeStatus()); //don't play particle in tutorial; it's distracting
 
 		FinishWithCard();
 		DoneFighting();

@@ -17,7 +17,7 @@
 
 		//scenes to load
 		private const string GAME_SCENE = "Game";
-		private const string TUTORIAL_SCENE = "Tutorial2";
+		private const string TUTORIAL_SCENE = "Tutorial3";
 
 
 		//is the game paused for the menu?
@@ -33,6 +33,7 @@
 			Services.Board = new BoardBehavior();
 			Services.Board.Setup();
 			Services.Events = new EventManager();
+			Services.AttackDeck = null;
 			Services.Attackers = new DemoAttackerCreator();
 			Services.Attackers.Setup();
 			Services.Defenders = new DefenderManager();
