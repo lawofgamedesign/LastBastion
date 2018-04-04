@@ -547,31 +547,62 @@ public class TurnManager {
 
 	/// <summary>
 	/// The game enters this state when the player wins.
-	/// 
-	/// Right now there's no way out of this state! The player should reset the game.
 	/// </summary>
 	protected class PlayerWin : FSM<TurnManager>.State {
 
 
+		private float timer = 0.0f;
+		private float resetWait = 1.0f;
+
+
 		public override void OnEnter (){
+			Services.Environment.ChangeEnvironment(EnvironmentManager.Place.Kitchen);
+			timer = 0.0f;
 			Services.EscapeMenu.Cleanup();
 			Services.EscapeMenu = new EndEscMenuBehavior();
 			Services.EscapeMenu.Setup();
 			Context.PlayerWinFeedback();
+		}
+
+
+		public override void Tick (){
+			timer += Time.deltaTime;
+
+			if (timer >= resetWait){
+				Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Pause));
+				Services.Events.Fire(new EscMenuEvent());
+			}
 		}
 	}
 
 
 	/// <summary>
 	/// The game enters this state when the player loses.
-	/// 
-	/// Right now there's no way out of this state! The player should reset the game.
 	/// </summary>
 	protected class PlayerLose : FSM<TurnManager>.State {
 
 
+		private float timer = 0.0f;
+		private float resetWait = 1.0f;
+
+
 		public override void OnEnter (){
+			Services.Environment.ChangeEnvironment(EnvironmentManager.Place.Kitchen);
+			timer = 0.0f;
+			Services.EscapeMenu.Cleanup();
+			Services.EscapeMenu = new EndEscMenuBehavior();
+			Services.EscapeMenu.Setup();
 			Context.PlayerLoseFeedback();
+		}
+
+
+		public override void Tick (){
+			timer += Time.deltaTime;
+
+			if (timer >= resetWait){
+				Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Pause));
+				Services.Events.Fire(new EscMenuEvent());
+			}
 		}
 	}
 }
