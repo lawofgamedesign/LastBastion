@@ -554,6 +554,9 @@ public class TurnManager {
 
 
 		public override void OnEnter (){
+			Services.EscapeMenu.Cleanup();
+			Services.EscapeMenu = new EndEscMenuBehavior();
+			Services.EscapeMenu.Setup();
 			Context.PlayerWinFeedback();
 		}
 	}

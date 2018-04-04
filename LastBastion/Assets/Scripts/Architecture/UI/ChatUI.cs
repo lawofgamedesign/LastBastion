@@ -872,7 +872,7 @@ public class ChatUI {
 		string overflowDeckListText = "";
 
 		for (int i = 0; i < attackerDeck.Count; i++){
-			if (i <= MAX_DECKLIST_SIZE) {
+			if (i <= MAX_DECKLIST_SIZE - 1) { //-1 because the loop index is zero-indexed, while MAX_DECKLIST_SIZE is a count of cards that starts at 1 card
 				if (attackerDeck[i].CheckIfDrawn()) deckListText += DRAWN_CARD_COLOR + START_STRIKETHROUGH;
 
 				deckListText += attackerDeck[i].Value.ToString();
