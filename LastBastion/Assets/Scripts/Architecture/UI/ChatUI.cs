@@ -60,16 +60,17 @@ public class ChatUI {
 	//the written list of the attacker's cards
 	protected const string DECK_LIST_CANVAS = "Attacker deck canvas";
 	protected const string DECK_LIST_LEFT_OBJ = "Deck column left";
+	protected const string DECK_LIST_CENTER_OBJ = "Deck column center";
 	protected const string DECK_LIST_RIGHT_OBJ = "Deck column right";
 	protected TextMeshProUGUI deckList;
 	protected TextMeshProUGUI deckListOverflow;
-	protected const string DECK_LIST_LABEL = "Attacker's cards";
+	protected TextMeshProUGUI deckListMoreOverflow;
 	protected const string NEWLINE = "\n";
 	protected const string START_STRIKETHROUGH = "<s>";
 	protected const string END_STRIKETHROUGH = "</s>";
 	protected const string DRAWN_CARD_COLOR = "<color=#A59E9EFF>";
 	protected const string END_COLOR = "</color>";
-	protected const int MAX_DECKLIST_SIZE = 9; //how many numbers can appear in the decklist before it needs to start writing in the overflow column?
+	protected const int MAX_DECKLIST_SIZE = 5; //how many numbers can appear in the decklist before it needs to start writing in the overflow column?
 
 
 	//turn UI
@@ -198,7 +199,8 @@ public class ChatUI {
 
 		//attacker decklist setup
 		deckList = GameObject.Find(DECK_LIST_CANVAS).transform.Find(DECK_LIST_LEFT_OBJ).GetComponent<TextMeshProUGUI>();
-		deckListOverflow = GameObject.Find(DECK_LIST_CANVAS).transform.Find(DECK_LIST_RIGHT_OBJ).GetComponent<TextMeshProUGUI>();
+		deckListOverflow = GameObject.Find(DECK_LIST_CANVAS).transform.Find(DECK_LIST_CENTER_OBJ).GetComponent<TextMeshProUGUI>();
+		deckListMoreOverflow = GameObject.Find(DECK_LIST_CANVAS).transform.Find(DECK_LIST_RIGHT_OBJ).GetComponent<TextMeshProUGUI>();
 		RewriteDecklist();
 
 
@@ -868,8 +870,9 @@ public class ChatUI {
 	public void RewriteDecklist(){
 		List<LinkedCard> attackerDeck = Services.AttackDeck.GetOrderedDeck();
 
-		string deckListText = DECK_LIST_LABEL + NEWLINE;
+		string deckListText = "";
 		string overflowDeckListText = "";
+		string moreOverflowDeckListText = "";
 
 		for (int i = 0; i < attackerDeck.Count; i++){
 			if (i <= MAX_DECKLIST_SIZE - 1) { //-1 because the loop index is zero-indexed, while MAX_DECKLIST_SIZE is a count of cards that starts at 1 card
@@ -881,20 +884,30 @@ public class ChatUI {
 
 				//add a newline after every number except the last that can go into this column
 				if (i < MAX_DECKLIST_SIZE) deckListText += NEWLINE;
-			} else {
-				if (attackerDeck[i].CheckIfDrawn()) deckListText += DRAWN_CARD_COLOR + START_STRIKETHROUGH;
+			} else if (i <= (MAX_DECKLIST_SIZE - 1) * 2){
+				if (attackerDeck[i].CheckIfDrawn()) overflowDeckListText += DRAWN_CARD_COLOR + START_STRIKETHROUGH;
 
 				overflowDeckListText += attackerDeck[i].Value.ToString();
 
-				if (attackerDeck[i].CheckIfDrawn()) deckListText += END_STRIKETHROUGH + END_COLOR;
+				if (attackerDeck[i].CheckIfDrawn()) overflowDeckListText += END_STRIKETHROUGH + END_COLOR;
 
 				//add a newline after every number except the last to be written
 				if (i < attackerDeck.Count - 1) overflowDeckListText += NEWLINE;
+			} else {
+				if (attackerDeck[i].CheckIfDrawn()) moreOverflowDeckListText += DRAWN_CARD_COLOR + START_STRIKETHROUGH;
+
+				moreOverflowDeckListText += attackerDeck[i].Value.ToString();
+
+				if (attackerDeck[i].CheckIfDrawn()) moreOverflowDeckListText += END_STRIKETHROUGH + END_COLOR;
+
+				//add a newline after every number except the last to be written
+				if (i < attackerDeck.Count - 1) moreOverflowDeckListText += NEWLINE;
 			}
 		}
 
 		deckList.text = deckListText;
 		deckListOverflow.text = overflowDeckListText;
+		deckListMoreOverflow.text = moreOverflowDeckListText;
 	}
 
 	#endregion decklist
