@@ -44,6 +44,25 @@ public class EnvironmentManager {
 		changePlace.Then(new ChangeFogTask(ChangeFogTask.DenseOrLight.Light));
 
 		Services.Tasks.AddTask(fogGrows);
+
+		PlayPlaceMusic();
+	}
+
+
+	/// <summary>
+	/// Set the background music based on the current environment.
+	/// </summary>
+	private void PlayPlaceMusic(){
+		switch (currentPlace){
+			case Place.Kitchen:
+				Services.Sound.PlayCalmMusic();
+				break;
+			case Place.Tavern:
+				Services.Sound.PlayDangerMusic();
+				break;
+			case Place.Battlefield:
+				break;
+		}
 	}
 
 

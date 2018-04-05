@@ -297,7 +297,8 @@ public class BoardBehavior {
 
 		for (int x = 0; x < BOARD_WIDTH; x++){
 			if (spaces[x, WallZPos + 1].contentType == SpaceBehavior.ContentType.Attacker){ //check the spaces north of the wall
-				if (!spaces[x, WallZPos + 1].Contents.GetComponent<AttackerSandbox>().FoughtThisTurn){
+				if (!spaces[x, WallZPos + 1].Contents.GetComponent<AttackerSandbox>().FoughtThisTurn &&
+					GetWallDurability(x) > 0){
 					besiegingAttackers.Add(spaces[x, WallZPos + 1].Contents.GetComponent<AttackerSandbox>());
 				}
 			}
@@ -399,6 +400,16 @@ public class BoardBehavior {
 		Debug.Assert(column < walls.Count);
 
 		return walls[column].Strength;
+	}
+
+
+	/// <summary>
+	/// Lift a wall so that something can move through it.
+	/// </summary>
+	/// <param name="column">The column of the wall to be moved.</param>
+	public void LiftWall(int column){
+		Debug.Assert(CheckValidColumn(column), "Attempting to lift a non-existent wall.");
+		walls[column].LiftWall();
 	}
 
 

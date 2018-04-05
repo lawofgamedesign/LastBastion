@@ -28,17 +28,37 @@ public class MoveTask : Task {
 	private float tolerance = 0.1f;
 
 
+	//needed to determine whether to lift the wall
+	private readonly int column;
+	private readonly int startZ;
+	private readonly int endZ;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
 
 
 	//constructor
-	public MoveTask(Transform obj, int endX, int endZ, float moveSpeed){
+	public MoveTask(Transform obj, int endX, int startZ, int endZ, float moveSpeed){
 		this.obj = obj;
+		this.column = endX;
+		this.startZ = startZ;
+		this.endZ = endZ;
 		this.moveSpeed = moveSpeed;
 		destination = Services.Board.GetWorldLocation(endX, endZ);
 		direction = (destination - obj.position).normalized;
+	}
+
+
+	/// <summary>
+	/// Lift the wall, if this move will take the attacker through it.
+	/// </summary>
+	protected override void Init (){
+		if (startZ > Services.Board.WallZPos && endZ <= Services.Board.WallZPos){
+			Debug.Log("Lifting wall " + column);
+			Services.Board.LiftWall(column);
+		}
 	}
 
 

@@ -206,7 +206,7 @@ public class AttackerManager {
 		newWarlord.GetComponent<AttackerSandbox>().NewLoc(x, z);
 		newWarlord.name = type + DIVIDER + enemyNum;
 		enemyNum++;
-		Services.Tasks.AddTask(new MoveTask(newWarlord.transform, x, z, MoveSpeed)); //create the task that moves the warlord onto the board
+		Services.Tasks.AddTask(new MoveTask(newWarlord.transform, x, z + 1, z, MoveSpeed)); //create the task that moves the warlord onto the board
 
 		if (Services.Board.GetSpace(x, z).Tankard) MoveTankard(x, z);
 
@@ -242,7 +242,7 @@ public class AttackerManager {
 			newRetinueMember.name = newRetinueMember.name.Remove(newRetinueMember.name.Length - CLONE_LENGTH);
 			newRetinueMember.name += DIVIDER + enemyNum;
 			enemyNum++;
-			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x - 1, z, MoveSpeed)); //create the task that moves them onto the board
+			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x - 1, z + 1, z, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
 
@@ -266,7 +266,7 @@ public class AttackerManager {
 			newRetinueMember.name = newRetinueMember.name.Remove(newRetinueMember.name.Length - CLONE_LENGTH);
 			newRetinueMember.name += DIVIDER + enemyNum;
 			enemyNum++;
-			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x, z - 1, MoveSpeed)); //create the task that moves them onto the board
+			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x, z + 1, z - 1, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
 
@@ -291,7 +291,7 @@ public class AttackerManager {
 			newRetinueMember.name = newRetinueMember.name.Remove(newRetinueMember.name.Length - CLONE_LENGTH);
 			newRetinueMember.name += DIVIDER + enemyNum;
 			enemyNum++;
-			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x + 1, z, MoveSpeed)); //create the task that moves them onto the board
+			Services.Tasks.AddTask(new MoveTask(newRetinueMember.transform, x + 1, z + 1, z, MoveSpeed)); //create the task that moves them onto the board
 
 			temp.Add(newRetinueMember.GetComponent<AttackerSandbox>());
 

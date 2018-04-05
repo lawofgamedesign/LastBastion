@@ -337,7 +337,7 @@ public class AttackerSandbox : MonoBehaviour {
 		if (Services.Board.GeneralSpaceQuery(XPos + dir, ZPos) == SpaceBehavior.ContentType.None){
 			Services.Board.TakeThingFromSpace(XPos, ZPos);
 			Services.Board.PutThingInSpace(gameObject, XPos + dir, ZPos, SpaceBehavior.ContentType.Attacker);
-			Services.Tasks.AddOrderedTask(new MoveTask(transform, XPos + dir, ZPos, Services.Attackers.MoveSpeed));
+			Services.Tasks.AddOrderedTask(new MoveTask(transform, XPos + dir, ZPos, ZPos, Services.Attackers.MoveSpeed));
 			NewLoc(XPos + dir, ZPos);
 			Services.Rulebook.IncreaseAdvanceDuration();
 			return true;
@@ -348,7 +348,7 @@ public class AttackerSandbox : MonoBehaviour {
 	private void GoToSouth(int speed){
 		Services.Board.TakeThingFromSpace(XPos, ZPos);
 		Services.Board.PutThingInSpace(gameObject, XPos, ZPos - speed, SpaceBehavior.ContentType.Attacker);
-		moveTasks.Add(new MoveTask(transform, XPos, ZPos - speed, Services.Attackers.MoveSpeed));
+		moveTasks.Add(new MoveTask(transform, XPos, ZPos, ZPos - speed, Services.Attackers.MoveSpeed));
 		NewLoc(XPos, ZPos - speed);
 		Services.Rulebook.IncreaseAdvanceDuration();
 	}

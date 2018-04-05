@@ -40,8 +40,12 @@ public class MoveDefenderTask : Task {
 	public override void Tick(){
 		Vector3 nextWaypointLoc = Services.Board.GetWorldLocation(waypoints[index].x, waypoints[index].z); 
 
-		//if you're at the current waypoint, discard it 
-		if (Vector3.Distance(defender.position, nextWaypointLoc) <= distTolerance) index++; 
+		//if you're at the current waypoint, discard it
+		//also check whether it's necessary to lift the wall to pass through
+		if (Vector3.Distance(defender.position, nextWaypointLoc) <= distTolerance){
+			if (CheckForWallPass()) Services.Board.LiftWall(waypoints[index].x);
+			index++; 
+		}
 
 		//so long as there's still a waypoint, move toward it. If there are no more waypoints, this task is complete 
 		if (index <= waypoints.Count - 1){ 
@@ -55,5 +59,24 @@ public class MoveDefenderTask : Task {
 																			   waypoints[waypoints.Count - 1].z)));
 			SetStatus(TaskStatus.Success); 
 		} 
-	} 
+	}
+
+
+	/// <summary>
+	/// Will the defender's next move take them through the wall?
+	/// </summary>
+	/// <returns><c>true</c> if the defender will move from south of the wall to north of it, or vice versa; <c>false</c> otherwise.</returns>
+	private bool CheckForWallPass(){
+		if (index <= waypoints.Count - 2){ //only see if the next move will pass through the wall if there will be a next move
+			if ((waypoints[index].z <= Services.Board.WallZPos &&
+				 waypoints[index + 1].z > Services.Board.WallZPos) ||
+				(waypoints[index].z > Services.Board.WallZPos &&
+				 waypoints[index + 1].z <= Services.Board.WallZPos)){
+
+				return true;
+			}
+		}
+
+		return false;
+	}
 } 

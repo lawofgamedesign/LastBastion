@@ -52,11 +52,11 @@ public class TurnManager {
 
 
 	//feedback for when the player loses
-	private const string LOSE_MSG = "You lose! R to restart.";
+	private const string LOSE_MSG = "Good game. This scenario is tough for the defenders.";
 
 
 	//feedback for when the player wins
-	private const string WIN_MSG = "You win! R to restart.";
+	private const string WIN_MSG = "Wow! I can't believe you made it.";
 
 
 	//help text, and related variables
@@ -552,7 +552,7 @@ public class TurnManager {
 
 
 		private float timer = 0.0f;
-		private float resetWait = 1.0f;
+		private float resetWait = 2.0f;
 
 
 		public override void OnEnter (){
@@ -583,7 +583,7 @@ public class TurnManager {
 
 
 		private float timer = 0.0f;
-		private float resetWait = 1.0f;
+		private float resetWait = 2.0f;
 
 
 		public override void OnEnter (){
