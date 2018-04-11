@@ -194,8 +194,11 @@ public class AttackerSandbox : MonoBehaviour {
 		if (Services.Board.CheckIfBlock(XPos, ZPos - 1)){
 			Services.Events.Fire(new BlockedEvent());
 
-			if (TryMoveLateral(WEST)) return;
-			else if (TryMoveLateral(EAST)) return;
+			if (XPos > 0) { //don't try to move west if at the left edge of the board
+				if (TryMoveLateral(WEST)) return;
+			} else if (XPos < BoardBehavior.BOARD_WIDTH - 1){ //don't try to move east if on the right edge of the board
+				if (TryMoveLateral(EAST)) return;
+			}
 
 			return; //if this attacker can't move laterally around the block, it can't move at all
 		}
