@@ -45,24 +45,16 @@ public class EnvironmentManager {
 
 		Services.Tasks.AddTask(fogGrows);
 
-		PlayPlaceMusic();
+		Services.Sound.PlayPlaceMusic(newPlace);
 	}
 
 
 	/// <summary>
-	/// Set the background music based on the current environment.
+	/// Provides access to the current place.
 	/// </summary>
-	private void PlayPlaceMusic(){
-		switch (currentPlace){
-			case Place.Kitchen:
-				Services.Sound.PlayCalmMusic();
-				break;
-			case Place.Tavern:
-				Services.Sound.PlayDangerMusic();
-				break;
-			case Place.Battlefield:
-				break;
-		}
+	/// <returns>The current place.</returns>
+	public Place GetCurrentPlace(){
+		return currentPlace;
 	}
 
 

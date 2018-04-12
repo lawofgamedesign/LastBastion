@@ -49,7 +49,7 @@
 			Services.Momentum = new MomentumManager();
 			Services.Momentum.Setup();
 			Services.Sound = new AudioManager();
-			Services.Sound.Setup();
+			Services.Sound.Setup(AudioManager.Clips.Komiku_La_Ville_Aux_Ponts_Suspendus);
 			Services.PlayerEyes = new CameraBehavior();
 			Services.PlayerEyes.Setup();
 			Services.Environment = new EnvironmentManager();
@@ -64,8 +64,14 @@
 
 			PauseEvent pauseEvent = e as PauseEvent;
 
-			if (pauseEvent.action == PauseEvent.Pause.Pause) paused = true;
-			else paused = false;
+			if (pauseEvent.action == PauseEvent.Pause.Pause){
+				paused = true;
+				Services.Sound.PlayPauseMusic();
+			}
+			else {
+				paused = false;
+				Services.Sound.PlaySceneStartMusic();
+			}
 		}
 
 
@@ -81,6 +87,8 @@
 		/// frame-by-frame is controlled from here.
 		/// </summary>
 		private void Update(){
+			Services.Sound.Tick(); //music fades in and out even if the game is paused
+
 			if (paused) return;
 
 			Services.Tasks.Tick();

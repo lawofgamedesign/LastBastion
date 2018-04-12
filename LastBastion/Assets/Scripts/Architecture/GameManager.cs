@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour {
 		Services.Momentum = new MomentumManager();
 		Services.Momentum.Setup();
 		Services.Sound = new AudioManager();
-		Services.Sound.Setup();
+		Services.Sound.Setup(AudioManager.Clips.Doctor_Turtle_It_Looks_Like_the_Future_but_Feels_Like_the_Past);
 		Services.PlayerEyes = new CameraBehavior();
 		Services.PlayerEyes.Setup();
 		Services.Environment = new EnvironmentManager();
@@ -63,8 +63,14 @@ public class GameManager : MonoBehaviour {
 
 		PauseEvent pauseEvent = e as PauseEvent;
 
-		if (pauseEvent.action == PauseEvent.Pause.Pause) paused = true;
-		else paused = false;
+		if (pauseEvent.action == PauseEvent.Pause.Pause){
+			paused = true;
+			Services.Sound.PlayPauseMusic();
+		}
+		else {
+			paused = false;
+			Services.Sound.PlayPlaceMusic(Services.Environment.GetCurrentPlace());
+		}
 	}
 
 
@@ -80,6 +86,8 @@ public class GameManager : MonoBehaviour {
 	/// frame-by-frame is controlled from here.
 	/// </summary>
 	private void Update(){
+		Services.Sound.Tick(); //sound always fades in and out, even if the game is paused
+
 		if (paused) return;
 
 		Services.Tasks.Tick();

@@ -39,7 +39,7 @@
 			Services.Defenders = new DefenderManager();
 			Services.Defenders.Setup();
 			Services.Sound = new AudioManager();
-			Services.Sound.Setup();
+			Services.Sound.Setup(AudioManager.Clips.Komiku_Barque_sur_le_Lac);
 			Services.Cursor = new CursorManager();
 			Services.Cursor.Setup();
 			Services.EscapeMenu = new TitleEscMenuBehavior();
@@ -51,6 +51,8 @@
 
 
 		private void Update(){
+			Services.Sound.Tick(); //music fades in and out even when the game is paused
+
 			if (paused) return;
 
 			camScript.Tick();
@@ -86,8 +88,13 @@
 	
 			PauseEvent pauseEvent = e as PauseEvent;
 
-			if (pauseEvent.action == PauseEvent.Pause.Pause) paused = true;
-			else paused = false;
+			if (pauseEvent.action == PauseEvent.Pause.Pause){
+				paused = true;
+				Services.Sound.PlayPauseMusic();
+			} else {
+				paused = false;
+				Services.Sound.PlaySceneStartMusic();
+			}
 		}
 	}
 }

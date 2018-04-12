@@ -70,7 +70,7 @@ public class ChatUI {
 	protected const string END_STRIKETHROUGH = "</s>";
 	protected const string DRAWN_CARD_COLOR = "<color=#A59E9EFF>";
 	protected const string END_COLOR = "</color>";
-	protected const int MAX_DECKLIST_SIZE = 5; //how many numbers can appear in the decklist before it needs to start writing in the overflow column?
+	protected const int MAX_DECKLIST_SIZE = 6; //how many numbers can appear in the decklist before it needs to start writing in the overflow column?
 
 
 	//turn UI

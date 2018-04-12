@@ -190,7 +190,7 @@ public class AttackerSandbox : MonoBehaviour {
 		}
 
 		//move west or east if blocked from moving forward
-		//note that this privileges westward movement; it checks westward movement first, and will therefore go west in preference to being lured east
+		//note that this privileges westward movement; it checks westward movement first, and will therefore go west in preference to going east
 		if (Services.Board.CheckIfBlock(XPos, ZPos - 1)){
 			Services.Events.Fire(new BlockedEvent());
 
