@@ -56,22 +56,16 @@
 			if (paused) return;
 
 			camScript.Tick();
-			ListenForClick();
 			ListenForMenu();
 		}
 
 
-		private void ListenForClick(){
-			if (Input.GetMouseButtonDown(0)){
-				Services.Events.Unregister<PauseEvent>(HandlePausing);
-				Services.EscapeMenu.Cleanup();
-				SceneManager.LoadScene(TUTORIAL_SCENE);
-			}
-			else if (Input.GetMouseButtonDown(1)){
-				Services.Events.Unregister<PauseEvent>(HandlePausing);
-				Services.EscapeMenu.Cleanup();
-				SceneManager.LoadScene(GAME_SCENE);
-			}
+		/// <summary>
+		/// Menu buttons use this to get ready to leave the title scene.
+		/// </summary>
+		public void CleanUp(){
+			Services.Events.Unregister<PauseEvent>(HandlePausing);
+			Services.EscapeMenu.Cleanup();
 		}
 
 
