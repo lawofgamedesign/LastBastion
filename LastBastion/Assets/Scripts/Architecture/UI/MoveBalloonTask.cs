@@ -39,7 +39,7 @@ public class MoveBalloonTask : Task {
 
 
 	//speed
-	private float speed = 500.0f;
+	private float speed = 1500.0f;
 
 
 	//balloon starting location

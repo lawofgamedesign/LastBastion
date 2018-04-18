@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using TMPro;
+using UnityEngine;
 
 public class ThrowAwayCardTask : Task {
 
@@ -52,7 +52,7 @@ public class ThrowAwayCardTask : Task {
 				startLoc).GetComponent<RectTransform>();
 		card.name = endLoc.name + CARD_OBJ;
 		card.position = startLoc.position;
-		card.Find(VALUE_OBJ).GetComponent<Text>().text = value.ToString();
+		card.Find(VALUE_OBJ).GetComponent<TextMeshProUGUI>().text = value.ToString();
 	}
 
 

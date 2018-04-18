@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using TMPro;
+using UnityEngine;
 
 public class PutInCardTask : Task {
 
@@ -54,7 +54,7 @@ public class PutInCardTask : Task {
 		card = MonoBehaviour.Instantiate<GameObject>(Resources.Load<GameObject>(CARD_OBJ),
 													 GameObject.Find(DECK_CANVAS).transform).transform;
 		card.position = startLoc.position;
-		card.Find(VALUE_OBJ).GetComponent<Text>().text = value.ToString();
+		card.Find(VALUE_OBJ).GetComponent<TextMeshProUGUI>().text = value.ToString();
 
 		direction = (endLoc.position - startLoc.position).normalized;
 	}

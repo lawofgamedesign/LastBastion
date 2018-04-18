@@ -670,7 +670,7 @@
 
 
 			private const string EVERYTHING_MSG = "That's everything we need to start playing.";
-			private const string WARLORD_Q_MSG = "What about those guys in back?";
+			private const string WARLORD_Q_MSG = "What about the ones in back?";
 			private const string WARLORD_A_MSG = "My skeletons are led by warlords. They're tougher than skeletons.";
 			private const string EXPLANATION_Q_MSG = "What do they do?";
 			private const string EXPLANATION_A_MSG = "There are different types. If you see one you're not sure about during the game, just ask.";

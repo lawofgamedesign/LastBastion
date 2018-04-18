@@ -53,6 +53,7 @@ public class ChatUI {
 	protected const string DISCARD_ORGANIZER = "Discard pile";
 	protected const string ADDED_CARD = " added with value of ";
 	protected const string VALUE_OBJ = "Value";
+	protected const string CARD_BACK_OBJ = "Card back";
 	protected const float CARD_VERTICAL_SPACE = 0.2f;
 	protected const float Y_AXIS_MESSINESS = 45.0f;
 
@@ -772,7 +773,8 @@ public class ChatUI {
 		//make the discard a little sloppy, so that it's easier to recognize as distinct from the deck
 		topCard.localRotation = Quaternion.Euler(new Vector3(0.0f, 0.0f, Random.Range(-Y_AXIS_MESSINESS, Y_AXIS_MESSINESS)));
 
-		topCard.Find(VALUE_OBJ).GetComponent<Text>().text = value.ToString();
+		topCard.Find(VALUE_OBJ).GetComponent<TextMeshProUGUI>().text = value.ToString();
+		topCard.Find(CARD_BACK_OBJ).gameObject.SetActive(false);
 	}
 
 
