@@ -77,6 +77,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const string BRAWLER_NAME = "Brawler";
 
 
+	//posing information
+	private const string ATTACK_ANIM = "WK_heavy_infantry_07_attack_A";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -96,6 +100,12 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		currentRampage = RampageTrack.None;
 		currentDrink = DrinkTrack.None;
+
+
+		//pose the Brawler
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.1f;
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
 	}
 
 

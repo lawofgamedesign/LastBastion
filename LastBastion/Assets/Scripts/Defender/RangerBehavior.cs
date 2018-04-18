@@ -57,6 +57,10 @@ public class RangerBehavior : DefenderSandbox {
 	private int landslideDamage = 999; //enough to defeat any attacker
 
 
+	//posing information
+	private const string ATTACK_ANIM = "WK_archer_07_attack_A";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -74,6 +78,12 @@ public class RangerBehavior : DefenderSandbox {
 		ammoOrganizer = transform.Find(PRIVATE_UI_CANVAS).Find(ATTACK_REMAINING_ORGANIZER);
 
 		currentTrap = TrapTrack.None;
+
+
+		//pose the Ranger
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.5f;
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
 	}
 
 

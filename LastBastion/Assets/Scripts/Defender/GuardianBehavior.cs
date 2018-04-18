@@ -64,6 +64,10 @@ public class GuardianBehavior : DefenderSandbox {
 	private const string GUARDIAN_NAME = "Guardian";
 
 
+	//posing information
+	private const string ATTACK_ANIM = "WK_heavy_infantry_08_attack_B";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -79,6 +83,12 @@ public class GuardianBehavior : DefenderSandbox {
 
 		currentHold = HoldTrack.None;
 		currentSingleCombat = SingleCombatTrack.None;
+
+
+		//pose the Guardian
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.75f;
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
 	}
 
 

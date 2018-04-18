@@ -104,6 +104,12 @@ public class DefenderSandbox : MonoBehaviour {
 	protected const string POWER_UP_MSG = " is ready to power up. I'll be able to choose a new ability at the start of the next turn.";
 
 
+	//the defender's miniature
+	protected const string MODEL_OBJ = "Model";
+	protected const string MINI_OBJ = "Miniature";
+	protected Animation pose;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -133,6 +139,7 @@ public class DefenderSandbox : MonoBehaviour {
 		DefeatedSoFar = START_DEFEATED;
 		xpParticle = transform.Find(XP_PARTICLE_OBJ).GetComponent<ParticleSystem>();
 		powerupReadyParticle = transform.Find(POWER_UP_PARTICLE_OBJ).gameObject;
+		pose = transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>();
 	}
 
 
