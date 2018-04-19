@@ -19,11 +19,18 @@ public class DefenderUIBehavior : MonoBehaviour {
 	private Color unselectedColor = Color.white;
 	private Color selectedColor = Color.blue;
 	private Color unavailableColor = Color.red;
+	private const string CARD_FRONT_OBJ = "Card front";
 
 
 	//for flipping cards face-down
 	private const float FACE_DOWN_Y = 180.0f;
 	private const string CARD_BACK_OBJ = "Card back";
+
+
+	//the icons on the back of cards
+	private Image[] icons;
+	private const string ICON_OBJ = "Icon";
+
 
 
 	/////////////////////////////////////////////
@@ -33,7 +40,11 @@ public class DefenderUIBehavior : MonoBehaviour {
 
 	//initialize variables
 	public void Setup(){
-		//no action required
+		icons = new Image[transform.childCount];
+
+		for (int i = 0; i < icons.Length; i++){
+			icons[i] = transform.GetChild(i).Find(CARD_BACK_OBJ).Find(ICON_OBJ).GetComponent<Image>();
+		}
 	}
 
 
@@ -83,10 +94,10 @@ public class DefenderUIBehavior : MonoBehaviour {
 
 	public void TurnSelectedColor(int index){
 		foreach (RectTransform child in transform){
-			if (child.GetComponent<Image>().color == selectedColor) child.GetComponent<Image>().color = unselectedColor;
+			if (child.Find(CARD_FRONT_OBJ).GetComponent<Image>().color == selectedColor) child.Find(CARD_FRONT_OBJ).GetComponent<Image>().color = unselectedColor;
 		}
 
-		transform.GetChild(index).GetComponent<Image>().color = selectedColor;
+		transform.GetChild(index).Find(CARD_FRONT_OBJ).GetComponent<Image>().color = selectedColor;
 	}
 
 
@@ -94,11 +105,22 @@ public class DefenderUIBehavior : MonoBehaviour {
 	/// Indicates that there is no currently-selected card by changing all cards' colors to the unselected color.
 	/// </summary>
 	public void ClearAllSelectedColor(){
-		foreach (Transform child in transform) child.GetComponent<Image>().color = unselectedColor;
+		foreach (Transform child in transform) child.Find(CARD_FRONT_OBJ).GetComponent<Image>().color = unselectedColor;
+	}
+
+
+	/// <summary>
+	/// Put the selected defender's icon on each card back.
+	/// </summary>
+	/// <param name="image">The defender's icon.</param>
+	public void SetIcons(Sprite image){
+		foreach (Image icon in icons){
+			icon.sprite = image;
+		}
 	}
 
 
 	public void TurnUnavailableColor(int index){
-		transform.GetChild(index).GetComponent<Image>().color = unavailableColor;
+		transform.GetChild(index).Find(CARD_FRONT_OBJ).GetComponent<Image>().color = unavailableColor;
 	}
 }

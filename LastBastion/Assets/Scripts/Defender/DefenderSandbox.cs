@@ -110,6 +110,10 @@ public class DefenderSandbox : MonoBehaviour {
 	protected Animation pose;
 
 
+	//the defender's icon
+	protected Sprite icon;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -415,6 +419,7 @@ public class DefenderSandbox : MonoBehaviour {
 		Selected = true;
 		selectedParticle.SetActive(true);
 		uICanvas.GetComponent<DefenderUIBehavior>().ClearAllSelectedColor();
+		uICanvas.GetComponent<DefenderUIBehavior>().SetIcons(icon);
 
 		Debug.Assert(combatHand.Count <= uICanvas.childCount, "Too many combat cards to display!");
 

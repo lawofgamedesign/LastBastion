@@ -61,6 +61,10 @@ public class RangerBehavior : DefenderSandbox {
 	private const string ATTACK_ANIM = "WK_archer_07_attack_A";
 
 
+	//icon
+	private const string RANGER_ICON_IMG = "Sprites/Ranger icon";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -84,6 +88,10 @@ public class RangerBehavior : DefenderSandbox {
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.5f;
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
+
+
+		//set icon
+		icon = Resources.Load<Sprite>(RANGER_ICON_IMG);
 	}
 
 

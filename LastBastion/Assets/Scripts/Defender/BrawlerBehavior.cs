@@ -81,6 +81,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const string ATTACK_ANIM = "WK_heavy_infantry_07_attack_A";
 
 
+	//icon
+	private const string BRAWLER_ICON_IMG = "Sprites/Brawler icon";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -106,6 +110,10 @@ public class BrawlerBehavior : DefenderSandbox {
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.1f;
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
+
+
+		//set icon
+		icon = Resources.Load<Sprite>(BRAWLER_ICON_IMG);
 	}
 
 
