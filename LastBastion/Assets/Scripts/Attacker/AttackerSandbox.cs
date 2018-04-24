@@ -75,6 +75,20 @@ public class AttackerSandbox : MonoBehaviour {
 	protected const string MINI_OBJ = "Miniature";
 
 
+	/*
+	 * 
+	 * ChatUI gets confused when calculating the number of rows for speech balloons
+	 * displaying attacker stats, owing to the newlines--it counts the two characters
+	 * in the newline, rather than treating it as a new row. The problem appears when the
+	 * number of characters in the attacker's name is too short; if the name is long enough,
+	 * ChatUI gets the right answer in the wrong way. This is a bodge to fix the problem;
+	 * where the name would be too short, these add characters to create enough length to get
+	 * the right result.
+	 * 
+	 */
+	protected const int MIN_NAME_LENGTH = 15;
+	protected const string LENGTH_MAKEUP = "     ";
+
 
 
 
@@ -468,9 +482,15 @@ public class AttackerSandbox : MonoBehaviour {
 	/// </summary>
 	/// <returns>This attacker's name and stats.</returns>
 	public string GetUIInfo(){
+
+		//see the discussion of the MIN_NAME_LENGTH and LENGTH_MAKEUP fields, above
+		string lengthMakeup = "";
+		if (attackerName.Length < MIN_NAME_LENGTH) lengthMakeup = LENGTH_MAKEUP;
+
 		return attackerName + NEWLINE +
 			   ATTACK + AttackMod.ToString() + NEWLINE +
 			   ARMOR + Armor.ToString() + NEWLINE +
-			   HEALTH + Health.ToString() + NEWLINE;
+			   HEALTH + Health.ToString() + NEWLINE +
+			   lengthMakeup;
 	}
 }

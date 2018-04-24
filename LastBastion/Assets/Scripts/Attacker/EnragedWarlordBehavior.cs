@@ -10,9 +10,9 @@ public class EnragedWarlordBehavior : WarlordSandbox {
 
 	//Enraged Warlord stats
 	private int enragedSpeed = 1;
-	private int enragedAttack = 1;
+	private int enragedAttack = 0;
 	private int enragedArmor = 0;
-	private int enragedHealth = 5;
+	private int enragedHealth = 7;
 	private const string NAME = "Enraged Warlord";
 
 
