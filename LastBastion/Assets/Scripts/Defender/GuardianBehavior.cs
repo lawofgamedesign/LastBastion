@@ -72,6 +72,10 @@ public class GuardianBehavior : DefenderSandbox {
 	private const string GUARDIAN_ICON_IMG = "Sprites/Guardian icon";
 
 
+	//portrait
+	private const string GUARDIAN_PORTRAIT_IMG = "Sprites/Portraits/Guardian portrait";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -97,6 +101,10 @@ public class GuardianBehavior : DefenderSandbox {
 
 		//set icon
 		icon = Resources.Load<Sprite>(GUARDIAN_ICON_IMG);
+
+
+		//set portrait
+		portrait = Resources.Load<Sprite>(GUARDIAN_PORTRAIT_IMG);
 	}
 
 
@@ -426,6 +434,7 @@ public class GuardianBehavior : DefenderSandbox {
 	/// </summary>
 	public override void TakeOverCharSheet(){
 		Services.UI.TakeOverCharSheet(GUARDIAN_NAME,
+									  portrait,
 									  Speed,
 									  AttackMod,
 									  Armor,

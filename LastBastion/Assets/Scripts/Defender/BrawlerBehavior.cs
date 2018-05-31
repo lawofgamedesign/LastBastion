@@ -85,6 +85,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private const string BRAWLER_ICON_IMG = "Sprites/Brawler icon";
 
 
+	//portrait
+	private const string BRAWLER_PORTRAIT_IMG = "Sprites/Portraits/Brawler portrait";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -114,6 +118,10 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		//set icon
 		icon = Resources.Load<Sprite>(BRAWLER_ICON_IMG);
+
+
+		//set portrait
+		portrait = Resources.Load<Sprite>(BRAWLER_PORTRAIT_IMG);
 	}
 
 
@@ -512,6 +520,7 @@ public class BrawlerBehavior : DefenderSandbox {
 	/// </summary>
 	public override void TakeOverCharSheet(){
 		Services.UI.TakeOverCharSheet(BRAWLER_NAME,
+									  portrait,
 									  Speed,
 									  AttackMod,
 									  Armor,

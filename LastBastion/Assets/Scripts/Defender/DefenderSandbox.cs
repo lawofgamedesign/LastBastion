@@ -114,6 +114,10 @@ public class DefenderSandbox : MonoBehaviour {
 	protected Sprite icon;
 
 
+	//the defender's portrait
+	protected Sprite portrait;
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -679,7 +683,7 @@ public class DefenderSandbox : MonoBehaviour {
 	/// Each defender calls their own TakeOverCharSheet, which gives them the chance to substitute in their own text for the upgrade paths.
 	/// </summary>
 	public virtual void TakeOverCharSheet(){
-		Services.UI.TakeOverCharSheet(name, Speed, AttackMod, Armor, defeatsToNextUpgrade, DefeatedSoFar, GetAvailableValues());
+		Services.UI.TakeOverCharSheet(name, portrait, Speed, AttackMod, Armor, defeatsToNextUpgrade, DefeatedSoFar, GetAvailableValues());
 	}
 
 

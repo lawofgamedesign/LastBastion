@@ -65,6 +65,10 @@ public class RangerBehavior : DefenderSandbox {
 	private const string RANGER_ICON_IMG = "Sprites/Ranger icon";
 
 
+	//portrait
+	private const string RANGER_PORTRAIT_IMG = "Sprites/Portraits/Ranger portrait";
+
+
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -92,6 +96,10 @@ public class RangerBehavior : DefenderSandbox {
 
 		//set icon
 		icon = Resources.Load<Sprite>(RANGER_ICON_IMG);
+
+
+		//set portrait
+		portrait = Resources.Load<Sprite>(RANGER_PORTRAIT_IMG);
 	}
 
 
@@ -356,6 +364,7 @@ public class RangerBehavior : DefenderSandbox {
 	/// </summary>
 	public override void TakeOverCharSheet(){
 		Services.UI.TakeOverCharSheet(RANGER_NAME,
+									  portrait,
 									  Speed,
 									  AttackMod,
 									  Armor,
