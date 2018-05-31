@@ -58,6 +58,11 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	private const string COMMA = ", ";
 
 
+	//character image
+	private Image charPortrait;
+	private const string PORTRAIT_OBJ = "Portrait";
+
+
 	//is the character sheet currently hidden or displayed?
 	public enum SheetStatus { Displayed, Hidden };
 	public SheetStatus CurrentStatus { get; private set; }
@@ -78,6 +83,7 @@ public class CharacterSheetBehavior : MonoBehaviour {
 		track2Next = transform.Find(TRACK_2_NEXT_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
 		track2Current = transform.Find(TRACK_2_CURRENT_OBJ).Find(TEXT_OBJ).GetComponent<TextMeshProUGUI>();
 		availCards = transform.Find(AVAILABLE_CARDS_OBJ).GetComponent<TextMeshProUGUI>();
+		charPortrait = transform.Find(PORTRAIT_OBJ).GetComponent<Image>();
 		Services.Events.Register<InputEvent>(HandleClicks);
 		CurrentStatus = SheetStatus.Hidden;
 		ChangeSheetState();
@@ -119,6 +125,15 @@ public class CharacterSheetBehavior : MonoBehaviour {
 	/// <param name="newName">The new name.</param>
 	public void RenameSheet(string newName){
 		nameButton.text = newName;
+	}
+
+
+	/// <summary>
+	/// Change the character portrait on the character sheet.
+	/// </summary>
+	/// <param name="portrait">The new character portrait.</param>
+	public void ReviseCharPortrait(Sprite portrait){
+		charPortrait.sprite = portrait;
 	}
 
 

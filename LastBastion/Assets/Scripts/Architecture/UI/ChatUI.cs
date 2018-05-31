@@ -621,9 +621,10 @@ public class ChatUI {
 	/// <param name="defeatsToNextUpgrade">The number of attackers the defender must defeat to upgrade.</param>
 	/// <param name="defeatsSoFar">The defender's current progress toward the next upgrade.</param>
 	/// <param name="values">The values of the defender's currently available combat cards.</param>
-	public void TakeOverCharSheet(string name, int speed, int attackMod, int armor, int defeatsToNextUpgrade, int defeatsSoFar, List<int> values){
+	public void TakeOverCharSheet(string name, Sprite portrait, int speed, int attackMod, int armor, int defeatsToNextUpgrade, int defeatsSoFar, List<int> values){
 		charSheet.RenameSheet(name);
-		charSheet.ReviseStatBlock(speed, attackMod, armor);
+		charSheet.ReviseCharPortrait(portrait);
+		//charSheet.ReviseStatBlock(speed, attackMod, armor); //there might be a need for a stat block in the future; right now, it's not doing any work
 		charSheet.ReviseNextLabel(defeatsToNextUpgrade - defeatsSoFar);
 		charSheet.ReviseAvailCards(values);
 		if (!charSheet.gameObject.activeInHierarchy) charSheet.ChangeSheetState();
@@ -639,6 +640,7 @@ public class ChatUI {
 	/// <param name="track2Current">The defender's current upgrade on the right-side track.</param>
 	/// <param name="values">The values of the defender's currently available combat cards.</param>
 	public void TakeOverCharSheet(string name,
+		Sprite portrait,
 		int speed,
 		int attackMod,
 		int armor,
@@ -651,7 +653,7 @@ public class ChatUI {
 		List<int> values){
 		charSheet.ReviseTrack1(track1Next, track1Current);
 		charSheet.ReviseTrack2(track2Next, track2Current);
-		TakeOverCharSheet(name, speed, attackMod, armor, defeatsToNextUpgrade, defeatsSoFar, values);
+		TakeOverCharSheet(name, portrait, speed, attackMod, armor, defeatsToNextUpgrade, defeatsSoFar, values);
 	}
 
 
