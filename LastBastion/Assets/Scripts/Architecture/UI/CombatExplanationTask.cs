@@ -129,7 +129,7 @@ public class CombatExplanationTask : Task {
 		ColorUtility.TryParseHtmlString(DEFENDER_COLOR_HEX, out defenderColor);
 		explainMachine = new FSM<CombatExplanationTask>(this);
 		explainMachine.TransitionTo<Intro>();
-		Services.Events.Register<InputEvent>(BeDone);
+		Services.Events.Register<CombatExplanationDoneEvent>(BeDone);
 	}
 
 
@@ -161,7 +161,7 @@ public class CombatExplanationTask : Task {
 
 		Services.UI.ExplainCombat(defenderValue, defenderScript, defenderMod, attackerScript, attackerValue, attackerMod, damage);
 
-		Services.Events.Unregister<InputEvent>(BeDone);
+		Services.Events.Unregister<CombatExplanationDoneEvent>(BeDone);
 
 		int total = (attackerValue + attackerMod) - (defenderValue + defenderMod);
 
@@ -179,7 +179,7 @@ public class CombatExplanationTask : Task {
 
 
 	private void BeDone(Event e){
-		Debug.Assert(e.GetType() == typeof(InputEvent));
+		Debug.Assert(e.GetType() == typeof(CombatExplanationDoneEvent));
 
 		SetStatus(TaskStatus.Success);
 	}
@@ -190,6 +190,7 @@ public class CombatExplanationTask : Task {
 	/////////////////////////////////////////////
 
 
+	//put up combatant names
 	private class Intro : FSM<CombatExplanationTask>.State {
 
 
@@ -210,6 +211,7 @@ public class CombatExplanationTask : Task {
 	}
 
 
+	//add the combatants' played cards
 	private class ShowValues : FSM<CombatExplanationTask>.State {
 
 
@@ -230,6 +232,7 @@ public class CombatExplanationTask : Task {
 	}
 
 
+	//add the combatants' attack modifiers
 	private class ShowMods : FSM<CombatExplanationTask>.State {
 
 
@@ -258,6 +261,7 @@ public class CombatExplanationTask : Task {
 	}
 
 
+	//show totals
 	private class ShowIndivTotals : FSM<CombatExplanationTask>.State {
 
 
@@ -278,6 +282,7 @@ public class CombatExplanationTask : Task {
 	}
 
 
+	//show the result, with subtitle for explanation
 	private class ShowOverallTotal : FSM<CombatExplanationTask>.State {
 
 
