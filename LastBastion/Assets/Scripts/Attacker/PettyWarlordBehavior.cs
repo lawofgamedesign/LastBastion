@@ -26,12 +26,12 @@ public class PettyWarlordBehavior : WarlordSandbox {
 
 	//initialize variables, including the Petty Warlord's stats
 	public override void Setup (){
-		base.Setup ();
 		speed = pettySpeed;
 		AttackMod = pettyAttack;
 		Armor = pettyArmor;
 		Health = pettyHealth;
 		startHealth = pettyHealth;
 		attackerName = NAME;
+		base.Setup();
 	}
 }

@@ -132,13 +132,13 @@ public static class Services {
 	}
 
 
-	private static CameraBehavior playerEyes;
-	public static CameraBehavior PlayerEyes {
+	private static CameraBehavior camControl;
+	public static CameraBehavior CamControl {
 		get {
-			Debug.Assert(playerEyes != null, "No controller for the player's view. Are services being created out of order?");
-			return playerEyes;
+			Debug.Assert(camControl != null, "No controller for the camera. Are services being created out of order?");
+			return camControl;
 		}
-		set { playerEyes = value; }
+		set { camControl = value; }
 	}
 
 

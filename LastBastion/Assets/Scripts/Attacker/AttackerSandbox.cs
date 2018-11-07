@@ -50,6 +50,7 @@ public class AttackerSandbox : MonoBehaviour {
 
 	//for the UI, when the player needs info on this attacker
 	protected string attackerName = "Skeleton";
+	protected const string SKELETON_NAME = "Skeleton";
 	protected const string ATTACK = "Attack: ";
 	protected const string ARMOR = "Armor: ";
 	protected const string HEALTH = "Health: ";
@@ -104,11 +105,16 @@ public class AttackerSandbox : MonoBehaviour {
 		FoughtThisTurn = false;
 		SiegeStrength = startSiegeStrength;
 		SpawnedThisTurn = true;
-		AttackMod = 0;
-		Armor = 0;
-		Health = baseHealth;
 		Blocked = false;
 		noDamageParticle = transform.Find(NO_DMG_PARTICLE_OBJ).GetComponent<ParticleSystem>();
+
+		//warlords handle this themselves. Skeletons do it here.
+		if (gameObject.name.Contains(SKELETON_NAME)){
+			attackerName = SKELETON_NAME;
+			AttackMod = 0;
+			Armor = 0;
+			Health = baseHealth;
+		}
 
 		RegisterForEvents();
 	}

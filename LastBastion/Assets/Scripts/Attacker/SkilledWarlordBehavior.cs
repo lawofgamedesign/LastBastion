@@ -27,14 +27,14 @@ public class SkilledWarlordBehavior : WarlordSandbox {
 
 
 	//initialize variables, including the Skilled Warlord's stats
-	public override void Setup (){
-		base.Setup ();
+	public override void Setup(){
 		speed = skilledSpeed;
 		AttackMod = skilledAttack;
 		Armor = skilledArmor;
 		Health = skilledHealth;
 		startHealth = skilledHealth;
 		attackerName = NAME;
+		base.Setup();
 
 
 		//pose the Skilled Warlord

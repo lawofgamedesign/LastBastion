@@ -93,6 +93,11 @@ public class RangerBehavior : DefenderSandbox {
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
 
+		//pose the unmoving model that stays behind when the player is moving the Ranger
+		transform.Find(UNMOVING_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.5f;
+		transform.Find(UNMOVING_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(UNMOVING_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
+
 
 		//set icon
 		icon = Resources.Load<Sprite>(RANGER_ICON_IMG);

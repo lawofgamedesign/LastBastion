@@ -23,12 +23,12 @@ public class FastWarlordBehavior : WarlordSandbox {
 
 	//initialize variables, including the Fast Warlord's stats
 	public override void Setup (){
-		base.Setup ();
 		speed = fastSpeed;
 		AttackMod = fastAttack;
 		Armor = fastArmor;
 		Health = fastHealth;
 		startHealth = fastHealth;
 		attackerName = NAME;
+		base.Setup ();
 	}
 }

@@ -50,8 +50,8 @@
 			Services.Momentum.Setup();
 			Services.Sound = new AudioManager();
 			Services.Sound.Setup(AudioManager.Clips.Komiku_La_Ville_Aux_Ponts_Suspendus);
-			Services.PlayerEyes = new CameraBehavior();
-			Services.PlayerEyes.Setup();
+			Services.CamControl = new CameraBehavior();
+			Services.CamControl.Setup();
 			Services.Environment = new EnvironmentManager();
 			Services.EscapeMenu = new TutorialEscMenuBehavior();
 			Services.EscapeMenu.Setup();

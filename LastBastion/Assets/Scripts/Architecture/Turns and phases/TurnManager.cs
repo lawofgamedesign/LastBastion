@@ -322,10 +322,11 @@ public class TurnManager {
 
 			if (inputEvent.selected.tag == DEFENDER_TAG){
 				Services.Defenders.SelectDefenderForMovement(inputEvent.selected.GetComponent<DefenderSandbox>());
-			} else if (inputEvent.selected.tag == BOARD_TAG){
-				if (Services.Defenders.IsAnyoneSelected()){
-					Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
-				}
+			//clicking directly on the board to move is disabled, since movement is now handled by draggint the mini using DefenderMoveTask
+//			} else if (inputEvent.selected.tag == BOARD_TAG){
+//				if (Services.Defenders.IsAnyoneSelected()){
+//					Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);
+//				}
 			} else if (inputEvent.selected.tag == ATTACKER_TAG || inputEvent.selected.tag == MINION_TAG || inputEvent.selected.tag == LEADER_TAG){
 				Services.UI.OpponentStatement(inputEvent.selected.GetComponent<AttackerSandbox>().GetUIInfo());
 			}
@@ -381,8 +382,6 @@ public class TurnManager {
 
 
 		private void HandleFightInputs(Event e){
-			//don't allow the player to interact with the board if the combat explanation screen is displayed
-			if (Services.Tasks.CheckForTaskOfType<CombatExplanationTask>()) return;
 
 			InputEvent inputEvent = e as InputEvent;
 

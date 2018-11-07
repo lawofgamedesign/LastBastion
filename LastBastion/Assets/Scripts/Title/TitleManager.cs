@@ -13,6 +13,8 @@
 
 		//rotates the camera
 		private CameraRotator camScript;
+		private enum CameraState { Rotating, Reading_Credits };
+		private CameraState camState;
 
 
 		//scenes to load
@@ -44,18 +46,22 @@
 			Services.Cursor.Setup();
 			Services.EscapeMenu = new TitleEscMenuBehavior();
 			Services.EscapeMenu.Setup();
+			Services.Tasks = new TaskManager();
 			camScript = new CameraRotator();
 			camScript.Setup();
+			camState = CameraState.Rotating;
 			Services.Events.Register<PauseEvent>(HandlePausing);
+			Services.Events.Register<CreditsButtonEvent>(ListenForCredits);
 		}
 
 
 		private void Update(){
 			Services.Sound.Tick(); //music fades in and out even when the game is paused
+			Services.Tasks.Tick();
 
 			if (paused) return;
 
-			camScript.Tick();
+			if (camState == CameraState.Rotating) camScript.Tick();
 			ListenForMenu();
 		}
 
@@ -65,6 +71,7 @@
 		/// </summary>
 		public void CleanUp(){
 			Services.Events.Unregister<PauseEvent>(HandlePausing);
+			Services.Events.Unregister<CreditsButtonEvent>(ListenForCredits);
 			Services.EscapeMenu.Cleanup();
 		}
 
@@ -74,6 +81,13 @@
 				Services.Events.Fire(new EscMenuEvent());
 				Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Pause));
 			}
+		}
+
+
+		private void ListenForCredits(global::Event e){
+			Debug.Assert(e.GetType() == typeof(CreditsButtonEvent), "Non-CreditsButtonEvent in TitleManager");
+
+			camState = CameraState.Reading_Credits;
 		}
 
 

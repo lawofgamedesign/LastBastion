@@ -101,23 +101,26 @@
 
 
 		/// <summary>
-		/// Switch on the UI element indicating where a given defender should move.
+		/// Switch on the UI element indicating where a given defender should move, or switch it off when the defender arrives.
 		/// </summary>
 		/// <param name="defender">The moving defender, or null if all notices should be off.</param>
-		private void ToggleMoveNotice(DefenderSandbox defender){
-			foreach (GameObject notice in moveNotices) notice.SetActive(false);
+		private void ToggleMoveNotice(DefenderSandbox defender, Indicate startOrStop){
+			if (defender == null){
+				foreach (GameObject notice in moveNotices) notice.SetActive(false);
+				return;
+			}
 
-			if (defender == null) return;
+			bool newState = startOrStop == Indicate.Start ? true : false;
 
 			switch (defender.gameObject.name) {
 				case RANGER:
-					rangerNotice.SetActive(true);
+					rangerNotice.SetActive(newState);
 					break;
 				case GUARDIAN:
-					guardianNotice.SetActive(true);
+					guardianNotice.SetActive(newState);
 					break;
 				case BRAWLER:
-					brawlerNotice.SetActive(true);
+					brawlerNotice.SetActive(newState);
 					break;
 			}
 		}
@@ -208,8 +211,8 @@
 
 			private const string WALL_TAG = "Wall";
 			private const string MOVE_PHASE_MSG = "Each turn starts with my horde advancing one space toward town.";
-			private const string WALL_Q_MSG = "What about that wall?";
-			private const string WALL_A_MSG = "Good question! My horde can't move through any part of the wall with guards on top.";
+			private const string WALL_Q_MSG = "What about the castle?";
+			private const string WALL_A_MSG = "Good question! My horde can't move through any part of the castle with guards on top.";
 			private const string GUARDS_Q_MSG = "Can I lose guards?";
 			private const string GUARDS_A_MSG = "Yes--we'll talk about it at the end of the turn. For now, let's talk about your defenders";
 			private const string READY_PROGRESS_MSG = "OK.";
@@ -305,11 +308,16 @@
 
 
 			private void HandleMoves(global::Event e){
-				Context.ToggleMoveNotice(null);
+				Debug.Assert(e.GetType() == typeof(MoveEvent), "Non-MoveEvent in HandleMoves");
+
+				MoveEvent moveEvent = e as MoveEvent;
+
+				Context.ToggleMoveNotice(moveEvent.movingObj.GetComponent<DefenderSandbox>(), Indicate.Stop);
 
 				if (ranger.ReportGridLoc().x == 0 && ranger.ReportGridLoc().z == 3){
 					if (guardian.ReportGridLoc().x == 5 && guardian.ReportGridLoc().z == 3){
 						if (brawler.ReportGridLoc().x == 8 && brawler.ReportGridLoc().z == 3){
+							Context.ToggleMoveNotice(null, Indicate.Stop); //sanity check; make sure all notices are off
 							Services.Board.HighlightAll(BoardBehavior.OnOrOff.Off);
 							Services.UI.SetButtonText(THERE_MSG);
 							Services.UI.TogglePhaseButton(ChatUI.OnOrOff.On);
@@ -330,7 +338,7 @@
 
 				if (inputEvent.selected.tag == DEFENDER_TAG){
 					Services.Defenders.SelectDefenderForMovement(inputEvent.selected.GetComponent<DefenderSandbox>());
-					Context.ToggleMoveNotice(Services.Defenders.GetSelectedDefender());
+					Context.ToggleMoveNotice(Services.Defenders.GetSelectedDefender(), Indicate.Start);
 				} else if (inputEvent.selected.tag == BOARD_TAG){
 					if (Services.Defenders.IsAnyoneSelected()){
 						Services.Defenders.GetSelectedDefender().TryPlanMove(inputEvent.selected.GetComponent<SpaceBehavior>().GridLocation);

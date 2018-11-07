@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class WarlordSandbox : AttackerSandbox {
 
@@ -16,8 +16,26 @@ public class WarlordSandbox : AttackerSandbox {
 
 
 	//UI for warlord health
-	protected Image healthUI;
-	protected const string HEALTH_IMAGE = "Health image";
+	protected Transform healthSpindown;
+	protected const string HEALTH_SPINDOWN_OBJ = "Health spindown";
+
+
+	//rotations for the spindown die used to track warlord health
+	protected Quaternion onePip;
+	protected Quaternion twoPips;
+	protected Quaternion threePips;
+	protected Quaternion fourPips;
+	protected Quaternion fivePips;
+	protected Quaternion sixPips;
+	protected List<Quaternion> sides = new List<Quaternion>();
+	protected Vector3 oneRot = new Vector3(0.0f, 0.0f, 0.0f);
+	protected Vector3 twoRot = new Vector3(0.0f, 0.0f, 270.0f);
+	protected Vector3 threeRot = new Vector3(180.0f, 0.0f, 0.0f);
+	protected Vector3 fourRot = new Vector3(90.0f, 0.0f, 0.0f);
+	protected Vector3 fiveRot = new Vector3(0.0f, 0.0f, 90.0f);
+	protected Vector3 sixRot = new Vector3(270.0f, 0.0f, 0.0f);
+	protected const float MIN_Y_ROT = 0.0f;
+	protected const float MAX_Y_ROT = 359.0f;
 
 
 	//starting health
@@ -30,12 +48,39 @@ public class WarlordSandbox : AttackerSandbox {
 	/////////////////////////////////////////////
 
 
-	//warlords have to set up their explanation bubble
+	//warlords have to set up their explanation bubble and prepare to display their health
 	public override void Setup(){
 		base.Setup();
-		healthUI = transform.Find(UI_CANVAS).Find(HEALTH_IMAGE).GetComponent<Image>();
+		healthSpindown = transform.Find(HEALTH_SPINDOWN_OBJ);
+		sides = SetSpindownRotations();
+		SpinDie(Health);
 		explanationBubble = transform.Find(UI_CANVAS).Find(EXPLANATION_OBJ).gameObject;
 		explanationBubble.SetActive(false);
+	}
+
+
+	/// <summary>
+	/// Assign values to the quaternions that will be used to rotate the spindown tracking warlord health.
+	/// </summary>
+	/// <returns>A populated list of the rotations, one to six, zero-indexed.</returns>
+	protected List<Quaternion> SetSpindownRotations(){
+		List<Quaternion> temp = new List<Quaternion>();
+
+		onePip = Quaternion.Euler(oneRot);
+		twoPips = Quaternion.Euler(twoRot);
+		threePips = Quaternion.Euler(threeRot);
+		fourPips = Quaternion.Euler(fourRot);
+		fivePips = Quaternion.Euler(fiveRot);
+		sixPips = Quaternion.Euler(sixRot);
+
+		temp.Add(onePip);
+		temp.Add(twoPips);
+		temp.Add(threePips);
+		temp.Add(fourPips);
+		temp.Add(fivePips);
+		temp.Add(sixPips);
+
+		return temp;
 	}
 
 
@@ -72,8 +117,26 @@ public class WarlordSandbox : AttackerSandbox {
 	/// </summary>
 	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
 	public override void TakeDamage (int damage){
-		base.TakeDamage(damage);
+		//determine current health
+		int newHealth = Health - damage;
 
-		healthUI.fillAmount = (float)Health/(float)startHealth;
+		//if the warlord has no health left, do nothing; the die gets picked up with the warlord
+		//otherwise, change the die to the correct facing
+		if (newHealth > 0) SpinDie(newHealth);
+
+		base.TakeDamage(damage);
+	}
+
+
+	/// <summary>
+	/// Spin the warlord's health die to show their current health.
+	/// </summary>
+	/// <param name="newHealth">The number to turn the die to.</param>
+	protected virtual void SpinDie(int health){
+		Debug.Assert(health > 0, "Trying to spin down to zero");
+		Debug.Assert(health < 7, "Trying to spin above six");
+
+		healthSpindown.rotation = sides[health - 1]; //-1 because the list is zero-indexed
+		healthSpindown.Rotate(Vector3.up, Random.Range(MIN_Y_ROT, MAX_Y_ROT), Space.World); //spin the die around the Y-axis, to make it look more naturally placed
 	}
 }

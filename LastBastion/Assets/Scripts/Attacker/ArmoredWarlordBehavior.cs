@@ -22,12 +22,12 @@ public class ArmoredWarlordBehavior : WarlordSandbox {
 
 	//initialize variables, including the Armored Warlord's stats
 	public override void Setup (){
-		base.Setup ();
 		speed = armoredSpeed;
 		AttackMod = armoredAttack;
 		Armor = armoredArmor;
 		Health = armoredHealth;
 		startHealth = armoredHealth;
 		attackerName = NAME;
+		base.Setup ();
 	}
 }

@@ -49,12 +49,14 @@ public class GameManager : MonoBehaviour {
 		Services.Momentum.Setup();
 		Services.Sound = new AudioManager();
 		Services.Sound.Setup(AudioManager.Clips.Doctor_Turtle_It_Looks_Like_the_Future_but_Feels_Like_the_Past);
-		Services.PlayerEyes = new CameraBehavior();
-		Services.PlayerEyes.Setup();
+		Services.CamControl = new CameraBehavior();
+		Services.CamControl.Setup();
 		Services.Environment = new EnvironmentManager();
+		Services.Environment.Setup();
 		Services.EscapeMenu = new GameEscMenuBehavior();
 		Services.EscapeMenu.Setup();
 		Services.Events.Register<PauseEvent>(HandlePausing);
+		Services.Cursor = new CursorManager();
 	}
 
 

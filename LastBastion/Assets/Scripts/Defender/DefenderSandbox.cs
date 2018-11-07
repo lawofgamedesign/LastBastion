@@ -106,8 +106,10 @@ public class DefenderSandbox : MonoBehaviour {
 
 	//the defender's miniature
 	protected const string MODEL_OBJ = "Model";
+	protected const string UNMOVING_OBJ = "Unmoving model";
 	protected const string MINI_OBJ = "Miniature";
 	protected Animation pose;
+	protected GameObject unmovingMini;
 
 
 	//the defender's icon
@@ -148,6 +150,7 @@ public class DefenderSandbox : MonoBehaviour {
 		xpParticle = transform.Find(XP_PARTICLE_OBJ).GetComponent<ParticleSystem>();
 		powerupReadyParticle = transform.Find(POWER_UP_PARTICLE_OBJ).gameObject;
 		pose = transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>();
+		unmovingMini = transform.Find(UNMOVING_OBJ).gameObject;
 	}
 
 
@@ -199,6 +202,7 @@ public class DefenderSandbox : MonoBehaviour {
 		selectedParticle.SetActive(true);
 		TakeOverCharSheet();
 		Services.Events.Fire(new NotSelectableEvent(this));
+		Services.Tasks.AddTask(new DefenderMoveTask(this));
 	}
 
 
@@ -244,6 +248,9 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	/// <summary>
+	/// Debug function for determining what grid locations this defender wants to move to.
+	/// </summary>
 	private void ReportMovesContents(){
 		for (int i = 0; i < moves.Count; i++) Debug.Log("moves[" + i + "] x == " + moves[i].x + ", z == " + moves[i].z);
 	}
@@ -269,8 +276,9 @@ public class DefenderSandbox : MonoBehaviour {
 			DrawLine(Speed - remainingSpeed, loc.x, loc.z);
 			moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
 
-			moveButton.gameObject.SetActive(true);
-			undoButton.gameObject.SetActive(true);
+			//the button UI for movement is no longer used
+//			moveButton.gameObject.SetActive(true);
+//			undoButton.gameObject.SetActive(true);
 
 			return true;
 		}
@@ -315,8 +323,20 @@ public class DefenderSandbox : MonoBehaviour {
 		undoButton.gameObject.SetActive(false);
 		Services.Events.Fire(new UndoMoveEvent());
 
-		//PrepareToMove will attempt to start the selectable icon moving; this is necessary to re-hide it
-		Services.Events.Fire(new NotSelectableEvent(this));
+		//PrepareToMove will attempt to start the selectable icon moving; this is necessary to re-hide it, if that is not intended
+		//with click-the-spaces movement that is undesirable; with dragging movement, however, it the selectable icon needs to reappear
+		//in order to inform the player that they can pick that piece up again
+		//Services.Events.Fire(new NotSelectableEvent(this));
+	}
+
+
+	/// <summary>
+	/// Has a move been planned? If there's only 1 move in the list (the starting location), no. If there's more than 1, yes.
+	/// </summary>
+	/// <returns><c>true</c> if the defender has a move traced out, <c>false</c> otherwise.</returns>
+	public bool CheckIfMovePlanned(){
+		if (moves.Count > 1) return true;
+		else return false;
 	}
 
 
@@ -390,6 +410,14 @@ public class DefenderSandbox : MonoBehaviour {
 	public bool CheckForRemainingMovement(){
 		if (remainingSpeed != 0) return true;
 		else return false;
+	}
+
+
+	/// <summary>
+	/// Toggle the unmoving miniature that marks a defender's start location during a move on or off. 
+	/// </summary>
+	public void ToggleUnmovingModel(){
+		unmovingMini.SetActive(!unmovingMini.activeInHierarchy);
 	}
 
 

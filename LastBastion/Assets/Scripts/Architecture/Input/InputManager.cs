@@ -9,7 +9,8 @@ public class InputManager {
 
 
 	public virtual void Tick(){
-		if (Input.GetMouseButtonDown(0)){
+		if (Input.GetMouseButtonDown(0) &&
+			!Services.Tasks.CheckForTaskOfType<CombatExplanationTask>()){ //don't allow any inputs while viewing a combat explanation except dismissing the explanation
 			GameObject selected = GetClickedThing();
 
 			if (selected != null) Services.Events.Fire(new InputEvent(selected));

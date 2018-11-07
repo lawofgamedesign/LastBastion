@@ -150,7 +150,8 @@ public class DefenderManager {
 	/// </summary>
 	/// <param name="selected">The selected defender.</param>
 	public void SelectDefenderForMovement(DefenderSandbox selected){
-		if (selected.Selected) return; //if the player is re-selecting the already-selected defender, do nothing
+		//this is no longer a concern with dragging movement--the player should be able to re-select a defender after an undone move
+		//if (selected.Selected) return; //if the player is re-selecting the already-selected defender, do nothing
 
 		//if a defender is in the middle of a move, stop
 		foreach (DefenderSandbox defender in defenders){

@@ -115,6 +115,11 @@ public class BrawlerBehavior : DefenderSandbox {
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
 		transform.Find(MODEL_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
 
+		//pose the unmoving model that stays behind when the brawler moves
+		transform.Find(UNMOVING_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedTime = 0.1f;
+		transform.Find(UNMOVING_OBJ).Find(MINI_OBJ).GetComponent<Animation>()[ATTACK_ANIM].normalizedSpeed = 0.0f;
+		transform.Find(UNMOVING_OBJ).Find(MINI_OBJ).GetComponent<Animation>().Play();
+
 
 		//set icon
 		icon = Resources.Load<Sprite>(BRAWLER_ICON_IMG);

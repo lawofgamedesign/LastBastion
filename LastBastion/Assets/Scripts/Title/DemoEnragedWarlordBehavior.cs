@@ -30,13 +30,13 @@
 
 		//initialize variables, including the Enraged Warlord's stats
 		public override void Setup (){
-			base.Setup ();
 			speed = enragedSpeed;
 			AttackMod = enragedAttack;
 			Armor = enragedArmor;
 			Health = enragedHealth;
 			startHealth = enragedHealth;
 			attackerName = NAME;
+			base.Setup();
 
 
 			//pose the Enraged Warlord

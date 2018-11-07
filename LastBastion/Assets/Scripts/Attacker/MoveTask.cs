@@ -56,7 +56,7 @@ public class MoveTask : Task {
 	/// </summary>
 	protected override void Init (){
 		if (startZ > Services.Board.WallZPos && endZ <= Services.Board.WallZPos){
-			Debug.Log("Lifting wall " + column);
+			//Debug.Log("Lifting wall " + column);
 			Services.Board.LiftWall(column);
 		}
 	}

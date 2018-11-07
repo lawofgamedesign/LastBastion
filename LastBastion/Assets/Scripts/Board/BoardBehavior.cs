@@ -54,6 +54,11 @@ public class BoardBehavior {
 	private const string TANKARD_TAG = "Tankard";
 
 
+	//for determining an object's grid location from its world position
+	private float worldWidth;
+	private float worldHeight;
+
+
 
 	/////////////////////////////////////////////
 	/// Functions
@@ -69,6 +74,8 @@ public class BoardBehavior {
 		BoardOrganizer = GameObject.Find(BOARD_ORGANIZER).transform;
 		spaces = MakeBoard();
 		walls = MakeWall();
+		worldWidth = BOARD_WIDTH * SpaceSize;
+		worldHeight = (BOARD_HEIGHT + 1) * SpaceSize; //+1 to account for the wall tile
 	}
 
 
@@ -159,6 +166,41 @@ public class BoardBehavior {
 	}
 
 
+	/// <summary>
+	/// Turn a world location into a grid location.
+	/// 
+	/// Returns null if the world location is not within the grid.
+	/// </summary>
+	/// <returns>The grid location.</returns>
+	/// <param name="x">The world x coordinate.</param>
+	/// <param name="z">The world z coordinate.</param>
+	public TwoDLoc GetGridLocation(float x, float z){
+		if (!CheckValidWorldLoc(x, z)) return null;
+
+		TwoDLoc gridLoc = new TwoDLoc(-1, -1); //nonsense value
+
+
+		for (int i = 0; i < BOARD_WIDTH; i++){
+			if (x >= i * SpaceSize - SpaceSize/2 && x <= i * SpaceSize + SpaceSize/2){
+				gridLoc .x = i;
+				break;
+			}
+		}
+
+		for (int i = 0; i <= BOARD_HEIGHT; i++){
+			if (i == WallZPos + 1) continue; //don't check the row where the wall is; note that WallZPos is "the row beyond which the wall appears"
+			if (z >= i * SpaceSize - SpaceSize/2 && z <= i * SpaceSize + SpaceSize/2){
+				if (i > WallZPos) gridLoc.z = i - 1;
+				else gridLoc.z = i;
+				break;
+			}
+		}
+
+		if (gridLoc.x == -1 || gridLoc.z == -1) return null; //final sanity check; were both x and z set properly?
+		else return gridLoc;
+	}
+
+
 	#endregion location
 
 
@@ -196,6 +238,21 @@ public class BoardBehavior {
 	/// <param name="x">The number to check.</param>
 	private bool CheckValidRow(int z){
 		if (z < 0 || z > BOARD_HEIGHT - 1) return false;
+		else return true;
+	}
+
+
+	/// <summary>
+	/// Makes sure a given world location is within the bounds of the board
+	/// </summary>
+	/// <returns><c>true</c> if the world x and z coordinates are over the board, <c>false</c> otherwise.</returns>
+	/// <param name="x">The x coordinate.</param>
+	/// <param name="z">The z coordinate.</param>
+	private bool CheckValidWorldLoc(float x, float z){
+		if (x < 0.0f ||
+			x > worldWidth ||
+			z < 0.0f ||
+			z > worldHeight) return false;
 		else return true;
 	}
 
