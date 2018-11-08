@@ -5,6 +5,7 @@
 */[Bb]uilds/
 /Assets/AssetStoreTools*
 */Assets/Temp*
+*/Assets/Prefabs/TempPrefabs/*
 */Advertising/
 */Additional Assets/
 */Assets/TextMesh*

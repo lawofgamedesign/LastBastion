@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Title;
+using UnityEngine;
 
 public class ViewCreditsTask : Task {
 
@@ -8,23 +9,28 @@ public class ViewCreditsTask : Task {
 	/////////////////////////////////////////////
 
 
-	//the camera's starting position and rotation
+	//the camera's starting position
 	private Vector3 camStartPos = new Vector3(0.0f, 0.0f, 0.0f);
-	private Quaternion camStartRot;
 
 
-	//the camera's position and rotation while reading the credits
+	//the camera's position while reading the credits
 	private Vector3 camFinalPos = new Vector3(45.0f, 10.1f, 24.3f);
 	private readonly Vector3 camFinalAngle = new Vector3(59.2f, 96.43f, 0.0f);
-	private Quaternion camFinalRot;
 
 
-	//movement speed
-	private const float moveSpeed = 0.1f;
-	private const float rotSpeed = 0.1f;
+	//movement
+	private const float maxMoveSpeed = 10.0f;
+	private const float startMoveSpeed = 0.0f;
+	private float currentMoveSpeed = 0.0f;
+	private CommonAnimationCurves curveSource;
+	private float totalDist = 0.0f;
+	private Vector3 moveVector;
+	private const float stopDist = 0.1f; //camera stops moving when this close to the destination
 
 
 	//the rulebook and the credits to display
+	private readonly Transform rulebook;
+	private const string RULEBOOK_OBJ = "Rulebook center"; //the rulebook's center is different from its pivot, look at this instead
 	private MeshRenderer creditsPageLeft;
 	private MeshRenderer creditsPageRight;
 	private const string CREDITS_LEFT_OBJ = "Mag_1_-_Open_Page_2";
@@ -34,6 +40,13 @@ public class ViewCreditsTask : Task {
 	private const string TITLE_PATH = "Title/";
 	private const string CREDITS_1 = "Credits page 1";
 	private const string CREDITS_2 = "Credits page 2";
+	
+	
+	//menu button text while looking at the credits, with associated variables
+	private const string LOOK_CREDITS_BUTTON_TEXT = "Neat.";
+	private const string TITLE_MENU_OBJ = "Menu";
+	private readonly TitleManager titleManager;
+	private const string TITLE_MANAGER_OBJ = "Game managers";
 
 
 	/////////////////////////////////////////////
@@ -43,18 +56,36 @@ public class ViewCreditsTask : Task {
 
 	//constructor
 	public ViewCreditsTask(){
-		camStartPos = Camera.main.transform.position;
-		camStartRot = Camera.main.transform.rotation;
-		camFinalRot = Quaternion.Euler(camFinalAngle);
+		rulebook = GameObject.Find(RULEBOOK_OBJ).transform;
 		creditsPageLeft = GameObject.Find(CREDITS_LEFT_OBJ).GetComponent<MeshRenderer>();
 		creditsPageRight = GameObject.Find(CREDITS_RIGHT_OBJ).GetComponent<MeshRenderer>();
-		creditsPage1 = Resources.Load<Material>(TITLE_PATH + CREDITS_1);
-		creditsPage2 = Resources.Load<Material>(TITLE_PATH + CREDITS_2);
+		titleManager = GameObject.Find(TITLE_MANAGER_OBJ).GetComponent<TitleManager>();
 	}
 
 
 	protected override void Init(){
+		camStartPos = Camera.main.transform.position;
+		creditsPage1 = Resources.Load<Material>(TITLE_PATH + CREDITS_1);
+		creditsPage2 = Resources.Load<Material>(TITLE_PATH + CREDITS_2);
 		creditsPageLeft.material = creditsPage1;
 		creditsPageRight.material = creditsPage2;
+		totalDist = Vector3.Distance(camStartPos, camFinalPos);
+		moveVector = (camFinalPos - camStartPos).normalized;
+		curveSource = Services.ScriptableObjs.curveSource;
+		GameObject.Find(TITLE_MENU_OBJ).GetComponent<TitleMenuBehavior>().SetButtonText(TitleMenuBehavior.TitleMenuButtons.Credits,
+																						LOOK_CREDITS_BUTTON_TEXT);
+		titleManager.SetCameraRotation(false);
+	}
+
+
+	public override void Tick(){
+		if (Vector3.Distance(Camera.main.transform.position, camFinalPos) > stopDist){
+			currentMoveSpeed = Mathf.Lerp(startMoveSpeed,
+									      maxMoveSpeed,
+									      curveSource.easeOutSudden.Evaluate(1.0f - Vector3.Distance(Camera.main.transform.position,
+																						             camFinalPos)/totalDist));
+			Camera.main.transform.Translate(moveVector * currentMoveSpeed * Time.deltaTime, Space.World);
+			Camera.main.transform.LookAt(rulebook);
+		}
 	}
 }

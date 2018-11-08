@@ -160,4 +160,14 @@ public static class Services {
 		}
 		set { escapeMenu = value; }
 	}
+
+
+	private static ScriptableObjectSource scriptableObjs;
+	public static ScriptableObjectSource ScriptableObjs{
+		get{
+			Debug.Assert(scriptableObjs != null, "No scriptable object source. Are services being created out of order?");
+			return scriptableObjs;
+		}
+		set { scriptableObjs = value; }
+	}
 }

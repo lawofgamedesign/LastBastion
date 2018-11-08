@@ -1,5 +1,6 @@
 ﻿namespace Title
 {
+	using TMPro;
 	using UnityEngine;
 	using UnityEngine.SceneManagement;
 
@@ -11,15 +12,18 @@
 
 
 		//scenes that can be loaded
-
 		public const string GAME_SCENE = "Game";
 		public const string TUTORIAL_SCENE = "Tutorial3";
-		//public const string CREDITS_SCENE = "Credits";
 
 
 		//the manager object
 		private const string MANAGER_OBJ = "Game managers";
-
+		
+		
+		//buttons, and associated variables to manage their text
+		public enum TitleMenuButtons{ Tutorial, Game, Credits }
+		private const string BUTTON_OBJ_LABEL = " button";
+		private const string TEXT_OBJ = "TextMeshPro Text";
 
 		/////////////////////////////////////////////
 		/// Functions
@@ -46,6 +50,12 @@
 		public void LoadCredits(){
 			Services.Events.Fire(new CreditsButtonEvent());
 			Services.Tasks.AddTask(new ViewCreditsTask());
+		}
+
+
+		public void SetButtonText(TitleMenuButtons button, string newText){
+			transform.Find(button.ToString() + BUTTON_OBJ_LABEL).Find(TEXT_OBJ)
+					.GetComponent<TextMeshProUGUI>().text = newText;
 		}
 	}
 }

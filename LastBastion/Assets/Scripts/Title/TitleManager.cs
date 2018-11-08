@@ -26,6 +26,7 @@
 		private bool paused = false;
 
 
+
 		/////////////////////////////////////////////
 		/// Functions
 		/////////////////////////////////////////////
@@ -51,7 +52,8 @@
 			camScript.Setup();
 			camState = CameraState.Rotating;
 			Services.Events.Register<PauseEvent>(HandlePausing);
-			Services.Events.Register<CreditsButtonEvent>(ListenForCredits);
+			Services.ScriptableObjs = new ScriptableObjectSource();
+			Services.ScriptableObjs.Setup();
 		}
 
 
@@ -71,7 +73,6 @@
 		/// </summary>
 		public void CleanUp(){
 			Services.Events.Unregister<PauseEvent>(HandlePausing);
-			Services.Events.Unregister<CreditsButtonEvent>(ListenForCredits);
 			Services.EscapeMenu.Cleanup();
 		}
 
@@ -84,10 +85,9 @@
 		}
 
 
-		private void ListenForCredits(global::Event e){
-			Debug.Assert(e.GetType() == typeof(CreditsButtonEvent), "Non-CreditsButtonEvent in TitleManager");
-
-			camState = CameraState.Reading_Credits;
+		public void SetCameraRotation(bool rotate){
+			if (rotate) camState = CameraState.Rotating;
+			else camState = CameraState.Reading_Credits;
 		}
 
 
