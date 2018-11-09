@@ -47,9 +47,20 @@
 		}
 
 
+		/// <summary>
+		/// If the player isn't currently viewing the credits, start the task that moves the camera to the rulebook
+		/// and "flips the page" to the credits.
+		/// 
+		/// If the player is viewing the credits, still send out an event indicating that the player pressed the credits button.
+		/// ViewCreditsTask uses this event to decide when to start the DoneViewingCreditsTask.
+		/// 
+		/// </summary>
 		public void LoadCredits(){
 			Services.Events.Fire(new CreditsButtonEvent());
-			Services.Tasks.AddTask(new ViewCreditsTask());
+			
+			//if the player isn't currently viewing the credits, start the task that moves the camera so that they can do so
+			//if the player is viewing the credits, 
+			if (!Services.Tasks.CheckForTaskOfType<ViewCreditsTask>()) Services.Tasks.AddTask(new ViewCreditsTask());
 		}
 
 

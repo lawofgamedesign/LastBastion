@@ -19,13 +19,13 @@ public class ViewCreditsTask : Task {
 
 
 	//movement
-	private const float maxMoveSpeed = 10.0f;
+	private float maxMoveSpeed = 10.0f;
 	private const float startMoveSpeed = 0.0f;
 	private float currentMoveSpeed = 0.0f;
 	private CommonAnimationCurves curveSource;
 	private float totalDist = 0.0f;
 	private Vector3 moveVector;
-	private const float stopDist = 0.1f; //camera stops moving when this close to the destination
+	private const float STOP_DIST = 0.1f; //camera stops moving when this close to the destination
 
 
 	//the rulebook and the credits to display
@@ -45,8 +45,6 @@ public class ViewCreditsTask : Task {
 	//menu button text while looking at the credits, with associated variables
 	private const string LOOK_CREDITS_BUTTON_TEXT = "Neat.";
 	private const string TITLE_MENU_OBJ = "Menu";
-	private readonly TitleManager titleManager;
-	private const string TITLE_MANAGER_OBJ = "Game managers";
 
 
 	/////////////////////////////////////////////
@@ -59,7 +57,6 @@ public class ViewCreditsTask : Task {
 		rulebook = GameObject.Find(RULEBOOK_OBJ).transform;
 		creditsPageLeft = GameObject.Find(CREDITS_LEFT_OBJ).GetComponent<MeshRenderer>();
 		creditsPageRight = GameObject.Find(CREDITS_RIGHT_OBJ).GetComponent<MeshRenderer>();
-		titleManager = GameObject.Find(TITLE_MANAGER_OBJ).GetComponent<TitleManager>();
 	}
 
 
@@ -74,12 +71,17 @@ public class ViewCreditsTask : Task {
 		curveSource = Services.ScriptableObjs.curveSource;
 		GameObject.Find(TITLE_MENU_OBJ).GetComponent<TitleMenuBehavior>().SetButtonText(TitleMenuBehavior.TitleMenuButtons.Credits,
 																						LOOK_CREDITS_BUTTON_TEXT);
-		titleManager.SetCameraRotation(false);
+		Services.Events.Fire(new ToggleCamRotEvent()); //let TitleManager know to stop the camera's rotation
+		Services.Events.Register<CreditsButtonEvent>(DoneViewing);
+
+		//if the camera is already close to the rulebook, reduce max speed so it can't jump past
+		if (Vector3.Distance(Camera.main.transform.position, camFinalPos) < maxMoveSpeed)
+			maxMoveSpeed = Vector3.Distance(Camera.main.transform.position, camFinalPos);
 	}
 
 
 	public override void Tick(){
-		if (Vector3.Distance(Camera.main.transform.position, camFinalPos) > stopDist){
+		if (Vector3.Distance(Camera.main.transform.position, camFinalPos) > STOP_DIST){
 			currentMoveSpeed = Mathf.Lerp(startMoveSpeed,
 									      maxMoveSpeed,
 									      curveSource.easeOutSudden.Evaluate(1.0f - Vector3.Distance(Camera.main.transform.position,
@@ -87,5 +89,19 @@ public class ViewCreditsTask : Task {
 			Camera.main.transform.Translate(moveVector * currentMoveSpeed * Time.deltaTime, Space.World);
 			Camera.main.transform.LookAt(rulebook);
 		}
+	}
+
+
+	private void DoneViewing(global::Event e){
+		SetStatus(TaskStatus.Success);
+	}
+
+
+	protected override void OnSuccess(){
+		Services.Tasks.AddTask(new DoneViewingCreditsTask(Camera.main.transform.position));
+	}
+
+	protected override void Cleanup(){
+		Services.Events.Unregister<CreditsButtonEvent>(DoneViewing);
 	}
 }

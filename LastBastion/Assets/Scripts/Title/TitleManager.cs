@@ -54,6 +54,7 @@
 			Services.Events.Register<PauseEvent>(HandlePausing);
 			Services.ScriptableObjs = new ScriptableObjectSource();
 			Services.ScriptableObjs.Setup();
+			Services.Events.Register<ToggleCamRotEvent>(SetCameraRotation);
 		}
 
 
@@ -73,10 +74,14 @@
 		/// </summary>
 		public void CleanUp(){
 			Services.Events.Unregister<PauseEvent>(HandlePausing);
+			Services.Events.Unregister<ToggleCamRotEvent>(SetCameraRotation);
 			Services.EscapeMenu.Cleanup();
 		}
 
 
+		/// <summary>
+		/// Carries out all actions required when the player activates the quit-game menu.
+		/// </summary>
 		private void ListenForMenu(){
 			if (Input.GetKeyDown(KeyCode.Escape)){
 				Services.Events.Fire(new EscMenuEvent());
@@ -84,10 +89,15 @@
 			}
 		}
 
+		
+		/// <summary>
+		/// Starts or stops the camera's rotation.
+		/// </summary>
+		private void SetCameraRotation(global::Event e){
+			Debug.Assert(e.GetType() == typeof(ToggleCamRotEvent), "Non-ToggleCamRotEvent in SetCameraRotation");
 
-		public void SetCameraRotation(bool rotate){
-			if (rotate) camState = CameraState.Rotating;
-			else camState = CameraState.Reading_Credits;
+			if (camState == CameraState.Rotating) camState = CameraState.Reading_Credits;
+			else camState = CameraState.Rotating;
 		}
 
 
