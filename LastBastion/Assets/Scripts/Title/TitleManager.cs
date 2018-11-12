@@ -24,6 +24,16 @@
 
 		//is the game paused for the menu?
 		private bool paused = false;
+		
+		
+		//choose which menu to display--the normal one, or the one for a player's first game
+		private Transform menuCanvas;
+		private const string MENU_CANVAS_OBJ = "Title text canvas";
+		private const string NORMAL_MENU = "Menu";
+		private const string FIRST_GAME_MENU = "First game menu";
+		private int numPlays = 0; //0 if game has never been played before
+		private const string NUM_PLAYS_KEY = "NumPlays";
+		private const int FIRST_PLAY_DEFAULT = 0;
 
 
 
@@ -55,7 +65,38 @@
 			Services.ScriptableObjs = new ScriptableObjectSource();
 			Services.ScriptableObjs.Setup();
 			Services.Events.Register<ToggleCamRotEvent>(SetCameraRotation);
+			menuCanvas = GameObject.Find(MENU_CANVAS_OBJ).transform;
+			
+			ChooseMenu();
 		}
+
+		/// <summary>
+		/// Activates either the normal start-of-game menu or, if this is the first game on this machine, a special menu
+		/// from which the player can load an introductory message. 
+		/// </summary>
+		private void ChooseMenu(){	
+			if (Application.isEditor) PlayerPrefs.SetInt(NUM_PLAYS_KEY, FIRST_PLAY_DEFAULT); //for testing purposes, always assume a new game
+			numPlays = PlayerPrefs.GetInt(NUM_PLAYS_KEY, FIRST_PLAY_DEFAULT);
+			
+			if (numPlays == 0) menuCanvas.Find(NORMAL_MENU).gameObject.SetActive(false);
+			else menuCanvas.Find(FIRST_GAME_MENU).gameObject.SetActive(false);
+
+			numPlays++;
+			
+			PlayerPrefs.SetInt(NUM_PLAYS_KEY, numPlays);
+		}
+
+
+		/// <summary>
+		/// Turns on the normal start-of-game menu and switches off the special first-game menu.
+		/// </summary>
+		public void SwitchMenus(){
+			menuCanvas.Find(NORMAL_MENU).gameObject.SetActive(true);
+			menuCanvas.Find(FIRST_GAME_MENU).gameObject.SetActive(false);
+		}
+		
+		
+		
 
 
 		private void Update(){
