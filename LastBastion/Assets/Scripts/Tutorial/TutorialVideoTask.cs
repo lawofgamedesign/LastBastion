@@ -20,6 +20,11 @@ public class TutorialVideoTask : Task {
 	private readonly VideoPlayer tutorialScreen;
 	
 	
+	//game speeds
+	private const float ZERO = 0.0f;
+	private const float ONE = 1.0f;
+	
+	
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -41,6 +46,7 @@ public class TutorialVideoTask : Task {
 		tutorialScreen.clip = tutorialClip;
 		tutorialScreen.Play();
 		Services.Events.Register<TutorialStopEvent>(ShutOffTutorial);
+		Time.timeScale = ZERO;
 	}
 
 
@@ -59,11 +65,20 @@ public class TutorialVideoTask : Task {
 
 
 	/// <summary>
+	/// Do everything needed to end the tutorial process and restore normal gameplay.
+	/// </summary>
+	private void EndTutorial(){
+		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.On);
+		tutorialCanvas.SetActive(false);
+		Time.timeScale = ONE;
+	}
+
+
+	/// <summary>
 	/// When the tutorial is done, shut the canvas containing the video display off and restore normal sound.
 	/// </summary>
 	protected override void OnSuccess(){
-		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.On);
-		tutorialCanvas.SetActive(false);
+		EndTutorial();
 	}
 
 
@@ -71,8 +86,7 @@ public class TutorialVideoTask : Task {
 	/// If the player bails out of the tutorial by pressing the stop button, shut the canvas off and restore normal sound.
 	/// </summary>
 	protected override void OnAbort(){
-		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.On);
-		tutorialCanvas.SetActive(false);
+		EndTutorial();
 	}
 
 	
