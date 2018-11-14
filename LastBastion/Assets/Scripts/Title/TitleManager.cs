@@ -65,6 +65,8 @@
 			Services.ScriptableObjs = new ScriptableObjectSource();
 			Services.ScriptableObjs.Setup();
 			Services.Events.Register<ToggleCamRotEvent>(SetCameraRotation);
+			Services.Tutorials = new TutorialManager();
+			Services.Tutorials.Setup();
 			menuCanvas = GameObject.Find(MENU_CANVAS_OBJ).transform;
 			
 			ChooseMenu();

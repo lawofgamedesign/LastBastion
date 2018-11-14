@@ -33,6 +33,10 @@ public class AudioManager {
 
 	//volumes
 	public const float MAX_VOLUME = 1.0f;
+	
+	
+	//used to turn sound on or off
+	public enum OnOrOff { On, Off }
 
 
 	/////////////////////////////////////////////
@@ -73,6 +77,18 @@ public class AudioManager {
 	public void PlaySceneStartMusic(){
 		backgroundMusic.Fade(sceneStartMusic, MAX_VOLUME, true);
 	}
+
+
+	/// <summary>
+	/// Switch all audio sources controlled by the audio manager (i.e., all audio sources) on or off.
+	/// </summary>
+	/// <param name="onOrOff">Whether the sources should be on or off.</param>
+	public void ToggleAllSound(OnOrOff onOrOff){
+		backgroundMusic.ToggleSound(onOrOff);
+	}
+	
+	
+	
 
 
 	/// <summary>

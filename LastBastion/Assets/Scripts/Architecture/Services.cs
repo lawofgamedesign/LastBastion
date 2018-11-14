@@ -170,4 +170,14 @@ public static class Services {
 		}
 		set { scriptableObjs = value; }
 	}
+
+
+	private static TutorialManager tutorials;
+	public static TutorialManager Tutorials{
+		get{
+			Debug.Assert(tutorials != null, "No tutorial manager. Did you forget to create one?");
+			return tutorials;
+		}
+		set { tutorials = value; }
+	}
 }

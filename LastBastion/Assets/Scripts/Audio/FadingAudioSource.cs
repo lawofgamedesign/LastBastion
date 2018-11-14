@@ -100,6 +100,16 @@ public class FadingAudioSource {
 
 
 	/// <summary>
+	/// Switch the sound for this source on or off.
+	/// </summary>
+	/// <param name="onOrOff">Whether the sound should be on or off.</param>
+	public void ToggleSound(AudioManager.OnOrOff onOrOff){
+		if (onOrOff == AudioManager.OnOrOff.On) source.enabled = true;
+		else source.enabled = false;
+	}
+
+
+	/// <summary>
 	/// Each frame, fade in or out if needed.
 	/// </summary>
 	public void Tick(){
@@ -116,7 +126,7 @@ public class FadingAudioSource {
 				FadeToNextClip();
 			}
 
-		//if fading in, increase folume until reaching the intended volume
+		//if fading in, increase volume until reaching the intended volume
 		} else if (fadeState == FadeState.In){
 			if (source.volume < nextClipVolume){
 				source.volume += fadeSpeed * Time.deltaTime;
