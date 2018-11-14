@@ -45,8 +45,9 @@ public class TutorialVideoTask : Task {
 		tutorialCanvas.SetActive(true);
 		tutorialScreen.clip = tutorialClip;
 		tutorialScreen.Play();
-		Services.Events.Register<TutorialStopEvent>(ShutOffTutorial);
+		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.Off); //shut off all other sound
 		Time.timeScale = ZERO;
+		Services.Events.Register<TutorialStopEvent>(ShutOffTutorial);
 	}
 
 

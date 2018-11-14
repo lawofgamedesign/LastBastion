@@ -37,7 +37,6 @@ public class TutorialManager {
 	/// </summary>
 	/// <param name="newClip">The clip to play.</param>
 	public void PlayTutorial(VideoClip newClip){
-		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.Off); //shut off all other sound
 		Services.Tasks.AddTask(new TutorialVideoTask(newClip, tutorialCanvas, tutorialScreen));
 	}
 }
