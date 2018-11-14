@@ -26,7 +26,7 @@ public class GuardianBehavior : DefenderSandbox {
 		"<b>Single Combat</b>\n\nWhen you defeat a Warlord, upgrade immediately.",
 		"<b>You're Mine!</b>\n\nWhen you defeat a Warlord, upgrade immediately.\n\nWhen attacking a Warlord, gain +5 attack.",
 		"<b>Run, Fools!</b>\n\nWhen you defeat a Warlord, upgrade immediately and reduce Momentum by 1.\n\nWhen attacking a Warlord, gain +5 attack.",
-		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +5 attack.\n\nWhen you defeat a Leader, also defeat their retinue and reduce Momentum by 1.",
+		"<b>Champion</b>\n\nWhen attacking a Warlord, gain +5 attack.\n\nWhen you defeat a Warlord, also defeat their retinue and reduce Momentum by 1.",
 		"<b>Master of single combat!</b>"
 	};
 	private SingleCombatTrack currentSingleCombat;

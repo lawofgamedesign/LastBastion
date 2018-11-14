@@ -45,10 +45,12 @@ public class GuardFallTask : Task {
 		if (Quaternion.Angle(guard.rotation, fallenRotation) > Mathf.Epsilon){
 			guard.MoveRotation(Quaternion.RotateTowards(guard.rotation, fallenRotation, rotationSpeed * Time.deltaTime));
 		} else {
-			guard.MovePosition(guard.position + -Vector3.up * fallSpeed * Time.deltaTime);
+			SetStatus(TaskStatus.Success);
+			//use this if the guard is to fall, as opposed to merely tipping over
+			//guard.MovePosition(guard.position + -Vector3.up * fallSpeed * Time.deltaTime);
 		}
 
-
-		if (guard.position.y <= 0.0f) SetStatus(TaskStatus.Success);
+		//use this if the guard is to fall, as opposed to merely tipping over
+		//if (guard.position.y <= 0.0f) SetStatus(TaskStatus.Success);
 	}
 }
