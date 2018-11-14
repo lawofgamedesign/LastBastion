@@ -549,7 +549,7 @@ public class TurnManager {
 	/// <summary>
 	/// The game enters this state when the player wins.
 	/// </summary>
-	protected class PlayerWin : FSM<TurnManager>.State {
+	public class PlayerWin : FSM<TurnManager>.State {
 
 
 		private float timer = 0.0f;
@@ -580,7 +580,7 @@ public class TurnManager {
 	/// <summary>
 	/// The game enters this state when the player loses.
 	/// </summary>
-	protected class PlayerLose : FSM<TurnManager>.State {
+	public class PlayerLose : FSM<TurnManager>.State {
 
 
 		private float timer = 0.0f;
