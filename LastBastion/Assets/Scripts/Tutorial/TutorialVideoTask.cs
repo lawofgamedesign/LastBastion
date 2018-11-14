@@ -40,6 +40,7 @@ public class TutorialVideoTask : Task {
 		tutorialCanvas.SetActive(true);
 		tutorialScreen.clip = tutorialClip;
 		tutorialScreen.Play();
+		Services.Events.Register<TutorialStopEvent>(ShutOffTutorial);
 	}
 
 
@@ -48,11 +49,37 @@ public class TutorialVideoTask : Task {
 		if (!tutorialScreen.isPlaying) SetStatus(TaskStatus.Success);
 	}
 
+	
+	/// <summary>
+	/// Pick up TutorialStopEvents fired when the player hits the tutorial stop button.
+	/// </summary>
+	private void ShutOffTutorial(global::Event e){
+		SetStatus(TaskStatus.Aborted);
+	}
+
 
 	/// <summary>
-	/// When the tutorial is done, shut the canvas containing the video display off.
+	/// When the tutorial is done, shut the canvas containing the video display off and restore normal sound.
 	/// </summary>
 	protected override void OnSuccess(){
+		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.On);
 		tutorialCanvas.SetActive(false);
+	}
+
+
+	/// <summary>
+	/// If the player bails out of the tutorial by pressing the stop button, shut the canvas off and restore normal sound.
+	/// </summary>
+	protected override void OnAbort(){
+		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.On);
+		tutorialCanvas.SetActive(false);
+	}
+
+	
+	/// <summary>
+	/// No matter how the tutorial ended, be sure to unregister for events.
+	/// </summary>
+	protected override void Cleanup(){
+		Services.Events.Unregister<TutorialStopEvent>(ShutOffTutorial);
 	}
 }
