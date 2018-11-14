@@ -28,10 +28,12 @@ public class ChatUI {
 	protected GameObject phaseOverButton;
 	protected GameObject undoButton;
 	protected GameObject explainButton;
+	protected GameObject tutorialButton;
 	protected TextMeshProUGUI phaseText;
 	protected const string PHASE_BUTTON_OBJ = "Phase over button";
 	protected const string UNDO_BUTTON_OBJ = "Phase undo button";
 	protected const string EXPLAIN_BUTTON_OBJ = "Explanation button";
+	protected const string TUTORIAL_BUTTON_OBJ = "Tutorial request button";
 
 
 	//common statements
@@ -166,6 +168,8 @@ public class ChatUI {
 		undoButton.SetActive(false);
 		explainButton = GameObject.Find(EXPLAIN_BUTTON_OBJ);
 		explainButton.SetActive(false);
+		tutorialButton = GameObject.Find(TUTORIAL_BUTTON_OBJ);
+		tutorialButton.SetActive(false);
 		Services.Events.Register<PhaseStartEvent>(PhaseStartHandling);
 
 
@@ -413,6 +417,19 @@ public class ChatUI {
 			explainButton.SetActive(true);
 		} else {
 			explainButton.SetActive(false);
+		}
+	}
+
+
+	/// <summary>
+	/// Switch the button that triggers tutorials.
+	/// </summary>
+	/// <param name="onOrOff">Whether the button should be displayed (gameobject active) or not (inactive)</param>
+	public virtual void ToggleTutorialButton(OnOrOff onOrOff){
+		if (onOrOff == OnOrOff.On){
+			tutorialButton.SetActive(true);
+		} else {
+			tutorialButton.SetActive(false);
 		}
 	}
 

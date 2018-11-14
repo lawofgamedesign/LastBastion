@@ -13,7 +13,6 @@
 
 		//scenes that can be loaded
 		public const string GAME_SCENE = "Game";
-		public const string TUTORIAL_SCENE = "Tutorial3";
 
 
 		//the manager object
@@ -38,7 +37,7 @@
 
 
 		public void LoadTutorial(){
-			LoadScene(TUTORIAL_SCENE);
+			Services.Tutorials.PlayTutorial(TutorialManager.Tutorials.Full);
 		}
 
 

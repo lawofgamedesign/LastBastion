@@ -55,8 +55,10 @@ public class GameManager : MonoBehaviour {
 		Services.Environment.Setup();
 		Services.EscapeMenu = new GameEscMenuBehavior();
 		Services.EscapeMenu.Setup();
-		Services.Events.Register<PauseEvent>(HandlePausing);
 		Services.Cursor = new CursorManager();
+		Services.Tutorials = new TutorialManager();
+		Services.Tutorials.Setup();
+		Services.Events.Register<PauseEvent>(HandlePausing);
 	}
 
 

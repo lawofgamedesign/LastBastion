@@ -354,6 +354,7 @@ public class TurnManager {
 			Services.Events.Fire(new PhaseStartEvent(Context.TurnMachine.CurrentState));
 			Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 			Services.UI.ToggleExplainButton(ChatUI.OnOrOff.On);
+			Services.UI.ToggleTutorialButton(ChatUI.OnOrOff.On);
 			Services.Undo.PrepareToUndoMoves();
 			Context.imSure = false;
 			//display help text for the first move phase
@@ -443,6 +444,7 @@ public class TurnManager {
 			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
 			Services.Defenders.CompleteFightPhase();
 			Services.UI.ToggleExplainButton(ChatUI.OnOrOff.Off);
+			Services.UI.ToggleTutorialButton(ChatUI.OnOrOff.Off);
 			if (Services.Attackers.GetCurrentWave() == 0 &&
 				Context.CurrentTurn == 1) Services.UI.ToggleTutorialText(ChatUI.OnOrOff.Off);
 		}

@@ -42,6 +42,7 @@ public class TutorialVideoTask : Task {
 	/// Switch on the canvas with the object where videos display, and start playing the video.
 	/// </summary>
 	protected override void Init(){
+		Debug.Assert(tutorialClip != null, "No tutorial clip provided");
 		tutorialCanvas.SetActive(true);
 		tutorialScreen.clip = tutorialClip;
 		tutorialScreen.Play();
