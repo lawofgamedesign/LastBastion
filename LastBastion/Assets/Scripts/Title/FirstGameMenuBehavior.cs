@@ -30,6 +30,7 @@ public class FirstGameMenuBehavior : MonoBehaviour {
 	public void PlayIntro(){
 		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.Off);
 		Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Pause));
+		Services.Tutorials.PlayTutorial(TutorialManager.Tutorials.Intro);
 	}
 	
 	

@@ -25,6 +25,13 @@ public class TutorialVideoTask : Task {
 	private const float ONE = 1.0f;
 	
 	
+	//timer for video clips
+	//note that VideoPlayers can't be relied upon to start playing immediately upon Play() being called;
+	//tracking time avoids this issue
+	private float clipDuration = 0.0f;
+	private float timer = 0.0f;
+	
+	
 	/////////////////////////////////////////////
 	/// Functions
 	/////////////////////////////////////////////
@@ -46,6 +53,7 @@ public class TutorialVideoTask : Task {
 		tutorialCanvas.SetActive(true);
 		tutorialScreen.clip = tutorialClip;
 		tutorialScreen.Play();
+		clipDuration = (float)tutorialClip.length;
 		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.Off); //shut off all other sound
 		Time.timeScale = ZERO;
 		Services.Events.Register<TutorialStopEvent>(ShutOffTutorial);
@@ -54,7 +62,9 @@ public class TutorialVideoTask : Task {
 
 	//When the tutorial is done, shut down the tutorial system.
 	public override void Tick(){
-		if (!tutorialScreen.isPlaying) SetStatus(TaskStatus.Success);
+		timer += Time.unscaledDeltaTime;
+		
+		if (timer >= clipDuration) SetStatus(TaskStatus.Success);
 	}
 
 	

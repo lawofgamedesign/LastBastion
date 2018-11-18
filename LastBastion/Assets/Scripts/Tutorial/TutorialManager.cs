@@ -20,14 +20,16 @@ public class TutorialManager {
 	
 	
 	//tutorial videos
+	private VideoClip introTutorial;
 	private VideoClip fullTutorial;
 	private VideoClip moveTutorial;
 	private VideoClip fightTutorial;
 	private const string TUTORIAL_MOV_PATH = "Video/";
+	private const string INTRO_MOV = "Intro clip";
 	private const string FULL_TUTORIAL_MOV = "Full tutorial clip";
 	private const string MOVE_TUTORIAL_MOV = "Move tutorial clip";
 	private const string FIGHT_TUTORIAL_MOV = "Fight tutorial clip";
-	public enum Tutorials { Full, Move, Fight }
+	public enum Tutorials { Intro, Full, Move, Fight }
 
 
 	/////////////////////////////////////////////
@@ -41,7 +43,8 @@ public class TutorialManager {
 																GameObject.Find(SCENE_ORGANIZER).transform);
 		tutorialScreen = GameObject.Find(SCREEN_OBJ).GetComponent<VideoPlayer>();
 		tutorialCanvas.SetActive(false);
-		
+
+		introTutorial = Resources.Load<VideoClip>(TUTORIAL_MOV_PATH + INTRO_MOV);
 		fullTutorial = Resources.Load<VideoClip>(TUTORIAL_MOV_PATH + FULL_TUTORIAL_MOV);
 		moveTutorial = Resources.Load<VideoClip>(TUTORIAL_MOV_PATH + MOVE_TUTORIAL_MOV);
 		fightTutorial = Resources.Load<VideoClip>(TUTORIAL_MOV_PATH + FIGHT_TUTORIAL_MOV);
@@ -62,8 +65,10 @@ public class TutorialManager {
 	/// </summary>
 	/// <param name="tutorial">The type of tutorial needed.</param>
 	/// <returns>The video clip for the chosen tutorial.</returns>
-	private VideoClip ChooseVideo(Tutorials tutorial){
-		if (tutorial == Tutorials.Full) return fullTutorial;
+	private VideoClip ChooseVideo(Tutorials tutorial)
+	{
+		if (tutorial == Tutorials.Intro) return introTutorial;
+		else if (tutorial == Tutorials.Full) return fullTutorial;
 		else if (tutorial == Tutorials.Move) return moveTutorial;
 		else if (tutorial == Tutorials.Fight) return fightTutorial;
 		else{
