@@ -38,6 +38,6 @@ public class FirstGameMenuBehavior : MonoBehaviour {
 	/// Shut the first game menu off, and show the normal title menu.
 	/// </summary>
 	public void SwitchOff(){
-		GameObject.Find(MANAGER_OBJ).GetComponent<TitleManager>().SwitchMenus();
+		Services.UI.SwitchMenus();
 	}
 }

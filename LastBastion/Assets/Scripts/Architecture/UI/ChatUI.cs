@@ -424,13 +424,25 @@ public class ChatUI {
 	/// <summary>
 	/// Switch the button that triggers tutorials.
 	/// </summary>
-	/// <param name="onOrOff">Whether the button should be displayed (gameobject active) or not (inactive)</param>
+	/// <param name="onOrOff">Whether the button should be displayed (gameobject active) or off (inactive).</param>
 	public virtual void ToggleTutorialButton(OnOrOff onOrOff){
 		if (onOrOff == OnOrOff.On){
 			tutorialButton.SetActive(true);
 		} else {
 			tutorialButton.SetActive(false);
 		}
+	}
+
+
+	/// <summary>
+	/// Switch on, or shut off, all buttons.
+	/// </summary>
+	/// <param name="onOrOff">Whether the buttons should be on (gameobject active) or off (inactive).</param>
+	public virtual void ToggleAllButtons(OnOrOff onOrOff){
+		TogglePhaseButton(onOrOff);
+		ToggleUndoButton(onOrOff);
+		ToggleExplainButton(onOrOff);
+		ToggleTutorialButton(onOrOff);
 	}
 
 
@@ -571,7 +583,7 @@ public class ChatUI {
 	/// </summary>
 	/// <returns>The balloon image.</returns>
 	/// <param name="type">The type of speech balloon.</param>
-	private Sprite AssignBalloonImage(ChatUI.BalloonTypes type){
+	protected Sprite AssignBalloonImage(ChatUI.BalloonTypes type){
 		Sprite temp;
 
 		switch (type){
@@ -590,7 +602,7 @@ public class ChatUI {
 	}
 
 
-	private Color AssignBalloonColor(ChatUI.BalloonTypes type){
+	protected Color AssignBalloonColor(ChatUI.BalloonTypes type){
 		Color temp = Color.magenta; //nonsense initialization for error-checking
 
 		switch (type){
@@ -960,4 +972,19 @@ public class ChatUI {
 
 
 	#endregion turn tracker
+	
+	
+	#region title menu
+	
+	
+	/// <summary>
+	/// These are empty methods for TitleUI, so that TitleUI's methods are easily accessible.
+	/// </summary>
+	
+	
+	public virtual void ChooseMenu() { }
+	
+	public virtual void SwitchMenus() { }
+	
+	#endregion
 }

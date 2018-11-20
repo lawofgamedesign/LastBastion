@@ -55,6 +55,7 @@ public class TutorialVideoTask : Task {
 		tutorialScreen.Play();
 		clipDuration = (float)tutorialClip.length;
 		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.Off); //shut off all other sound
+		if (Services.UI != null) Services.UI.ToggleAllButtons(ChatUI.OnOrOff.Off); //if in-game, switch off all UI buttons
 		Time.timeScale = ZERO;
 		Services.Events.Register<TutorialStopEvent>(ShutOffTutorial);
 	}
@@ -82,6 +83,8 @@ public class TutorialVideoTask : Task {
 	private void EndTutorial(){
 		Services.Sound.ToggleAllSound(AudioManager.OnOrOff.On);
 		tutorialCanvas.SetActive(false);
+		if (Services.UI != null) Services.UI.ToggleAllButtons(ChatUI.OnOrOff.On); //switch menu buttons back on
+		Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Unpause)); //send out an event the title scene can pick up to start rotating again
 		Time.timeScale = ONE;
 	}
 
