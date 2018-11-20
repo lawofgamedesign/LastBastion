@@ -46,6 +46,11 @@ public class DefenderSandbox : MonoBehaviour {
 	[SerializeField] protected float moveSpeed = 1.0f; //movement on screen, as opposed to spaces on the grid
 	protected Rigidbody rb;
 	protected const float LINE_OFFSET = 0.5f; //picks the movement line up off the board to avoid clipping
+	
+	
+	//icon indicating that this defender can be selected
+	protected Image selectableIcon;
+	protected const string SELECTABLE_ICON_OBJ = "Selectable icon";
 
 
 	//location in the grid
@@ -140,6 +145,8 @@ public class DefenderSandbox : MonoBehaviour {
 		moveButton = transform.Find(PRIVATE_UI_CANVAS).Find(MOVE_BUTTON_OBJ).GetComponent<Button>();
 		undoButton = transform.Find(PRIVATE_UI_CANVAS).Find(UNDO_BUTTON_OBJ).GetComponent<Button>();
 		moveCanvas = transform.Find(PRIVATE_UI_CANVAS);
+		selectableIcon = transform.Find(PRIVATE_UI_CANVAS).Find(SELECTABLE_ICON_OBJ).GetComponent<Image>();
+		selectableIcon.sprite = Services.Cursor.CurrentCursor;
 		rb = GetComponent<Rigidbody>();
 		GridLoc = new TwoDLoc(0, 0); //default initialization
 		combatHand = MakeCombatHand();

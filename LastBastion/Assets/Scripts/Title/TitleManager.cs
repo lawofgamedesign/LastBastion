@@ -35,6 +35,8 @@
 		private void Awake(){
 			Services.Board = new BoardBehavior();
 			Services.Board.Setup();
+			Services.Cursor = new CursorManager();
+			Services.Cursor.Setup();
 			Services.Events = new EventManager();
 			Services.AttackDeck = null;
 			Services.Attackers = new DemoAttackerCreator();
@@ -43,8 +45,6 @@
 			Services.Defenders.Setup();
 			Services.Sound = new AudioManager();
 			Services.Sound.Setup(AudioManager.Clips.Komiku_Barque_sur_le_Lac);
-			Services.Cursor = new CursorManager();
-			Services.Cursor.Setup();
 			Services.EscapeMenu = new TitleEscMenuBehavior();
 			Services.EscapeMenu.Setup();
 			Services.Tasks = new TaskManager();
