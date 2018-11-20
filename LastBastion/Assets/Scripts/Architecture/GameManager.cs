@@ -30,6 +30,13 @@ public class GameManager : MonoBehaviour {
 		Services.Tasks = new TaskManager();
 		Services.AttackDeck = new LinkedAttackerDeck();
 		Services.Events = new EventManager();
+
+		//make sure there's a cursor manager (e.g., because the game scene was loaded directly)
+		if (Services.Cursor == null){
+			Services.Cursor = new CursorManager();
+			Services.Cursor.Setup();	
+		}
+		
 		Services.UI = new ChatUI();
 		Services.UI.Setup();
 		Services.Board = new BoardBehavior();

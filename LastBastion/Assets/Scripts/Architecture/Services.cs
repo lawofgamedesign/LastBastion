@@ -125,7 +125,8 @@ public static class Services {
 	private static CursorManager cursor;
 	public static CursorManager Cursor {
 		get {
-			Debug.Assert(cursor != null, "No cursor manager. Are services being created out of order?");
+			if (cursor == null) Debug.Log("No cursor manager. " +
+			                              "This is OK if a null check is occurring, otherwise services are being created out of order.");
 			return cursor;
 		}
 		set { cursor = value; }
