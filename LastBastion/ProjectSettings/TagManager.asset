@@ -56,3 +56,6 @@ TagManager:
   - name: Defender UI
     uniqueID: 2594159835
     locked: 0
+  - name: Character sheet
+    uniqueID: 1754036709
+    locked: 0
