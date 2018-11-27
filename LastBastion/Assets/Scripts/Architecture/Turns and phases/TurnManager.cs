@@ -358,12 +358,13 @@ public class TurnManager {
 			Services.Undo.PrepareToUndoMoves();
 			Context.imSure = false;
 			//display help text for the first move phase
-			if (Services.Attackers.GetCurrentWave() == 0 &&
+			//this has been deactivated with the new tutorial system
+			/*if (Services.Attackers.GetCurrentWave() == 0 &&
 				Context.CurrentTurn == 1){
 
 				Services.UI.SetTutorialText(MOVE_REMINDER_MSG);
 				Services.UI.ToggleTutorialText(ChatUI.OnOrOff.On);
-			}
+			}*/
 		}
 
 
@@ -434,8 +435,9 @@ public class TurnManager {
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
 			Services.Events.Fire(new PhaseStartEvent(Context.TurnMachine.CurrentState));
 			//display help text for the first fight phase
-			if (Services.Attackers.GetCurrentWave() == 0 &&
-				Context.CurrentTurn == 1) Services.UI.SetTutorialText(FIGHT_REMINDER_MSG);
+			//this has been deactivated in light of the new tutorial system
+			/*if (Services.Attackers.GetCurrentWave() == 0 &&
+				Context.CurrentTurn == 1) Services.UI.SetTutorialText(FIGHT_REMINDER_MSG);*/
 		}
 
 
