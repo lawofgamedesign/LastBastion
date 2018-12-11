@@ -49,7 +49,7 @@
 			Services.Momentum = new MomentumManager();
 			Services.Momentum.Setup();
 			Services.Sound = new AudioManager();
-			Services.Sound.Setup(AudioManager.Clips.Komiku_La_Ville_Aux_Ponts_Suspendus);
+			/*Services.Sound.Setup(AudioManager.Clips.Komiku_La_Ville_Aux_Ponts_Suspendus);*/
 			Services.CamControl = new CameraBehavior();
 			Services.CamControl.Setup();
 			Services.Environment = new EnvironmentManager();
@@ -70,7 +70,7 @@
 			}
 			else {
 				paused = false;
-				Services.Sound.PlaySceneStartMusic();
+				Services.Sound.ResumeMusic();
 			}
 		}
 

@@ -110,6 +110,15 @@ public class FadingAudioSource {
 
 
 	/// <summary>
+	/// Access to the audio source's clip.
+	/// </summary>
+	/// <returns>The clip.</returns>
+	public AudioClip GetCurrentClip(){
+		return source.clip;
+	}
+
+
+	/// <summary>
 	/// Each frame, fade in or out if needed.
 	/// </summary>
 	public void Tick(){

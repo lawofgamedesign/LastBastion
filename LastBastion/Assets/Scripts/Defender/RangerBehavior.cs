@@ -23,7 +23,7 @@ public class RangerBehavior : DefenderSandbox {
 
 	//the Showboat upgrade track
 	private enum ShowboatTrack { None, Showboat, Effortless, Pull_Ahead, Set_the_Standard };
-	private List<string> showboatDescriptions = new List<string>() {
+	private readonly List<string> showboatDescriptions = new List<string>() {
 		"<b>Start showboating</b>",
 		"<size=14><b>Showboat</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.</size>",
 		"<size=14><b>Effortless</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nIf you are behind the target, reduce their attack by 1.</size>",
@@ -46,7 +46,7 @@ public class RangerBehavior : DefenderSandbox {
 
 	//the Lay Traps upgrade track
 	public enum TrapTrack { None, Rockfall, Landslide, On_the_Lookout, The_Last_Chance };
-	private List<string> trapDescriptions = new List<string>() {
+	private readonly List<string> trapDescriptions = new List<string>() {
 		"<b>Lay your traps</b>",
 		"<b>Rockfall</b>\n\n<size=11>When you choose this, select an empty space adjacent to you. The Horde must go around that space.\n\nGain 1 experience whenever your rockfall blocks the Horde.</size>",
 		"<b>Landslide</b>\n\n<size=11>When you choose this, defeat every Horde member adjacent to your rockfall.\n\nGain 1 experience whenever your rockfall blocks the Horde.</size>",
@@ -54,7 +54,7 @@ public class RangerBehavior : DefenderSandbox {
 	};
 	private TrapTrack currentTrap;
 	public TwoDLoc RockfallLoc { get; set; }
-	private int landslideDamage = 999; //enough to defeat any attacker
+	private const int LANDSLIDE_DAMAGE = 999; //enough to defeat any attacker
 
 
 	//posing information
@@ -463,8 +463,8 @@ public class RangerBehavior : DefenderSandbox {
 		if (Services.Board.CheckValidSpace(x, z)){
 			if (Services.Board.GeneralSpaceQuery(x, z) == SpaceBehavior.ContentType.Attacker){
 				AttackerSandbox attacker = Services.Board.GetThingInSpace(x, z).GetComponent<AttackerSandbox>();
-				if (attacker.Health <= landslideDamage) DefeatedSoFar++;
-				attacker.TakeDamage(landslideDamage);
+				if (attacker.Health <= LANDSLIDE_DAMAGE) DefeatedSoFar++;
+				attacker.TakeDamage(LANDSLIDE_DAMAGE);
 			}
 		}
 	}

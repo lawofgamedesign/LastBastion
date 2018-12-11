@@ -30,11 +30,12 @@ public class GameManager : MonoBehaviour {
 		Services.Tasks = new TaskManager();
 		Services.AttackDeck = new LinkedAttackerDeck();
 		Services.Events = new EventManager();
+	
 
 		//make sure there's a cursor manager (e.g., because the game scene was loaded directly)
 		if (Services.Cursor == null){
 			Services.Cursor = new CursorManager();
-			Services.Cursor.Setup();	
+			Services.Cursor.Setup();
 		}
 		
 		Services.UI = new ChatUI();
@@ -55,14 +56,13 @@ public class GameManager : MonoBehaviour {
 		Services.Momentum = new MomentumManager();
 		Services.Momentum.Setup();
 		Services.Sound = new AudioManager();
-		Services.Sound.Setup(AudioManager.Clips.Doctor_Turtle_It_Looks_Like_the_Future_but_Feels_Like_the_Past);
+		Services.Sound.Setup(EnvironmentManager.Place.Kitchen);
 		Services.CamControl = new CameraBehavior();
 		Services.CamControl.Setup();
 		Services.Environment = new EnvironmentManager();
 		Services.Environment.Setup();
 		Services.EscapeMenu = new GameEscMenuBehavior();
 		Services.EscapeMenu.Setup();
-		Services.Cursor = new CursorManager();
 		Services.Tutorials = new TutorialManager();
 		Services.Tutorials.Setup();
 		Services.Events.Register<PauseEvent>(HandlePausing);
@@ -99,6 +99,8 @@ public class GameManager : MonoBehaviour {
 	private void Update(){
 		Services.Sound.Tick(); //sound always fades in and out, even if the game is paused
 
+		if (Input.GetKeyDown(KeyCode.Space)) paused = !paused;
+		
 		if (paused) return;
 
 		Services.Tasks.Tick();

@@ -10,24 +10,37 @@ public class AudioManager {
 
 	//audio sources
 	private FadingAudioSource backgroundMusic;
+	private FadingAudioSource foley;
 	private const string AUDIO_ORGANIZER = "Speakers";
 	private const string MUSIC_SPEAKER = "Music";
+	private const string FOLEY_SPEAKER = "Foley";
 
 	//clips
+	private AudioClip titleMusic; //the music for the title screen
 	private AudioClip kitchenMusic;
 	private AudioClip tavernMusic;
 	private AudioClip battlefieldMusic;
 	private AudioClip pauseMusic;
-	private AudioClip sceneStartMusic;
+	private AudioClip errorClip; //a default clip which should never play; if this plays, something is wrong!
+	private AudioClip kitchenBackgroundSFX;
+	private AudioClip battleBackgroundSFX;
 	private const string MUSIC_PATH = "Audio/Music/";
+	private const string SFX_PATH = "Audio/SFX/";
+
+
+	//the music clip currently playing; useful for, e.g., unpausing the title scene
+	private AudioClip currentMusic;
 
 	public enum Clips {
+		Error,
 		Komiku_Barque_sur_le_Lac,
 		Komiku_La_Ville_Aux_Ponts_Suspendus,
 		Doctor_Turtle_It_Looks_Like_the_Future_but_Feels_Like_the_Past,
 		Doctor_Turtle_Jolenta_Clears_the_Table,
 		Komiku_Pirates_Libertaires,
-		Komiku_Chill_Out_Theme
+		Komiku_Chill_Out_Theme,
+		Kitchen_SFX,
+		Battlefield_SFX
 	}
 
 
@@ -44,25 +57,48 @@ public class AudioManager {
 	/////////////////////////////////////////////
 
 
-	//initialize variables, and then play calm music
-	public void Setup(Clips sceneBackground){
+	//initialize variables, and then start the audio for the appropriate environment 
+	public void Setup(EnvironmentManager.Place place){
+		errorClip = Resources.Load<AudioClip>(MUSIC_PATH + Clips.Error.ToString());
+		titleMusic = Resources.Load<AudioClip>(MUSIC_PATH + Clips.Komiku_Barque_sur_le_Lac.ToString());
 		kitchenMusic = Resources.Load<AudioClip>(MUSIC_PATH + Clips.Doctor_Turtle_It_Looks_Like_the_Future_but_Feels_Like_the_Past.ToString());
 		tavernMusic = Resources.Load<AudioClip>(MUSIC_PATH + Clips.Komiku_Pirates_Libertaires.ToString());
 		pauseMusic = Resources.Load<AudioClip>(MUSIC_PATH + Clips.Komiku_Chill_Out_Theme.ToString());
-		sceneStartMusic = Resources.Load<AudioClip>(MUSIC_PATH + sceneBackground.ToString());
-		backgroundMusic = new FadingAudioSource(GameObject.Find(AUDIO_ORGANIZER).transform.Find(MUSIC_SPEAKER).GetComponent<AudioSource>(), sceneBackground, MAX_VOLUME, true, true);
+		backgroundMusic = new FadingAudioSource(GameObject.Find(AUDIO_ORGANIZER).transform.Find(MUSIC_SPEAKER).GetComponent<AudioSource>(), Clips.Error, MAX_VOLUME, true, false);
+		kitchenBackgroundSFX = Resources.Load<AudioClip>(SFX_PATH + Clips.Kitchen_SFX.ToString());
+		battleBackgroundSFX = Resources.Load<AudioClip>(SFX_PATH + Clips.Battlefield_SFX.ToString());
+		foley = new FadingAudioSource(GameObject.Find(AUDIO_ORGANIZER).transform.Find(FOLEY_SPEAKER).GetComponent<AudioSource>(), Clips.Error, MAX_VOLUME, true, false);
+		PlayPlaceMusic(place);
 	}
 
 
 	public void PlayPlaceMusic(EnvironmentManager.Place place){
 		switch (place){
+			case EnvironmentManager.Place.Title_Screen:
+				backgroundMusic.Fade(titleMusic, MAX_VOLUME, true);
+				
+				//start the kitchen background noises
+				foley.ToggleSound(OnOrOff.On);
+				foley.Fade(kitchenBackgroundSFX, MAX_VOLUME, true);
+				break;
 			case EnvironmentManager.Place.Kitchen:
 				backgroundMusic.Fade(kitchenMusic, MAX_VOLUME, true);
+				
+				//start the kitchen background noises
+				foley.ToggleSound(OnOrOff.On);
+				foley.Fade(kitchenBackgroundSFX, MAX_VOLUME, true);
 				break;
 			case EnvironmentManager.Place.Tavern:
 				backgroundMusic.Fade(tavernMusic, MAX_VOLUME, true);
 				break;
+			case EnvironmentManager.Place.Battlefield:
+				
+				//start the sword-clashing background sound
+				foley.Fade(battleBackgroundSFX, MAX_VOLUME, true);
+				break;
 		}
+
+		currentMusic = backgroundMusic.GetCurrentClip();
 	}
 
 
@@ -72,10 +108,10 @@ public class AudioManager {
 
 
 	/// <summary>
-	/// Play whatever was the first music played this scene; useful for the tutorial and title screen.
+	/// Play whatever was playing before; useful for the tutorial and title screen.
 	/// </summary>
-	public void PlaySceneStartMusic(){
-		backgroundMusic.Fade(sceneStartMusic, MAX_VOLUME, true);
+	public void ResumeMusic(){
+		backgroundMusic.Fade(currentMusic, MAX_VOLUME, true);
 	}
 
 

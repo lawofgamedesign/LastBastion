@@ -447,8 +447,8 @@ public class TurnManager {
 			Services.Defenders.CompleteFightPhase();
 			Services.UI.ToggleExplainButton(ChatUI.OnOrOff.Off);
 			Services.UI.ToggleTutorialButton(ChatUI.OnOrOff.Off);
-			if (Services.Attackers.GetCurrentWave() == 0 &&
-				Context.CurrentTurn == 1) Services.UI.ToggleTutorialText(ChatUI.OnOrOff.Off);
+			/*if (Services.Attackers.GetCurrentWave() == 0 &&
+				Context.CurrentTurn == 1) Services.UI.ToggleTutorialText(ChatUI.OnOrOff.Off);*/
 		}
 	}
 

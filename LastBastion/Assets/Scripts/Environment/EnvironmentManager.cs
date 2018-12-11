@@ -9,7 +9,7 @@ public class EnvironmentManager {
 
 
 	//the places the game can take place
-	public enum Place { Kitchen, Tavern, Battlefield };
+	public enum Place { Title_Screen, Kitchen, Tavern, Battlefield };
 
 
 	//the current place

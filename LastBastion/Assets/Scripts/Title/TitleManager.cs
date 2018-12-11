@@ -44,7 +44,7 @@
 			Services.Defenders = new DefenderManager();
 			Services.Defenders.Setup();
 			Services.Sound = new AudioManager();
-			Services.Sound.Setup(AudioManager.Clips.Komiku_Barque_sur_le_Lac);
+			Services.Sound.Setup(EnvironmentManager.Place.Title_Screen);
 			Services.EscapeMenu = new TitleEscMenuBehavior();
 			Services.EscapeMenu.Setup();
 			Services.Tasks = new TaskManager();
@@ -118,7 +118,7 @@
 				Services.Sound.PlayPauseMusic();
 			} else {
 				paused = false;
-				Services.Sound.PlaySceneStartMusic();
+				Services.Sound.ResumeMusic();
 			}
 		}
 	}
