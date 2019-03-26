@@ -425,6 +425,11 @@ public class TurnManager {
 			if (!Services.Tasks.CheckForTaskOfType<PickUpCardTask>() &&
 				!Services.Tasks.CheckForTaskOfType<FlipCardTask>() &&
 				!Services.Tasks.CheckForTaskOfType<PutDownCardTask>()) TransitionTo<BesiegeWalls>();
+
+			//if the Ranger had the opportunity to teleport via The Last Chance, the opportunity ends 
+			if (Services.Tasks.CheckForTaskOfType<TeleportDefenderTask>()){
+				Services.Tasks.GetCurrentTaskOfType<TeleportDefenderTask>().SetStatusExternally(Task.TaskStatus.Aborted);
+			}
 		}
 
 

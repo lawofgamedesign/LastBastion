@@ -101,20 +101,17 @@ public class TeleportDefenderTask : Task {
 			SetStatus(TaskStatus.Success);
 		}
 	}
-	
-	
-	protected override void OnSuccess(){
+
+
+	/// <summary>
+	/// No matter how the task ends, unregister for InputEvents and shut off highlights.
+	/// </summary>
+	protected override void Cleanup(){
 		if (destination == PossibleDestinations.Any_open) Services.Board.HighlightAllEmpty(BoardBehavior.OnOrOff.Off);
 		else if (destination == PossibleDestinations.Adjacent) 
 			Services.Board.HighlightAllAroundSpace(defender.ReportGridLoc().x, defender.ReportGridLoc().z, BoardBehavior.OnOrOff.Off);
 		else Debug.Log("Trying to teleport to an impossible location.");
-	}
-
-
-	/// <summary>
-	/// No matter how the task ends, unregister for InputEvents.
-	/// </summary>
-	protected override void Cleanup(){
+		
 		Services.Events.Unregister<InputEvent>(SelectDestination);
 	}
 }

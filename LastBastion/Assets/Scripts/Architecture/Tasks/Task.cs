@@ -56,6 +56,11 @@
 	protected virtual void OnAbort() {}
 
 
+	public void SetStatusExternally(TaskStatus newStatus){
+		SetStatus(newStatus);
+	}
+
+
 	public Task NextTask { get; private set; }
 
 
