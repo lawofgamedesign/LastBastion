@@ -18,7 +18,7 @@ public class RangerBehavior : DefenderSandbox {
 
 	//character sheet
 	private const string RANGER_NAME = "Ranger";
-	private enum UpgradeTracks { Showboat, Trap };
+	private enum UpgradeTracks { Showboat, MoveTricks, Trap };
 
 
 	//the Showboat upgrade track
@@ -26,9 +26,9 @@ public class RangerBehavior : DefenderSandbox {
 	private readonly List<string> showboatDescriptions = new List<string>() {
 		"<b>Start showboating</b>",
 		"<size=14><b>Showboat</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.</size>",
-		"<size=14><b>Effortless</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nIf you are behind the target, reduce their attack by 1.</size>",
-		"<size=14><b>Pull Ahead</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nIf you are behind the target, ignore their attack modifier.</size>",
-		"<size=14><b>Set the Standard</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nIf you are behind the target, ignore their attack modifier and armor.</size>",
+		"<size=14><b>Effortless</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nReduce the horde member's card by 1 when attacking from behind.</size>",
+		"<size=14><b>Pull Ahead</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nIgnore bonuses to a warlord's card when attacking from behind.</size>",
+		"<size=14><b>Set the Standard</b></size><size=11>\n\nYou gain extra attacks equal to the number of Horde members you defeated last turn.\n\nYou may attack in any direction.\n\nIgnore bonuses and armor when attacking from behind.</size>",
 		"<b>Maximum showboating!</b>"
 	};
 	private ShowboatTrack currentShowboat;
@@ -55,7 +55,23 @@ public class RangerBehavior : DefenderSandbox {
 	private TrapTrack currentTrap;
 	public TwoDLoc RockfallLoc { get; set; }
 	private const int LANDSLIDE_DAMAGE = 999; //enough to defeat any attacker
+	
+	
+	//the MoveTricks track
+	public enum MoveTricksTrack { None, Lightfooted, Secret_Paths, Swift_Escape, The_Last_Chance }
 
+	private readonly List<string> moveTricksDescriptions = new List<string>() {
+		"<b>Move swiftly</b>",
+		"<size=14><b>Lightfooted</b></size>\n\n<size=11>You can move up to 5 spaces, instead of 4.\n\nGain 1 Inspiration if you move 5 spaces.</size>",
+		"<size=14><b>Secret Paths</b></size>\n\n<size=11>You can move up to 5 spaces, and can move through the Horde.\n\nGain 1 Inspiration if you move 5 spaces.</size>",
+		"<size=14><b>Swift Escape</b></size>\n\n<size=11>When you choose this, immediately move to any space.\n\nYou can move up to 5 spaces, and can move through the Horde.\n\nGain 1 Inspiration if you move 5 spaces.</size>",
+		"<size=14><b>The Last Chance</b></size>\n\n<size=11>You can move up to 5 spaces, and can move through the Horde.\n\nWhen you defeat the Horde, you can move one space.\n\nGain 1 Inspiration if you move 5 spaces.</size>",
+		"To quick to see, too quick to stop!"
+	};
+	private MoveTricksTrack currentMoveTricks;
+	private const int LIGHTFOOTED_SPEED = 5;
+	
+	
 
 	//posing information
 	private const string ATTACK_ANIM = "WK_archer_07_attack_A";
@@ -86,6 +102,7 @@ public class RangerBehavior : DefenderSandbox {
 		ammoOrganizer = transform.Find(PRIVATE_UI_CANVAS).Find(ATTACK_REMAINING_ORGANIZER);
 
 		currentTrap = TrapTrack.None;
+		currentMoveTricks = MoveTricksTrack.None;
 
 
 		//pose the Ranger
@@ -115,6 +132,43 @@ public class RangerBehavior : DefenderSandbox {
 	protected override List<Card> MakeCombatHand(){
 		return new List<Card>() { new Card(3), new Card(5), new Card(6) };
 	}
+	
+	
+	#region movement
+
+	
+	/// <summary>
+	/// The Ranger can, from Secret Paths on in the Movement Tricks track, move through the Horde.
+	/// </summary>
+	/// <param name="loc">The grid location to which the Ranger wants to move.</param>
+	/// <returns><c>true</c> if the Ranger can move to that space, <c>false</c> otherwise.</returns>
+	public override bool TryPlanMove(TwoDLoc loc){
+		if (CheckAdjacent(moves[Speed - remainingSpeed], loc) &&
+		    remainingSpeed > 0 &&
+		    !CheckAlreadyThroughSpace(loc)) {
+
+			//the Ranger can enter a space if either:
+			//1. it is empty, or
+			//2. it is not the last space of the move, the Horde is present, and the Ranger has reached at least Secret Paths
+			//on the Movement Tricks track
+			if (Services.Board.GeneralSpaceQuery(loc.x, loc.z) == SpaceBehavior.ContentType.None ||
+			    (currentMoveTricks >= MoveTricksTrack.Secret_Paths &&
+			     remainingSpeed - 1 > 0 && //check remaining speed after the proposed move
+			     Services.Board.GeneralSpaceQuery(loc.x, loc.z) == SpaceBehavior.ContentType.Attacker)){
+				
+				moves.Add(loc);
+				remainingSpeed--;
+				DrawLine(Speed - remainingSpeed, loc.x, loc.z);
+				moveCanvas.position = Services.Board.GetWorldLocation(loc.x, loc.z) + new Vector3(0.0f, LINE_OFFSET, 0.0f);
+
+				return true;	
+			}
+		}
+
+		return false;
+	}
+	
+	#endregion
 
 
 	#region combat
@@ -199,7 +253,11 @@ public class RangerBehavior : DefenderSandbox {
 		Services.UI.ReviseCardsAvail(GetAvailableValues());
 	}
 
-
+	
+	/// <summary>
+	/// This method reflects changes for both the Showboat track and the MoveTricks track.
+	/// </summary>
+	/// <param name="attacker">The attacker defeated</param>
 	public override void WinFight(AttackerSandbox attacker){
 		DefeatedSoFar++;
 		if (Services.Rulebook.GetType() != typeof(Tutorial.TutorialTurnManager)) powerupReadyParticle.SetActive(CheckUpgradeStatus()); //don't play particle in tutorial; it's distracting
@@ -215,6 +273,9 @@ public class RangerBehavior : DefenderSandbox {
 
 		FinishWithCard();
 		if (currentAttacks <= 0 && currentShowboat > ShowboatTrack.None) DoneFighting();
+		if (currentMoveTricks == MoveTricksTrack.The_Last_Chance) {
+			Services.Tasks.AddTask(new TeleportDefenderTask(this, TeleportDefenderTask.PossibleDestinations.Adjacent));
+		}
 	}
 
 
@@ -363,6 +424,8 @@ public class RangerBehavior : DefenderSandbox {
 
 	#endregion combat
 
+	
+	
 
 	/// <summary>
 	/// Use this defender's name when taking over the character sheet, and display its upgrade paths.
@@ -377,8 +440,8 @@ public class RangerBehavior : DefenderSandbox {
 									  DefeatedSoFar,
 									  showboatDescriptions[(int)currentShowboat + 1],
 									  showboatDescriptions[(int)currentShowboat],
-									  trapDescriptions[(int)currentTrap + 1],
-									  trapDescriptions[(int)currentTrap],
+									  moveTricksDescriptions[(int)currentMoveTricks + 1],
+									  moveTricksDescriptions[(int)currentMoveTricks],
 									  GetAvailableValues()
 		);
 	}
@@ -390,7 +453,7 @@ public class RangerBehavior : DefenderSandbox {
 	/// <param>The upgrade tree the player wants to move along.</param>
 	/// <param name="tree">The upgrade tree the player clicked. Left is 0, right is 1.</param>
 	public override bool PowerUp(int tree){
-		if (!base.PowerUp(tree)) return false; //has the Brawler defeated enough attackers to upgrade?
+		if (!base.PowerUp(tree)) return false; //has the Ranger defeated enough attackers to upgrade?
 
 		switch (tree){
 			case (int)UpgradeTracks.Showboat:
@@ -409,29 +472,44 @@ public class RangerBehavior : DefenderSandbox {
 				}
 
 				break;
-		case (int)UpgradeTracks.Trap:
-			if (currentTrap != TrapTrack.Landslide){
-				currentTrap++;
-
-				//the Trap Track has a series of idiosyncratic abilities
-				switch (currentTrap){
-					case TrapTrack.Rockfall:
-						//they gain the ability to gain XP when their blocks prevent movement
-						Services.Events.Register<BlockedEvent>(GetXPFromBlock);
-						
-						Services.Tasks.InsertTask(Services.Tasks.GetCurrentTaskOfType<UpgradeTask>(), new RockfallTask(this));
-						break;
-					case TrapTrack.Landslide:
-						DamageAtLoc(RockfallLoc.x, RockfallLoc.z + 1);
-						DamageAtLoc(RockfallLoc.x, RockfallLoc.z - 1);
-						DamageAtLoc(RockfallLoc.x - 1, RockfallLoc.z);
-						DamageAtLoc(RockfallLoc.x + 1, RockfallLoc.z);
-						break;
+			case (int)UpgradeTracks.MoveTricks:
+				if (currentMoveTricks != MoveTricksTrack.The_Last_Chance) {
+					currentMoveTricks++;
+					Services.UI.ReviseTrack2(moveTricksDescriptions[(int)currentMoveTricks + 1], moveTricksDescriptions[(int)currentMoveTricks]);
+					
+					//upon adopting first move trick, increase speed
+					if (currentMoveTricks == MoveTricksTrack.Lightfooted) Speed = LIGHTFOOTED_SPEED;
+					
+					//upon adopting Swift Escape, give the Ranger the opportunity to teleport
+					if (currentMoveTricks == MoveTricksTrack.Swift_Escape)
+						Services.Tasks.InsertTask(Services.Tasks.GetCurrentTaskOfType<UpgradeTask>(),
+												  new TeleportDefenderTask(this, TeleportDefenderTask.PossibleDestinations.Any_open));
 				}
-
-				Services.UI.ReviseTrack2(trapDescriptions[(int)currentTrap + 1], trapDescriptions[(int)currentTrap]);
-			}
-			break;
+				
+				break;
+//		case (int)UpgradeTracks.Trap:
+//			if (currentTrap != TrapTrack.Landslide){
+//				currentTrap++;
+//
+//				//the Trap Track has a series of idiosyncratic abilities
+//				switch (currentTrap){
+//					case TrapTrack.Rockfall:
+//						//they gain the ability to gain XP when their blocks prevent movement
+//						Services.Events.Register<BlockedEvent>(GetXPFromBlock);
+//						
+//						Services.Tasks.InsertTask(Services.Tasks.GetCurrentTaskOfType<UpgradeTask>(), new RockfallTask(this));
+//						break;
+//					case TrapTrack.Landslide:
+//						DamageAtLoc(RockfallLoc.x, RockfallLoc.z + 1);
+//						DamageAtLoc(RockfallLoc.x, RockfallLoc.z - 1);
+//						DamageAtLoc(RockfallLoc.x - 1, RockfallLoc.z);
+//						DamageAtLoc(RockfallLoc.x + 1, RockfallLoc.z);
+//						break;
+//				}
+//
+//				Services.UI.ReviseTrack2(trapDescriptions[(int)currentTrap + 1], trapDescriptions[(int)currentTrap]);
+//			}
+//			break;
 		}
 
 		//having powered up, shut off the particle telling the player to power up

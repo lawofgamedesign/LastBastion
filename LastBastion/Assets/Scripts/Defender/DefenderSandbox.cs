@@ -428,6 +428,15 @@ public class DefenderSandbox : MonoBehaviour {
 	}
 
 
+	/// <summary>
+	/// Utility function for other classes to get the speed with which this defender's model moves.
+	/// </summary>
+	/// <returns>This defender's on-screen movement speed.</returns>
+	public float GetScreenMoveSpeed(){
+		return moveSpeed;
+	}
+
+
 	#endregion movement
 
 
@@ -767,6 +776,8 @@ public class DefenderSandbox : MonoBehaviour {
 
 	#endregion UI
 
+	
+	#region powerup
 
 	/// <summary>
 	/// Each defender is responsible for figuring out how they power up. This base function only handles making sure the defender
@@ -785,4 +796,7 @@ public class DefenderSandbox : MonoBehaviour {
 
 		return true;
 	}
+	
+	
+	#endregion
 }

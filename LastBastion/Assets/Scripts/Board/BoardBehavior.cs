@@ -218,6 +218,29 @@ public class BoardBehavior {
 			!CheckValidRow(z)) return false;
 		else return true;
 	}
+	
+
+	/// <summary>
+	/// Check if a given space is adjacent to another space.
+	/// </summary>
+	/// <param name="referenceX">The grid X coordinate of the first space.</param>
+	/// <param name="referenceZ">The grid Z coordinate of the first space.</param>
+	/// <param name="checkedX">The grid X coordinate of the second space.</param>
+	/// <param name="checkedZ">The grid Z coordinate of the second space.</param>
+	/// <returns></returns>
+	public bool CheckAdjacentSpace(int referenceX, int referenceZ, int checkedX, int checkedZ){
+		Debug.Assert(CheckValidSpace(referenceX, referenceZ), "Illegal reference space.");
+		Debug.Assert(CheckValidSpace(checkedX, checkedZ), "Illegal checked space.");
+		Debug.Assert(referenceX >= 0 && referenceZ >= 0 && checkedX >= 0 && checkedZ >= 0,
+			"Danger of logic error in checking adjacency."); //risk of subracting a negative and getting a large value
+
+		//spaces are not considered adjacent to themselves
+		if (referenceX == checkedX && referenceZ == checkedZ) return false;
+		
+		//if the difference between the grid coordinates on the X and Z axes is <= 1, they're adjacent
+		if (Mathf.Abs(referenceX - checkedX) <= 1 && Mathf.Abs(referenceZ - checkedZ) <= 1) return true;
+		else return false;
+	}
 
 
 	/// <summary>
