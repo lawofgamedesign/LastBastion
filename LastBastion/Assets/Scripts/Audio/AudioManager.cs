@@ -108,7 +108,7 @@ public class AudioManager {
 
 
 	/// <summary>
-	/// Play whatever was playing before; useful for the tutorial and title screen.
+	/// Play the standard background music for the environment; useful for the tutorial and title screen.
 	/// </summary>
 	public void ResumeMusic(){
 		backgroundMusic.Fade(currentMusic, MAX_VOLUME, true);
