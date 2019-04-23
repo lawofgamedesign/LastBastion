@@ -168,6 +168,36 @@ public class RangerBehavior : DefenderSandbox {
 		return false;
 	}
 	
+	
+	/// <summary>
+	/// The Ranger has an extra rule with regard to movement: the Movement Tricks track allows the Ranger to gain inspiration
+	/// by moving their full distance.
+	/// </summary>
+	public override void Move(){
+		Services.Tasks.AddTask(new MoveDefenderTask(rb, moveSpeed, moves));
+		ClearLine();
+
+
+		//move on the grid used for game logic
+		Services.Board.TakeThingFromSpace(GridLoc.x, GridLoc.z);
+		TwoDLoc destination = moves[moves.Count - 1];
+		Services.Board.PutThingInSpace(gameObject, destination.x, destination.z, SpaceBehavior.ContentType.Defender);
+		NewLoc(destination.x, destination.z);
+		BeUnselected();
+		Services.UI.ShutOffCharSheet();
+		Services.Defenders.DeclareSelfDone(this);
+		Services.Events.Fire(new NotSelectableEvent(this));
+
+		if (currentMoveTricks > MoveTricksTrack.None){
+			if (remainingSpeed == 0) DefeatAttacker();
+		}
+
+		remainingSpeed = 0;
+
+		//send out an event announcing that this defender has moved; important for the tutorial
+
+	}
+	
 	#endregion
 
 
@@ -273,7 +303,8 @@ public class RangerBehavior : DefenderSandbox {
 
 		FinishWithCard();
 		if (currentAttacks <= 0 && currentShowboat > ShowboatTrack.None) DoneFighting();
-		if (currentMoveTricks == MoveTricksTrack.The_Last_Chance) {
+		if (currentMoveTricks == MoveTricksTrack.The_Last_Chance &&
+		    !Services.Tasks.CheckForTaskOfType<TeleportDefenderTask>()) {
 			Services.Tasks.AddTask(new TeleportDefenderTask(this, TeleportDefenderTask.PossibleDestinations.Adjacent));
 		}
 	}
