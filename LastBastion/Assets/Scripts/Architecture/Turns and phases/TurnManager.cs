@@ -43,6 +43,7 @@ public class TurnManager {
 	protected const string STOP_MOVING_MSG = "Done moving";
 	protected const string STOP_FIGHTING_MSG = "Done fighting";
 	protected const string ARE_YOU_SURE_MSG = "Are you sure? Not all defenders moved.";
+	protected const string WAIT_MSG = "You need to make a choice before we go on.";
 	protected bool imSure = true; //used to determine whether a player is sure that they're ready to go on when there are still defenders who can move
 
 
@@ -311,8 +312,9 @@ public class TurnManager {
 	/// <summary>
 	/// State for the defenders' movement. This is public so that the momentum system can determine whether momentum has been used up.
 	/// </summary>
-	public class PlayerMove : FSM<TurnManager>.State {
-
+	public class PlayerMove : FSM<TurnManager>.State
+	{
+		private bool needWait = false;
 
 		private void HandleMoveInputs(Event e){
 			InputEvent inputEvent = e as InputEvent;
@@ -338,19 +340,46 @@ public class TurnManager {
 
 			//go on to the Defenders Fight phase if all defenders have moved, or if the player clicks again after getting a warning that they
 			//haven't
-			if (Services.Defenders.CheckAllDoneMoving()) TransitionTo<PlayerFight>();
-			else if (Context.imSure) TransitionTo<PlayerFight>();
-			else {
+			//go to the special Waiting state if the Guardian needs to make a choice for the Hold the Line track
+			if (Services.Defenders.CheckAllDoneMoving() && !needWait){
+				TransitionTo<PlayerFight>();
+			}
+			else if (Context.imSure && !needWait) TransitionTo<PlayerFight>();
+			else if (!Context.imSure){
 				Context.imSure = true;
 				Services.UI.OpponentStatement(ARE_YOU_SURE_MSG);
 			}
+			else if (needWait){
+				Services.UI.OpponentStatement(WAIT_MSG);
+				TransitionTo<Waiting>();
+			}
 		}
+
+
+		/// <summary>
+		/// Is there a need to wait before going on to PlayerFight? There is if:
+		/// 
+		/// 1. The Guardian needs to select a column for the Hold the Line track.
+		///
+		/// IMPORTANT: this assumes that there is only ever going to be one reason to wait, so there will never be
+		/// conflicting needs (i.e., one defender still needs the system to wait while another is saying to go ahead).
+		/// If conflicting needs are possible, this will need to be refactored to take that into account. 
+		/// </summary>
+		private void CheckNeedWait(global::Event e){
+			Debug.Assert(e.GetType() == typeof(NeedWaitEvent), "Non-NeedWaitEvent in CheckNeedWait");
+			
+			NeedWaitEvent waitEvent = e as NeedWaitEvent;
+
+			needWait = waitEvent.needWait;
+		}
+		
 
 
 		public override void OnEnter(){
 			Services.Defenders.PrepareDefenderMovePhase();
 			Services.Events.Register<InputEvent>(HandleMoveInputs);
 			Services.Events.Register<EndPhaseEvent>(HandlePhaseEndInput);
+			Services.Events.Register<NeedWaitEvent>(CheckNeedWait);
 			Services.Events.Fire(new PhaseStartEvent(Context.TurnMachine.CurrentState));
 			Services.UI.RemindPhase(Context.TurnMachine.CurrentState);
 			Services.UI.ToggleExplainButton(ChatUI.OnOrOff.On);
@@ -372,6 +401,7 @@ public class TurnManager {
 			Services.Defenders.CompleteMovePhase();
 			Services.Events.Unregister<InputEvent>(HandleMoveInputs);
 			Services.Events.Unregister<EndPhaseEvent>(HandlePhaseEndInput);
+			Services.Events.Unregister<NeedWaitEvent>(CheckNeedWait);
 		}
 	}
 
@@ -611,6 +641,41 @@ public class TurnManager {
 				Services.Events.Fire(new PauseEvent(PauseEvent.Pause.Pause));
 				Services.Events.Fire(new EscMenuEvent());
 			}
+		}
+	}
+
+
+	/// <summary>
+	/// This is a special class used when something needs to happen before going to the next state.
+	///
+	/// For example, the game enters this state when waiting for the Guardian to choose a column to block
+	/// in the Hold the Line track.
+	/// </summary>
+	public class Waiting : FSM<TurnManager>.State {
+		
+		
+		/// <summary>
+		/// Listen for the reasons the TurnManager could be waiting.
+		/// </summary>
+		public override void OnEnter (){
+			Services.Events.Register<BlockColumnEvent>(GoToFight);
+		}
+
+
+		/// <summary>
+		/// Go to the PlayerFight phase.
+		/// </summary>
+		/// <param name="e">Any event that signals the reason to wait before the PlayerFight phase is over.</param>
+		private void GoToFight(global::Event e){
+			TransitionTo<PlayerFight>();
+		}
+
+		
+		/// <summary>
+		/// Always unregister from all reasons to wait.
+		/// </summary>
+		public override void OnExit(){
+			Services.Events.Unregister<BlockColumnEvent>(GoToFight);
 		}
 	}
 }

@@ -36,7 +36,7 @@ public class GuardianBehavior : DefenderSandbox {
 
 
 	//Hold the Line track
-	private enum HoldTrack { None, Hold_the_Line, Draw_Them_In, Bulwark, The_Last_Bastion };
+	public enum HoldTrack { None, Hold_the_Line, Draw_Them_In, Bulwark, The_Last_Bastion };
 	private List<string> holdDescriptions = new List<string>() {
 		"Stand strong",
 		"<b>Hold the Line</b>\n\n<size=12>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen the Horde is defeated in that column, gain 1 experience.</size>",
@@ -144,6 +144,7 @@ public class GuardianBehavior : DefenderSandbox {
 			if (blockedColumn != JUST_STARTED) MakeColumnLure(blockedColumn, false);
 			UnholdLine();
 			Services.Events.Register<InputEvent>(ChooseColumn);
+			Services.Events.Fire(new NeedWaitEvent(true)); //inform TurnManager that it might need to wait for a column selection
 			Services.Board.HighlightColumn(GridLoc.x - 1, BoardBehavior.OnOrOff.On);
 			Services.Board.HighlightColumn(GridLoc.x + 1, BoardBehavior.OnOrOff.On);
 		}
@@ -228,6 +229,7 @@ public class GuardianBehavior : DefenderSandbox {
 			if (space.GridLocation.x - 1 == GridLoc.x || space.GridLocation.x + 1 == GridLoc.x){
 				blockedColumn = space.GridLocation.x;
 				Services.Events.Fire(new BlockColumnEvent(blockedColumn));
+				Services.Events.Fire(new NeedWaitEvent(false)); //tell TurnManager there's no need to wait anymore
 
 				if (currentHold != HoldTrack.Hold_the_Line) MakeColumnLure(blockedColumn, true); //attackers move into blocked columns at higher Hold the Line levels
 
@@ -542,5 +544,10 @@ public class GuardianBehavior : DefenderSandbox {
 
 			marker.name = LINE_MARKER_OBJ + i.ToString();
 		}
+	}
+
+
+	public HoldTrack GetCurrentHold(){
+		return currentHold;
 	}
 }
