@@ -40,9 +40,9 @@ public class GuardianBehavior : DefenderSandbox {
 	private List<string> holdDescriptions = new List<string>() {
 		"Stand strong",
 		"<b>Hold the Line</b>\n\n<size=12>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen the Horde is defeated in that column, gain 1 experience.</size>",
-		"<b>Face me!</b>\n\n<size=10>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 1 experience.</size>",
-		"<b>Bulwark</b>\n\n<size=10>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there.\n\nWhen there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 2 experience.</size>",
-		"<b>The Last Bastion</b>\n\nEvery other turn, the Horde does not advance. Gain 2 experience when the Horde is defeated.",
+		"<b>Face me!</b>\n\n<size=10>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there, and when there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 1 experience.</size>",
+		"<b>Bulwark</b>\n\n<size=10>After moving, choose the column to the left or right of the Guardian. The Horde does not advance there, and when there is an open space in the chosen column, the Horde will move into that space.\n\nWhen the Horde is defeated in that column, gain 2 experience.</size>",
+		"<b>The Last Bastion</b>\n\nEvery other turn, the Horde does not advance. Gain 2 experience when the Horde is defeated anywhere on the board.",
 		"<b>None shall pass!</b>"
 	};
 	private HoldTrack currentHold;
