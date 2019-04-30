@@ -24,10 +24,10 @@ public class BrawlerBehavior : DefenderSandbox {
 	private enum RampageTrack { None, Rampage, Wade_In, Berserk, The_Last_One_Standing };
 	private List<string> rampageDescriptions = new List<string>() {
 		"<b>Start rampaging</b>",
-		"<b>Rampage</b>\n\nYou get two attacks: one north and one east or west.",
-		"<b>Wade In</b>\n\n<size=10>You get two attacks: one north and one east or west.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
-		"<b>Berserk</b>\n\n<size=10>You get three attacks: one north and two east or west.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
-		"<b>The Last One Standing</b>\n\n<size=10>You get infinite attacks east and west, so long as each one inflicts damage. You get one attack north.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>Rampage</b>\n\nYou get two attacks: one ahead and one to either side.",
+		"<b>Wade In</b>\n\n<size=10>You get two attacks: one ahead and one to either side.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>Berserk</b>\n\n<size=10>You get three attacks: one ahead and one to either side.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
+		"<b>The Last One Standing</b>\n\n<size=10>You get infinite attacks ahead and to the sides, so long as you keep winning.\n\nAfter defeating a Horde member, you may move into the space they occupied.</size>",
 		"<b>Maximum rampage!</b>"
 	};
 	private RampageTrack currentRampage;
@@ -198,8 +198,15 @@ public class BrawlerBehavior : DefenderSandbox {
 
 
 	private void SetAvailableFeedback(){
-		//in all cases, the Brawler gets one attack to the north
-		if (!attacksSoFar.Contains(Directions.North)){
+		//The Last One Standing allows infinite attacks until a failure, so just turn on one arrow in each direction
+		if (currentRampage == RampageTrack.The_Last_One_Standing){
+			dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
+			dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
+			dirFeedback.Find(Directions.North.ToString()).gameObject.SetActive(true);
+		}
+		
+		//in all other cases, the Brawler gets one attack to the north
+		else if (!attacksSoFar.Contains(Directions.North)){
 			dirFeedback.Find(Directions.North.ToString()).gameObject.SetActive(true);
 		} else {
 			dirFeedback.Find(Directions.North.ToString()).gameObject.SetActive(false);
@@ -217,31 +224,22 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		//Berserk gives the Brawler 2 total lateral attacks
 		} else if (currentRampage == RampageTrack.Berserk){
-			if (GetNumLateralAttacks() == 0){
+			if (GetNumLateralAttacks() == 0)
+			{
 				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
 				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
 				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
 				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
-			} else if (GetNumLateralAttacks() == 1){
+			}
+			else if (GetNumLateralAttacks() == 1)
+			{
 				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
 				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
 				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
-				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
-			} else {
-				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(false);
-				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
-				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(false);
 				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
 			}
-
-		//The Last One Standing gives the Brawler infinite lateral attacks, so long as the Brawler keeps inflicting damage
-		} else if (currentRampage == RampageTrack.The_Last_One_Standing){
-			if (defeatedLastTarget){
-				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(true);
-				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
-				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(true);
-				dirFeedback.Find(Directions.West.ToString() + SECOND_ATTACK).gameObject.SetActive(true);
-			} else {
+			else
+			{
 				dirFeedback.Find(Directions.East.ToString()).gameObject.SetActive(false);
 				dirFeedback.Find(Directions.East.ToString() + SECOND_ATTACK).gameObject.SetActive(false);
 				dirFeedback.Find(Directions.West.ToString()).gameObject.SetActive(false);
@@ -264,7 +262,7 @@ public class BrawlerBehavior : DefenderSandbox {
 		if (!UseUpAttacks(dir)) return;
 
 		if (currentRampage == RampageTrack.The_Last_One_Standing &&
-			dir != Directions.North &&
+			//dir != Directions.North && //this is removed so that the Brawler is not limited to a single attack ahead
 			!defeatedLastTarget) return; //the Brawler stops in The LastOneStanding mode after missing a hit
 
 		//if the Brawler gets this far, a fight will actually occur; get a card for the Attacker
