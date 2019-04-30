@@ -436,10 +436,12 @@ public class AttackerSandbox : MonoBehaviour {
 	/// </summary>
 	/// <param name="damage">The amount of damage sustained, after all modifiers.</param>
 	public virtual void TakeDamage(int damage){
+		Services.Events.Fire(new AttackerDefeatedEvent(this));
+		
 		Health -= damage;
 
 		if (Health <= 0) {
-			BeDefeated();
+			BeReducedToZero();
 		}
 	}
 
@@ -447,10 +449,9 @@ public class AttackerSandbox : MonoBehaviour {
 	/// <summary>
 	/// Call this when this attacker is defeated by a defender.
 	/// </summary>
-	public virtual void BeDefeated(){
+	public virtual void BeReducedToZero(){
 		Services.Attackers.EliminateAttacker(this);
 		Services.Board.TakeThingFromSpace(XPos, ZPos);
-		Services.Events.Fire(new AttackerDefeatedEvent(this));
 		UnregisterForEvents();
 
 		AttackerFallTask fallTask = new AttackerFallTask(GetComponent<Rigidbody>());
