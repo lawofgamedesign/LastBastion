@@ -345,7 +345,7 @@ public class TurnManager {
 				TransitionTo<PlayerFight>();
 			}
 			else if (Context.imSure && !needWait) TransitionTo<PlayerFight>();
-			else if (!Context.imSure){
+			else if (!Context.imSure && !Services.Defenders.CheckAllDoneMoving()){
 				Context.imSure = true;
 				Services.UI.OpponentStatement(ARE_YOU_SURE_MSG);
 			}
