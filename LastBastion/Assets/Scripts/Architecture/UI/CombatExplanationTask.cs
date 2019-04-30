@@ -166,8 +166,11 @@ public class CombatExplanationTask : Task {
 		int total = (attackerValue + attackerMod) - (defenderValue + defenderMod);
 
 		if (total < 0){
-			defenderScript.WinFight(attackerScript);
+			//warning to future me: if there is ever a time when an attacker is immediately destroyed, defenderScript will be
+			//getting a null argument
+			//this ordering helps the Brawler not try to move into spaces where there is a Horde member, but it is dangerous!
 			attackerScript.TakeDamage(damage);
+			defenderScript.WinFight(attackerScript);
 		} else if (total == 0){
 			defenderScript.TieFight(attackerScript);
 			attackerScript.FailToDamage();

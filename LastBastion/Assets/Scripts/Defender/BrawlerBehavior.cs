@@ -307,7 +307,12 @@ public class BrawlerBehavior : DefenderSandbox {
 
 			if (lastDefeatedLoc != null) Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
 			lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
-			Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
+			Debug.Log(attacker.XPos + ", " + attacker.ZPos);
+			Debug.Log(Services.Board.GeneralSpaceQuery(attacker.XPos, attacker.ZPos));
+
+			if (Services.Board.GeneralSpaceQuery(attacker.XPos, attacker.ZPos) != SpaceBehavior.ContentType.Attacker){
+				Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
+			}
 		}
 		defeatedLastTarget = true; //only important for The Last One Standing
 
