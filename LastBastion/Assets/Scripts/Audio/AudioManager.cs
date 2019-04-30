@@ -23,6 +23,7 @@ public class AudioManager {
 	private AudioClip pauseMusic;
 	private AudioClip errorClip; //a default clip which should never play; if this plays, something is wrong!
 	private AudioClip kitchenBackgroundSFX;
+	private AudioClip tavernBackgroundSFX;
 	private AudioClip battleBackgroundSFX;
 	private const string MUSIC_PATH = "Audio/Music/";
 	private const string SFX_PATH = "Audio/SFX/";
@@ -40,6 +41,7 @@ public class AudioManager {
 		Komiku_Pirates_Libertaires,
 		Komiku_Chill_Out_Theme,
 		Kitchen_SFX,
+		Tavern_SFX,
 		Battlefield_SFX
 	}
 
@@ -66,6 +68,7 @@ public class AudioManager {
 		pauseMusic = Resources.Load<AudioClip>(MUSIC_PATH + Clips.Komiku_Chill_Out_Theme.ToString());
 		backgroundMusic = new FadingAudioSource(GameObject.Find(AUDIO_ORGANIZER).transform.Find(MUSIC_SPEAKER).GetComponent<AudioSource>(), Clips.Error, MAX_VOLUME, true, false);
 		kitchenBackgroundSFX = Resources.Load<AudioClip>(SFX_PATH + Clips.Kitchen_SFX.ToString());
+		tavernBackgroundSFX = Resources.Load<AudioClip>(SFX_PATH + Clips.Tavern_SFX.ToString());
 		battleBackgroundSFX = Resources.Load<AudioClip>(SFX_PATH + Clips.Battlefield_SFX.ToString());
 		foley = new FadingAudioSource(GameObject.Find(AUDIO_ORGANIZER).transform.Find(FOLEY_SPEAKER).GetComponent<AudioSource>(), Clips.Error, MAX_VOLUME, true, false);
 		PlayPlaceMusic(place);
@@ -90,6 +93,7 @@ public class AudioManager {
 				break;
 			case EnvironmentManager.Place.Tavern:
 				backgroundMusic.Fade(tavernMusic, MAX_VOLUME, true);
+				foley.Fade(tavernBackgroundSFX, MAX_VOLUME, true);
 				break;
 			case EnvironmentManager.Place.Battlefield:
 				
