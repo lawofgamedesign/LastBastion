@@ -22,6 +22,10 @@ public class ChatUI {
 	protected const string CHAT_OBJ = "Chat window";
 	protected const string VIEWPORT_OBJ = "Viewport";
 	protected const string CONTENT_OBJ = "Content";
+	
+	
+	//length management for the chat UI
+	protected const int MAX_CHAT_MSGS = 10;
 
 
 	//buttons the player can press
@@ -230,12 +234,23 @@ public class ChatUI {
 		TextMeshProUGUI balloon = AddBalloon(statement, type);
 		balloon.text = statement;
 
+		ManageChatLength();
 		WaitTask waitTask = new WaitTask();
 		WaitTask waitTask2 = new WaitTask(); //an ugly, irksome bodge! the scrollbar needs to be fully resized before the scrolling starts
 		waitTask.Then(waitTask2);
 		waitTask2.Then(new ScrollChatTask());
 
 		Services.Tasks.AddTask(waitTask);
+	}
+
+
+	/// <summary>
+	/// Get rid of old chat messages, so that the chat scrollbar widget doesn't get so small as to be invisible.
+	/// </summary>
+	protected void ManageChatLength(){
+		if (chatContent.transform.childCount > MAX_CHAT_MSGS){
+			MonoBehaviour.Destroy(chatContent.transform.GetChild(0).gameObject);
+		}
 	}
 
 
