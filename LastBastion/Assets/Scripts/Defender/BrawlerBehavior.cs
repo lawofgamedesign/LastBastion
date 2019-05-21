@@ -106,7 +106,7 @@ public class BrawlerBehavior : DefenderSandbox {
 
 		dirFeedback = transform.Find(PRIVATE_UI_CANVAS).Find(DIR_FEEDBACK_ORGANIZER);
 
-		currentRampage = RampageTrack.None;
+		currentRampage = RampageTrack.The_Last_One_Standing;
 		currentDrink = DrinkTrack.None;
 
 
@@ -305,8 +305,6 @@ public class BrawlerBehavior : DefenderSandbox {
 
 			if (lastDefeatedLoc != null) Services.Board.HighlightSpace(lastDefeatedLoc.x, lastDefeatedLoc.z, BoardBehavior.OnOrOff.Off);
 			lastDefeatedLoc = new TwoDLoc(attacker.XPos, attacker.ZPos);
-			Debug.Log(attacker.XPos + ", " + attacker.ZPos);
-			Debug.Log(Services.Board.GeneralSpaceQuery(attacker.XPos, attacker.ZPos));
 
 			if (Services.Board.GeneralSpaceQuery(attacker.XPos, attacker.ZPos) != SpaceBehavior.ContentType.Attacker){
 				Services.Board.HighlightSpace(attacker.XPos, attacker.ZPos, BoardBehavior.OnOrOff.On);
@@ -391,8 +389,8 @@ public class BrawlerBehavior : DefenderSandbox {
 		}
 
 
-		//at The Last One Standing, things get simple again. Attacks to the north are limited, lateral attacks are limitless
-		else if (currentRampage == RampageTrack.The_Last_One_Standing) if (direction == Directions.North && attacksSoFar.Contains(direction)) temp = false;
+		//at The Last One Standing, things get simple again. Attacks are limitless, so there's no need to do anything
+		//temp stays true, and TryFight always proceeds
 
 
 		attacksSoFar.Add(direction);
